@@ -1,0 +1,7 @@
+# General
+.DS_Store
+.env
+
+# Packer
+packer_cache/
+*.pkrvars.hcl
