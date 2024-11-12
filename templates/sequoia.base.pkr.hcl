@@ -12,7 +12,7 @@ source "tart-cli" "tart" {
   vm_name      = "sequoia-base"
   cpu_count    = 4
   memory_gb    = 8
-  disk_size_gb = 40
+  disk_size_gb = 100
   ssh_password = "admin"
   ssh_username = "admin"
   ssh_timeout  = "300s"
@@ -116,10 +116,20 @@ build {
 
   provisioner "breakpoint" {
     disable = true
-    note    = "waiting after initial install"
+    note    = "waiting post-install"
+  }
+
+  provisioner "file" {
+    source      = pathexpand("~/caches/xcode/Xcode-16.1.0.xip")
+    destination = "/Users/admin/Downloads/"
   }
 
   provisioner "shell" {
     script = "${path.root}/scripts/initialize.bash"
+  }
+
+  provisioner "breakpoint" {
+    disable = true
+    note    = "waiting post-initialization"
   }
 }

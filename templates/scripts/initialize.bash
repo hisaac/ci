@@ -71,7 +71,7 @@ function install_rosetta_2() {
 function install_xcode_command_line_tools() {
 	echo "Installing Xcode command line tools..."
 	touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-	declare -r newest_command_line_tools="$(softwareupdate -l | grep "\*.*Command Line" | head -n 1)"
+	declare -r newest_command_line_tools="$(softwareupdate --list | grep "\*.*Command Line" | tail --lines=1)"
 	declare -r newest_command_line_tools_name="${newest_command_line_tools#'* Label: '}"
 	softwareupdate --install "$newest_command_line_tools_name" --verbose
 	rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
@@ -121,14 +121,66 @@ function add_github_to_known_hosts() {
 function install_xcode() {
 	declare -r version="${1}"
 	echo "Installing Xcode ${version}..."
-	# xcodes install --experimental-unxip --empty-trash 15.1 # 15.4 16.0
-	# sudo xcodes select 16.0
-	# xcodes runtimes install "iOS 17.2" # 17.5 18.0
+
+	(
+		# The xip tool expands to the current directory.
+		# We'll `cd` into the downloads directory in a subshell to not pollute the current directory.
+		cd "${HOME}/Downloads" || exit 1
+		xip --expand "Xcode-${version}.xip"
+		mv "Xcode.app" "/Applications/Xcode-${version}.app"
+		rm "Xcode-${version}.xip"
+	)
+
+	# Most of these steps are based on xcodes' install process
+	# Sure, I could just use xcodes, but I want to learn how to do this manually
+
+	sudo DevToolsSecurity -enable
+	sudo dseditgroup -o edit -t group -a staff _developer
+
+	sudo xcrun xcode-select --switch "/Applications/Xcode-${version}.app"
+	sudo xcrun xcodebuild -license accept
+	sudo xcrun xcodebuild -runFirstLaunch
+
+	# TODO: Figure out what this is actually doing. I'm not sure why we create this file.
+	declare -r user_cache_dir="$(getconf DARWIN_USER_CACHE_DIR)"
+	declare -r macos_build_version="$(sw_vers -buildVersion)"
+	declare -r xcode_build_version="$(
+		/usr/libexec/PlistBuddy -c "Print :ProductBuildVersion" \
+			"/Applications/Xcode-${version}.app/Contents/version.plist"
+	)"
+	touch "${user_cache_dir}/com.apple.dt.Xcode.InstallCheckCache_${macos_build_version}_${xcode_build_version}"
 }
 
 function prewarm_simulators() {
 	echo "Prewarming simulators..."
 	echo "Not sure yet how to automate this, so just do it manually"
+
+	echo "Downloading iOS simulator runtime..."
+	# source: https://developer.apple.com/documentation/xcode/installing-additional-simulator-runtimes
+	xcrun xcodebuild -downloadPlatform iOS -buildVersion "18.1"
+
+	echo "Deleting all simulators..."
+	xcrun simctl delete all
+
+	echo "Creating new simulator..."
+	declare -r simulator_udid="$(xcrun simctl create "iPhone 16" "iPhone 16" "iOS18.1")"
+
+	# This bit is based on https://github.com/biscuitehh/yeetd/blob/main/Resources/prewarm_simulators.sh
+	echo "Prewarming new simulator..."
+	xcrun simctl bootstatus "${simulator_udid}" -b
+	xcrun simctl shutdown "${simulator_udid}"
+
+	# Wait for the "update_dyld_sim_shared_cache" process to finish to avoid wasting CPU cycles after boot
+	# sources:
+	#   - https://github.com/cirruslabs/macos-image-templates/blob/5b17f4e2644723b2124c5cf1c1def4ba81fc6db7/templates/xcode.pkr.hcl#L243-L252
+	#   - https://apple.stackexchange.com/questions/412101/update-dyld-sim-shared-cache-is-taking-up-a-lot-of-memory
+	#   - https://stackoverflow.com/a/68394101/9316533
+	echo "Waiting for simulator shared cache to update..."
+	while pgrep -q "update_dyld_sim_shared_cache"; do
+		echo "Simulator shared cache is still being updated..."
+		sleep 5
+	done
+	echo "Simulator shared cache update complete"
 }
 
 main "$@"
