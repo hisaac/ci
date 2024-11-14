@@ -4,7 +4,7 @@ function main() {
 	declare -r username="${1:-admin}"
 	declare -r password="${2:-admin}"
 
-	enable_passwordless_sudo "${username}"
+	enable_passwordless_sudo "${username}" "${password}"
 	enable_auto_login "${username}" "${password}"
 	disable_screensaver_at_login_screen
 	disable_screensaver_for_admin_user
@@ -23,6 +23,7 @@ function main() {
 
 function enable_passwordless_sudo() {
 	declare -r username="${1}"
+	declare -r password="${2}"
 	echo "Enabling passwordless sudo for ${username} user..."
 	echo "${password}" | sudo -S sh -c "mkdir -p /etc/sudoers.d/; echo '${username} ALL=(ALL) NOPASSWD: ALL' | EDITOR=tee visudo /etc/sudoers.d/${username}-nopasswd"
 }
@@ -32,7 +33,41 @@ function enable_auto_login() {
 	declare -r username="${1}"
 	declare -r password="${2}"
 	echo "Enabling auto login for ${username} user..."
-	sudo sysadminctl -autologin set -userName "${username}" -password "${password}"
+
+	# See https://github.com/freegeek-pdx/mkuser/blob/b7a7900d2e6ef01dfafad1ba085c94f7302677d9/mkuser.sh#L6460-L6631
+
+	# These are the special "kcpassword" repeating cipher hex characters.
+	declare -ra cipher_key=( '7d' '89' '52' '23' 'd2' 'bc' 'dd' 'ea' 'a3' 'b9' '1f' )
+	declare -ri cipher_key_length="${#cipher_key[@]}"
+
+	declare encoded_password_hex_string
+	declare -i this_password_hex_char_index=0
+	while IFS='' read -r this_password_hex_char; do
+		printf -v this_encoded_password_hex_char '%02x' "$(( 0x${this_password_hex_char} ^ 0x${cipher_key[this_password_hex_char_index % cipher_key_length]} ))"
+		encoded_password_hex_string+="${this_encoded_password_hex_char} "
+		this_password_hex_char_index+=1
+	done < <(printf '%s' "${password}" | xxd -c 1 -p)
+
+	encoded_password_hex_string="${cipher_key[this_password_hex_char_index % cipher_key_length]}"
+
+	rm -rf '/private/etc/kcpassword'
+	touch '/private/etc/kcpassword'
+	chown 0:0 '/private/etc/kcpassword'
+	chown 600 '/private/etc/kcpassword'
+
+	echo "${encoded_password_hex_string}" | xxd -r -p > '/private/etc/kcpassword'
+
+	if [[ ! -f '/private/etc/kcpassword' ]] || ! encoded_password_length="$(wc -c '/private/etc/kcpassword' 2> /dev/null | awk '{ print $1; exit }')" || (( encoded_password_length == 0 )); then
+		echo "Failed to set auto login password"
+		exit 1
+	fi
+
+	encoded_password_random_data_padding_multiples="$(( cipher_key_length + 1 ))"
+	if (( (encoded_password_length % encoded_password_random_data_padding_multiples) != 0 )); then
+		head -c "$(( encoded_password_random_data_padding_multiples - (encoded_password_length % encoded_password_random_data_padding_multiples) ))" /dev/urandom >> '/private/etc/kcpassword'
+	fi
+
+	defaults write '/Library/Preferences/com.apple.loginwindow' autoLoginUser -string "${username}"
 }
 
 function disable_screensaver_at_login_screen() {
