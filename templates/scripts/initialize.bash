@@ -32,7 +32,7 @@ function enable_auto_login() {
 	declare -r username="${1}"
 	declare -r password="${2}"
 	echo "Enabling auto login for ${username} user..."
-	sysadminctl -autologin set -userName "${username}" -password "${password}"
+	sudo sysadminctl -autologin set -userName "${username}" -password "${password}"
 }
 
 function disable_screensaver_at_login_screen() {
