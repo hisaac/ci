@@ -50,24 +50,24 @@ function enable_auto_login() {
 
 	encoded_password_hex_string="${cipher_key[this_password_hex_char_index % cipher_key_length]}"
 
-	rm -rf '/private/etc/kcpassword'
-	touch '/private/etc/kcpassword'
-	chown 0:0 '/private/etc/kcpassword'
-	chown 600 '/private/etc/kcpassword'
+	sudo rm -rf '/private/etc/kcpassword'
+	sudo touch '/private/etc/kcpassword'
+	sudo chown 0:0 '/private/etc/kcpassword'
+	sudo chmod 600 '/private/etc/kcpassword'
 
-	echo "${encoded_password_hex_string}" | xxd -r -p > '/private/etc/kcpassword'
+	echo "${encoded_password_hex_string}" | xxd -r -p | sudo tee '/private/etc/kcpassword' > /dev/null
 
-	if [[ ! -f '/private/etc/kcpassword' ]] || ! encoded_password_length="$(wc -c '/private/etc/kcpassword' 2> /dev/null | awk '{ print $1; exit }')" || (( encoded_password_length == 0 )); then
+	if [[ ! -f '/private/etc/kcpassword' ]] || ! encoded_password_length="$(sudo wc -c '/private/etc/kcpassword' 2> /dev/null | awk '{ print $1; exit }')" || (( encoded_password_length == 0 )); then
 		echo "Failed to set auto login password"
 		exit 1
 	fi
 
 	encoded_password_random_data_padding_multiples="$(( cipher_key_length + 1 ))"
 	if (( (encoded_password_length % encoded_password_random_data_padding_multiples) != 0 )); then
-		head -c "$(( encoded_password_random_data_padding_multiples - (encoded_password_length % encoded_password_random_data_padding_multiples) ))" /dev/urandom >> '/private/etc/kcpassword'
+		head -c "$(( encoded_password_random_data_padding_multiples - (encoded_password_length % encoded_password_random_data_padding_multiples) ))" /dev/urandom | sudo tee -a '/private/etc/kcpassword' > /dev/null
 	fi
 
-	defaults write '/Library/Preferences/com.apple.loginwindow' autoLoginUser -string "${username}"
+	sudo defaults write '/Library/Preferences/com.apple.loginwindow' autoLoginUser -string "${username}"
 }
 
 function disable_screensaver_at_login_screen() {
@@ -152,7 +152,6 @@ function add_github_to_known_hosts() {
 	ssh-keyscan -t rsa github.com >> "$HOME/.ssh/known_hosts"
 }
 
-# TODO: Figure out how to install Xcode and prewarm simulators
 function install_xcode() {
 	declare -r version="${1}"
 	echo "Installing Xcode ${version}..."
@@ -188,11 +187,11 @@ function install_xcode() {
 
 function prewarm_simulators() {
 	echo "Prewarming simulators..."
-	echo "Not sure yet how to automate this, so just do it manually"
 
-	echo "Downloading iOS simulator runtime..."
 	# source: https://developer.apple.com/documentation/xcode/installing-additional-simulator-runtimes
-	xcrun xcodebuild -downloadPlatform iOS -buildVersion "18.1"
+	echo "Importing iOS simulator runtime..."
+	xcrun xcodebuild -importPlatform "${HOME}/Downloads/iphonesimulator_18.1_22B81.dmg"
+	rm "${HOME}/Downloads/iphonesimulator_18.1_22B81.dmg"
 
 	echo "Deleting all simulators..."
 	xcrun simctl delete all

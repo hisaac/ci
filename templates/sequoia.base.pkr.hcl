@@ -17,6 +17,8 @@ source "tart-cli" "tart" {
   ssh_username = "admin"
   ssh_timeout  = "300s"
 
+  # headless = true
+
   boot_command = [
     // hello, hola, bonjour, etc.
     "<wait60s><spacebar>",
@@ -121,6 +123,11 @@ build {
 
   provisioner "file" {
     source      = pathexpand("~/caches/xcode/Xcode-16.1.0.xip")
+    destination = "/Users/admin/Downloads/"
+  }
+
+  provisioner "file" {
+    source      = pathexpand("~/caches/simruntime/iphonesimulator_18.1_22B81.dmg")
     destination = "/Users/admin/Downloads/"
   }
 
