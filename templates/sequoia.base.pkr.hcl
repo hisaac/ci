@@ -16,8 +16,11 @@ source "tart-cli" "tart" {
   ssh_password = "admin"
   ssh_username = "admin"
   ssh_timeout  = "300s"
-
   headless = true
+
+  // A (hopefully) temporary workaround for Virtualization.Framework's
+  // installation process not fully finishing in a timely manner
+  create_grace_time = "30s"
 
   boot_command = [
     // hello, hola, bonjour, etc.
@@ -107,10 +110,6 @@ source "tart-cli" "tart" {
     // Quit System Settings
     "<wait10s><leftAltOn>q<leftAltOff>",
   ]
-
-  // A (hopefully) temporary workaround for Virtualization.Framework's
-  // installation process not fully finishing in a timely manner
-  create_grace_time = "30s"
 }
 
 build {

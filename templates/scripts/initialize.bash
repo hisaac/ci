@@ -17,7 +17,7 @@ function main() {
 	setup_shell_profile
 	install_developer_certificates
 	add_github_to_known_hosts
-	install_xcode "16.1.0"
+	install_xcode "16.1.0+16B40"
 	prewarm_simulators
 }
 
