@@ -17,7 +17,7 @@ source "tart-cli" "tart" {
   ssh_username = "admin"
   ssh_timeout  = "300s"
 
-  # headless = true
+  headless = true
 
   boot_command = [
     // hello, hola, bonjour, etc.
