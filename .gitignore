@@ -5,3 +5,6 @@
 # Packer
 packer_cache/
 *.pkrvars.hcl
+
+# Homebrew
+Brewfile.lock.json
