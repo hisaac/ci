@@ -1,5 +1,10 @@
 packer {
   required_plugins {
+    ipsw = {
+      version = ">= 0.1.5"
+      source  = "github.com/torarnv/ipsw"
+    }
+
     tart = {
       version = ">= 1.14.0"
       source  = "github.com/cirruslabs/tart"
@@ -7,8 +12,14 @@ packer {
   }
 }
 
+data "ipsw" "macos" {
+  os      = "macOS"
+  version = "^15"
+  device  = "VirtualMac2,1"
+}
+
 source "tart-cli" "tart" {
-  from_ipsw    = "~/caches/macos/Install macOS Sequoia 15.1-24B2083.ipsw"
+  from_ipsw    = "${data.ipsw.macos.url}"
   vm_name      = "sequoia-base"
   cpu_count    = 4
   memory_gb    = 8
@@ -16,7 +27,7 @@ source "tart-cli" "tart" {
   ssh_password = "admin"
   ssh_username = "admin"
   ssh_timeout  = "300s"
-  headless = true
+  headless     = true
 
   // A (hopefully) temporary workaround for Virtualization.Framework's
   // installation process not fully finishing in a timely manner
