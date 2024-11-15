@@ -8,7 +8,7 @@ packer {
 }
 
 source "tart-cli" "tart" {
-  from_ipsw    = "~/caches/macos/sequoia-15.1.0.ipsw"
+  from_ipsw    = "~/caches/macos/Install macOS Sequoia 15.1-24B2083.ipsw"
   vm_name      = "sequoia-base"
   cpu_count    = 4
   memory_gb    = 8
@@ -122,7 +122,7 @@ build {
   }
 
   provisioner "file" {
-    source      = pathexpand("~/caches/xcode/Xcode-16.1.0.xip")
+    source      = pathexpand("~/caches/xcode/Xcode-16.1.0+16B40.xip")
     destination = "/Users/admin/Downloads/"
   }
 
