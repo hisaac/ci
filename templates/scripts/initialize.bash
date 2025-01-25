@@ -1,24 +1,29 @@
 #!/bin/bash -euo pipefail
 
 function main() {
-	declare -r username="${1:-admin}"
-	declare -r password="${2:-admin}"
+	declare -r vm_base="${1:-${VM_BASE:-false}}"
+	declare -r username="${2:-${USERNAME:-admin}}"
+	declare -r password="${3:-${PASSWORD:-admin}}"
+	unset VM_BASE USERNAME PASSWORD
 
-	enable_passwordless_sudo "${username}" "${password}"
-	enable_auto_login "${username}" "${password}"
-	disable_screensaver_at_login_screen
-	disable_screensaver_for_admin_user
-	prevent_vm_from_sleeping
-	disable_screen_lock "${password}"
-	disable_automatic_updates
-	install_rosetta_2
-	install_xcode_command_line_tools
-	install_homebrew
-	setup_shell_profile
-	install_developer_certificates
-	add_github_to_known_hosts
-	install_xcode "16.1.0+16B40"
-	prewarm_simulators
+	if [[ "${vm_base}" == "true" ]]; then
+		enable_passwordless_sudo "${username}" "${password}"
+		enable_auto_login "${username}" "${password}"
+	else
+		disable_screensaver_at_login_screen
+		disable_screensaver_for_admin_user
+		prevent_vm_from_sleeping
+		disable_screen_lock "${password}"
+		disable_automatic_updates
+		install_rosetta_2
+		install_xcode_command_line_tools
+		install_homebrew
+		setup_shell_profile
+		install_developer_certificates
+		add_github_to_known_hosts
+		install_xcode "16.2.0"
+		prewarm_simulators "18.2"
+	fi
 }
 
 function enable_passwordless_sudo() {
@@ -102,6 +107,12 @@ function install_rosetta_2() {
 	sudo softwareupdate --install-rosetta --agree-to-license
 }
 
+function disable_tips() {
+	defaults write com.apple.tipsd SiriTipsDisabled -bool true
+	defaults write com.apple.Tips TipsDisabled -bool true
+	killall Tips >/dev/null 2>&1 || true
+}
+
 # based on https://github.com/timsutton/osx-vm-templates/blob/d3de634fc09aed981e8ec53ba302163c4624f039/scripts/xcode-cli-tools.sh#L12-L19
 function install_xcode_command_line_tools() {
 	echo "Installing Xcode command line tools..."
@@ -148,8 +159,13 @@ function install_developer_certificates() {
 function add_github_to_known_hosts() {
 	echo "Adding GitHub to known hosts..."
 	mkdir -p "$HOME/.ssh"
-	touch "$HOME/.ssh/known_hosts"
-	ssh-keyscan -t rsa github.com >> "$HOME/.ssh/known_hosts"
+	chmod 777 "$HOME/.ssh"
+	cat >> "$HOME/.ssh/known_hosts" <<- EOF
+		# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
+		github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+		github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+		github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+	EOF
 }
 
 function install_xcode() {
@@ -186,18 +202,23 @@ function install_xcode() {
 }
 
 function prewarm_simulators() {
-	echo "Prewarming simulators..."
+	declare -r version="${1}"
+	echo "Prewarming simulators for iOS ${version}..."
+
+	# Disable default simulator set creation
+	# source: https://developer.apple.com/documentation/xcode-release-notes/xcode-16_2-release-notes#Simulator
+	defaults write com.apple.CoreSimulator EnableDefaultSetCreation -bool NO
 
 	# source: https://developer.apple.com/documentation/xcode/installing-additional-simulator-runtimes
 	echo "Importing iOS simulator runtime..."
-	xcrun xcodebuild -importPlatform "${HOME}/Downloads/iphonesimulator_18.1_22B81.dmg"
-	rm "${HOME}/Downloads/iphonesimulator_18.1_22B81.dmg"
+	xcrun xcodebuild -importPlatform "${HOME}/Downloads/iphonesimulator_${version}.dmg"
+	rm "${HOME}/Downloads/iphonesimulator_${version}.dmg"
 
 	echo "Deleting all simulators..."
 	xcrun simctl delete all
 
 	echo "Creating new simulator..."
-	declare -r simulator_udid="$(xcrun simctl create "iPhone 16" "iPhone 16" "iOS18.1")"
+	declare -r simulator_udid="$(xcrun simctl create "iPhone 16" "iPhone 16" "iOS${version}")"
 
 	# This bit is based on https://github.com/biscuitehh/yeetd/blob/main/Resources/prewarm_simulators.sh
 	echo "Prewarming new simulator..."

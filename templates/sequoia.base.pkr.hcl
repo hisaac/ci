@@ -27,7 +27,12 @@ source "tart-cli" "tart" {
   ssh_password = "admin"
   ssh_username = "admin"
   ssh_timeout  = "300s"
-  headless     = true
+
+  // Uncomment for quiet and headless mode
+  // headless = true
+  // run_extra_args = [
+  //   "--no-audio",
+  // ]
 
   // A (hopefully) temporary workaround for Virtualization.Framework's
   // installation process not fully finishing in a timely manner
@@ -83,7 +88,7 @@ source "tart-cli" "tart" {
     "<wait10s><tab><spacebar>",
 
     // Select Your Time Zone
-    "<wait10s><tab>UTC<enter><leftShiftOn><tab><leftShiftOff><spacebar>",
+    "<wait10s><tab><tab>UTC<enter><leftShiftOn><tab><tab><leftShiftOff><spacebar>",
 
     // Analytics
     "<wait10s><leftShiftOn><tab><leftShiftOff><spacebar>",
@@ -131,22 +136,12 @@ build {
     note    = "waiting post-install"
   }
 
-  provisioner "file" {
-    source      = pathexpand("~/caches/xcode/Xcode-16.1.0+16B40.xip")
-    destination = "/Users/admin/Downloads/"
-  }
-
-  provisioner "file" {
-    source      = pathexpand("~/caches/simruntime/iphonesimulator_18.1_22B81.dmg")
-    destination = "/Users/admin/Downloads/"
-  }
-
   provisioner "shell" {
     script = "${path.root}/scripts/initialize.bash"
-  }
-
-  provisioner "breakpoint" {
-    disable = true
-    note    = "waiting post-initialization"
+    env = {
+      "VM_BASE"  = "true",
+      "USERNAME" = "admin",
+      "PASSWORD" = "admin",
+    }
   }
 }
