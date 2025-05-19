@@ -1,0 +1,5 @@
+[tools]
+"aqua:cirruslabs/tart" = "latest"
+"aqua:ninxsoft/mist-cli" = "latest"
+"aqua:XcodesOrg/xcodes" = "latest"
+"packer" = "latest"
