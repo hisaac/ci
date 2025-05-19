@@ -1,5 +1,4 @@
 # These settings allow us to source external files without warnings
-disable=SC1091
 external-sources=true
 
 # This setting throws a warning when we include more than one argument in a shebang.

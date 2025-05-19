@@ -1,5 +1,9 @@
-#!/bin/bash -euo pipefail
+#!/usr/bin/env bash -euo pipefail
 
-xcodes download "16.2" --directory "${HOME}/caches/xcode/"
-mist download firmware sequoia --output-directory "${HOME}/caches/macos/"
-xcrun xcodebuild -downloadPlatform iOS -buildVersion "18.2" -exportPath "${HOME}/caches/simruntime/"
+mkdir -p "${HOME}/caches/xcode/"
+mise exec -- xcodes update
+mise exec -- xcodes download --latest --directory "${HOME}/caches/xcode/"
+
+xcrun xcodebuild -downloadAllPlatforms -exportPath "${HOME}/caches/simruntime/"
+
+mise exec -- mist download firmware sequoia --output-directory "${HOME}/caches/macos/"

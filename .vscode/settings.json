@@ -12,7 +12,10 @@
 		"kcpassword",
 		"killall",
 		"loginwindow",
+		"mdfind",
+		"mdls",
 		"NOPASSWD",
+		"onlyin",
 		"passwordless",
 		"pathexpand",
 		"setsleep",
@@ -28,6 +31,7 @@
 		"tipsd",
 		"torarnv",
 		"udid",
+		"unxip",
 		"urandom",
 		"WWDRCAG",
 		"xcodes"

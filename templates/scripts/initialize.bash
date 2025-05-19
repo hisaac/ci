@@ -1,5 +1,8 @@
 #!/bin/bash -euo pipefail
 
+# shellcheck source=./xcode-utils.bash
+source "$(dirname "$0")/xcode-utils.bash"
+
 function main() {
 	declare -r vm_base="${1:-${VM_BASE:-false}}"
 	declare -r username="${2:-${USERNAME:-admin}}"
@@ -229,12 +232,21 @@ function prewarm_simulators() {
 	# sources:
 	#   - https://github.com/cirruslabs/macos-image-templates/blob/5b17f4e2644723b2124c5cf1c1def4ba81fc6db7/templates/xcode.pkr.hcl#L243-L252
 	#   - https://apple.stackexchange.com/questions/412101/update-dyld-sim-shared-cache-is-taking-up-a-lot-of-memory
+	#   - https://github.com/cirruslabs/macos-image-templates/issues/236
 	#   - https://stackoverflow.com/a/68394101/9316533
 	echo "Waiting for simulator shared cache to update..."
-	while pgrep -q "update_dyld_sim_shared_cache"; do
-		echo "Simulator shared cache is still being updated..."
-		sleep 5
-	done
+
+	declare -r selected_xcode_version="$(get_selected_xcode_version)"
+	if [[ "$(printf '%s\n' "${selected_xcode_version}" "16.4.0" | sort -V | head -n1)" == "16.4.0" ]]; then
+		# If the selected Xcode version is 16.4.0 or greater, we can use the new simulator shared cache update process
+		xcrun simctl runtime dyld_shared_cache update --all
+	else
+		# If the selected Xcode version is less than 16.4.0, we need to use the old simulator shared cache update process
+		while pgrep -q "update_dyld_sim_shared_cache"; do
+			echo "Simulator shared cache is still being updated..."
+			sleep 5
+		done
+	fi
 	echo "Simulator shared cache update complete"
 }
 
