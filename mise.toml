@@ -1,5 +1,14 @@
+# The minimum version of Mise that is required to run this project.
+min_version = "2025.4.8"
+
+[settings]
+experimental = true
+
 [tools]
 "aqua:cirruslabs/tart" = "latest"
-"aqua:ninxsoft/mist-cli" = "latest"
 "aqua:XcodesOrg/xcodes" = "latest"
-"packer" = "latest"
+"pipx:ansible" = "latest"
+jq = "latest"
+packer = "latest"
+python = "latest"
+usage = "latest"

@@ -2,9 +2,8 @@
 .DS_Store
 .env
 
+# Xcode downloads
+xcodes/
+
 # Packer
 packer_cache/
-*.pkrvars.hcl
-
-# Homebrew
-Brewfile.lock.json

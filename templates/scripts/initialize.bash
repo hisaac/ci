@@ -1,46 +1,52 @@
 #!/bin/bash -euo pipefail
 
+set -x
+
 # shellcheck source=./xcode-utils.bash
 source "$(dirname "$0")/xcode-utils.bash"
 
 function main() {
-	declare -r vm_base="${1:-${VM_BASE:-false}}"
-	declare -r username="${2:-${USERNAME:-admin}}"
-	declare -r password="${3:-${PASSWORD:-admin}}"
-	unset VM_BASE USERNAME PASSWORD
+	declare -r username="${2:-${USERNAME}}"
+	declare -r password="${3:-${PASSWORD}}"
+	declare -r xcode_versions="${4:-${XCODE_VERSIONS}}"
+	declare -r simulator_runtimes="${5:-${SIMULATOR_RUNTIMES}}"
+	unset USERNAME PASSWORD XCODE_VERSIONS SIMULATOR_RUNTIMES
 
-	if [[ "${vm_base}" == "true" ]]; then
-		enable_passwordless_sudo "${username}" "${password}"
-		enable_auto_login "${username}" "${password}"
-	else
-		disable_screensaver_at_login_screen
-		disable_screensaver_for_admin_user
-		prevent_vm_from_sleeping
-		disable_screen_lock "${password}"
-		disable_automatic_updates
-		install_rosetta_2
-		install_xcode_command_line_tools
-		install_homebrew
-		setup_shell_profile
-		install_developer_certificates
-		add_github_to_known_hosts
-		install_xcode "16.2.0"
-		prewarm_simulators "18.2"
-	fi
+	enable_passwordless_sudo "${username}" "${password}"
+	enable_auto_login "${username}" "${password}"
+	disable_screensaver_at_login_screen
+	disable_screensaver_for_admin_user
+	prevent_vm_from_sleeping
+	disable_screen_lock "${password}"
+	disable_automatic_updates
+	install_rosetta_2
+	install_xcode_command_line_tools
+	install_homebrew
+	setup_shell_profile
+	install_developer_certificates
+	add_github_to_known_hosts
+
+	for xcode_version in ${xcode_versions//,/ }; do
+		install_xcode "${xcode_version}"
+		if [[ -n "${simulator_runtimes}" ]]; then
+			install_simulator_runtimes "${simulator_runtimes}"
+		fi
+		prewarm_simulators
+	done
 }
 
 function enable_passwordless_sudo() {
-	declare -r username="${1}"
-	declare -r password="${2}"
-	echo "Enabling passwordless sudo for ${username} user..."
-	echo "${password}" | sudo -S sh -c "mkdir -p /etc/sudoers.d/; echo '${username} ALL=(ALL) NOPASSWD: ALL' | EDITOR=tee visudo /etc/sudoers.d/${username}-nopasswd"
+	declare -r arg_username="${1}"
+	declare -r arg_password="${2}"
+	echo "Enabling passwordless sudo for ${arg_username} user..."
+	echo "${arg_password}" | sudo -S sh -c "mkdir -p /etc/sudoers.d/; echo '${arg_username} ALL=(ALL) NOPASSWD: ALL' | EDITOR=tee visudo /etc/sudoers.d/${arg_username}-nopasswd"
 }
 
 # learned how to do this from https://github.com/freegeek-pdx/mkuser
 function enable_auto_login() {
-	declare -r username="${1}"
-	declare -r password="${2}"
-	echo "Enabling auto login for ${username} user..."
+	declare -r arg_username="${1}"
+	declare -r arg_password="${2}"
+	echo "Enabling auto login for ${arg_username} user..."
 
 	# See https://github.com/freegeek-pdx/mkuser/blob/b7a7900d2e6ef01dfafad1ba085c94f7302677d9/mkuser.sh#L6460-L6631
 
@@ -54,7 +60,7 @@ function enable_auto_login() {
 		printf -v this_encoded_password_hex_char '%02x' "$(( 0x${this_password_hex_char} ^ 0x${cipher_key[this_password_hex_char_index % cipher_key_length]} ))"
 		encoded_password_hex_string+="${this_encoded_password_hex_char} "
 		this_password_hex_char_index+=1
-	done < <(printf '%s' "${password}" | xxd -c 1 -p)
+	done < <(printf '%s' "${arg_password}" | xxd -c 1 -p)
 
 	encoded_password_hex_string="${cipher_key[this_password_hex_char_index % cipher_key_length]}"
 
@@ -75,7 +81,7 @@ function enable_auto_login() {
 		head -c "$(( encoded_password_random_data_padding_multiples - (encoded_password_length % encoded_password_random_data_padding_multiples) ))" /dev/urandom | sudo tee -a '/private/etc/kcpassword' > /dev/null
 	fi
 
-	sudo defaults write '/Library/Preferences/com.apple.loginwindow' autoLoginUser -string "${username}"
+	sudo defaults write '/Library/Preferences/com.apple.loginwindow' autoLoginUser -string "${arg_username}"
 }
 
 function disable_screensaver_at_login_screen() {
@@ -94,9 +100,9 @@ function prevent_vm_from_sleeping() {
 }
 
 function disable_screen_lock() {
-	declare -r password="${1}"
+	declare -r arg_password="${1}"
 	echo "Disabling screen lock..."
-	sysadminctl -screenLock off -password "${password}"
+	sysadminctl -screenLock off -password "${arg_password}"
 }
 
 function disable_automatic_updates() {
@@ -172,17 +178,25 @@ function add_github_to_known_hosts() {
 }
 
 function install_xcode() {
-	declare -r version="${1}"
-	echo "Installing Xcode ${version}..."
-
 	(
 		# The xip tool expands to the current directory.
 		# We'll `cd` into the downloads directory in a subshell to not pollute the current directory.
-		cd "${HOME}/Downloads" || exit 1
-		xip --expand "Xcode-${version}.xip"
-		mv "Xcode.app" "/Applications/Xcode-${version}.app"
-		rm "Xcode-${version}.xip"
+		cd /tmp/xcodes || exit 1
+
+		for xip_file in Xcode-*.xip; do
+			if [[ -f "$xip_file" ]]; then
+				echo "Unzipping Xcode archive: $xip_file"
+				xip --expand "$xip_file"
+				local xcode_app_name="${xip_file%.xip}.app"
+				echo "Moving Xcode to /Applications/${xcode_app_name}"
+				mv "Xcode.app" "/Applications/${xcode_app_name}"
+				echo "Xcode installed to /Applications/${xcode_app_name}"
+				rm "$xip_file"
+			fi
+		done
 	)
+
+	rm -rf /tmp/xcodes
 
 	# Most of these steps are based on xcodes' install process
 	# Sure, I could just use xcodes, but I want to learn how to do this manually
@@ -190,43 +204,56 @@ function install_xcode() {
 	sudo DevToolsSecurity -enable
 	sudo dseditgroup -o edit -t group -a staff _developer
 
-	sudo xcrun xcode-select --switch "/Applications/Xcode-${version}.app"
-	sudo xcrun xcodebuild -license accept
-	sudo xcrun xcodebuild -runFirstLaunch
+	declare -ra installed_xcode_paths="$(get_paths_to_installed_xcode_versions)"
 
-	# TODO: Figure out what this is actually doing. I'm not sure why we create this file.
-	declare -r user_cache_dir="$(getconf DARWIN_USER_CACHE_DIR)"
-	declare -r macos_build_version="$(sw_vers -buildVersion)"
-	declare -r xcode_build_version="$(
-		/usr/libexec/PlistBuddy -c "Print :ProductBuildVersion" \
-			"/Applications/Xcode-${version}.app/Contents/version.plist"
-	)"
-	touch "${user_cache_dir}/com.apple.dt.Xcode.InstallCheckCache_${macos_build_version}_${xcode_build_version}"
+	for xcode_path in "${installed_xcode_paths[@]}"; do
+		declare xcode_version
+		xcode_version="$(get_xcode_version_at_path "$xcode_path")"
+		sudo xcode-select --switch "$xcode_path"
+		sudo xcodebuild -license accept
+
+		if [[ "$(printf '%s\n' "${xcode_version}" "16.2" | sort -V | head -n1)" == "16.2" ]]; then
+			# If the Xcode version is 16.2 or greater, we can also check for newer components
+			sudo xcrun xcodebuild -runFirstLaunch -checkForNewerComponents
+		else
+			sudo xcrun xcodebuild -runFirstLaunch
+		fi
+
+		# TODO: Figure out what this is actually doing.
+		# I'm not sure why we create this file, but xcodes does it, so we'll do it too.
+		declare -r user_cache_dir="$(getconf DARWIN_USER_CACHE_DIR)"
+		declare -r macos_build_version="$(sw_vers -buildVersion)"
+		declare -r xcode_build_version="$(
+			/usr/libexec/PlistBuddy -c "Print :ProductBuildVersion" "${xcode_path}/Contents/version.plist"
+		)"
+		touch "${user_cache_dir}/com.apple.dt.Xcode.InstallCheckCache_${macos_build_version}_${xcode_build_version}"
+	done
+}
+
+function install_simulator_runtimes() {
+	declare -r arg_simulator_runtimes="${1}"
+	declare -r simulator_runtimes="$(echo "${arg_simulator_runtimes}" | tr ',' ' ')"
+	for simulator_runtime in ${simulator_runtimes}; do
+		echo "Installing simulator runtime: ${simulator_runtime}..."
+		xcrun xcodebuild -downloadPlatform "${simulator_runtime}"
+	done
+	sudo xcrun xcodebuild -runFirstLaunch -checkForNewerComponents
 }
 
 function prewarm_simulators() {
-	declare -r version="${1}"
-	echo "Prewarming simulators for iOS ${version}..."
-
-	# Disable default simulator set creation
-	# source: https://developer.apple.com/documentation/xcode-release-notes/xcode-16_2-release-notes#Simulator
-	defaults write com.apple.CoreSimulator EnableDefaultSetCreation -bool NO
-
-	# source: https://developer.apple.com/documentation/xcode/installing-additional-simulator-runtimes
-	echo "Importing iOS simulator runtime..."
-	xcrun xcodebuild -importPlatform "${HOME}/Downloads/iphonesimulator_${version}.dmg"
-	rm "${HOME}/Downloads/iphonesimulator_${version}.dmg"
-
-	echo "Deleting all simulators..."
-	xcrun simctl delete all
-
-	echo "Creating new simulator..."
-	declare -r simulator_udid="$(xcrun simctl create "iPhone 16" "iPhone 16" "iOS${version}")"
-
 	# This bit is based on https://github.com/biscuitehh/yeetd/blob/main/Resources/prewarm_simulators.sh
-	echo "Prewarming new simulator..."
-	xcrun simctl bootstatus "${simulator_udid}" -b
-	xcrun simctl shutdown "${simulator_udid}"
+	echo "Prewarming simulators..."
+
+	declare -r simulator_udids=("$(xcrun simctl list devices --json | jq '.devices[] | .[] | .udid')")
+	for simulator_udid in "${simulator_udids[@]}"; do
+		# Remove leading and trailing quotes
+		simulator_udid="${simulator_udid%\"}"
+		simulator_udid="${simulator_udid#\"}"
+
+		echo "Booting the Simulator..."
+		xcrun simctl bootstatus "${simulator_udid}" -b
+		xcrun simctl shutdown "${simulator_udid}"
+	done
 
 	# Wait for the "update_dyld_sim_shared_cache" process to finish to avoid wasting CPU cycles after boot
 	# sources:
@@ -237,11 +264,11 @@ function prewarm_simulators() {
 	echo "Waiting for simulator shared cache to update..."
 
 	declare -r selected_xcode_version="$(get_selected_xcode_version)"
-	if [[ "$(printf '%s\n' "${selected_xcode_version}" "16.4.0" | sort -V | head -n1)" == "16.4.0" ]]; then
-		# If the selected Xcode version is 16.4.0 or greater, we can use the new simulator shared cache update process
+	if [[ "$(printf '%s\n' "${selected_xcode_version}" "16.4" | sort -V | head -n1)" == "16.4" ]]; then
+		# If the selected Xcode version is 16.4 or greater, we can use the new simulator shared cache update process
 		xcrun simctl runtime dyld_shared_cache update --all
 	else
-		# If the selected Xcode version is less than 16.4.0, we need to use the old simulator shared cache update process
+		# If the selected Xcode version is less than 16.4, we need to use the old simulator shared cache update process
 		while pgrep -q "update_dyld_sim_shared_cache"; do
 			echo "Simulator shared cache is still being updated..."
 			sleep 5

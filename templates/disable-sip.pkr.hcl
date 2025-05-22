@@ -12,7 +12,7 @@ variable "vm_name" {
 }
 
 source "tart-cli" "tart" {
-  vm_name = "${var.vm_name}"
+  vm_name  = "${var.vm_name}"
   recovery = true
 
   boot_command = [
