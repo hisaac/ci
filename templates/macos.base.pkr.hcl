@@ -21,7 +21,7 @@ variable "macos_version" {
   type    = string
   validation {
     condition     = can(regex("^14", var.macos_version)) || can(regex("^15", var.macos_version))
-    error_message = "Only macOS 14 and 15 are supported."
+    error_message = "Only macOS 14 and 15 are currently supported."
   }
 }
 

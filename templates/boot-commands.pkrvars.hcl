@@ -9,7 +9,7 @@ macos_14_sonoma_boot_command = [
   # first entry in a list of "english"-prefixed items, which will be "English".
   #
   # [1]: should be named "English (US)", but oh well 🤷
-  "<wait30s>italiano<esc>english<enter>",
+  "<wait60s>italiano<esc>english<enter>",
 
   # Select Your Country and Region
   "<wait30s>united states<leftShiftOn><tab><leftShiftOff><spacebar>",
@@ -27,7 +27,7 @@ macos_14_sonoma_boot_command = [
   "<wait10s><tab><tab><tab><spacebar>",
 
   # Sign In with Your Apple ID
-  "<wait10s><leftShiftOn><tab><leftShiftOff><leftShiftOn><tab><leftShiftOff><spacebar>",
+  "<wait10s><leftShiftOn><tab><tab><leftShiftOff><spacebar>",
 
   # Are you sure you want to skip signing in with an Apple ID?
   "<wait10s><tab><spacebar>",
@@ -42,7 +42,7 @@ macos_14_sonoma_boot_command = [
   "<wait10s>admin<tab><tab>admin<tab>admin<tab><tab><tab><spacebar>",
 
   # Enable Location Services
-  "<wait10s><leftShiftOn><tab><leftShiftOff><spacebar>",
+  "<wait120s><leftShiftOn><tab><leftShiftOff><spacebar>",
 
   # Are you sure you don't want to use Location Services?
   "<wait10s><tab><spacebar>",
@@ -75,10 +75,10 @@ macos_14_sonoma_boot_command = [
   "<wait10s><leftAltOn><spacebar><leftAltOff>System Settings<enter>",
 
   # Navigate to "Sharing"
-  "<wait10s><leftCtrlOn><leftShiftOn>/<leftShiftOff><leftCtrlOff>Sharing<down><enter>",
+  "<wait10s><leftAltOn><leftShiftOn>/<leftShiftOff><leftAltOff>Sharing<down><enter>",
 
   # Navigate to "Screen Sharing" and enable it
-  "<wait10s><tab><tab><tab><tab><tab><spacebar>",
+  "<wait10s><tab><tab><tab><tab><tab><tab><tab><spacebar>",
 
   # Navigate to "Remote Login" and enable it
   "<wait10s><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><spacebar>",
@@ -98,7 +98,7 @@ macos_15_sequoia_boot_command = [
   # first entry in a list of "english"-prefixed items, which will be "English".
   #
   # [1]: should be named "English (US)", but oh well 🤷
-  "<wait30s>italiano<esc>english<enter>",
+  "<wait60s>italiano<esc>english<enter>",
 
   # Select Your Country or Region
   "<wait30s>united states<leftShiftOn><tab><leftShiftOff><spacebar>",
@@ -119,6 +119,8 @@ macos_15_sequoia_boot_command = [
   "<wait10s>admin<tab>admin<tab>admin<tab>admin<tab><tab><spacebar><tab><tab><spacebar>",
 
   # Enable Voice Over
+  # For whatever reason, the ability to navigate the installer using the keyboard goes away at this point,
+  # so we enable Voice Over as a workaround, which allows us to navigate using the keyboard.
   "<wait120s><leftAltOn><f5><leftAltOff>",
 
   # Sign In with Your Apple ID
@@ -167,13 +169,17 @@ macos_15_sequoia_boot_command = [
   # This is so that we can navigate the System Settings app using the keyboard
   "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<enter>",
   "<wait5s>defaults write NSGlobalDomain AppleKeyboardUIMode -int 3<enter>",
-  "<wait5s><leftAltOn>q<leftAltOff>",
 
-  # Now that the installation is done, open "System Settings"
+  # Disable Gatekeeper (1/2)
+  "<wait10s>sudo spctl --global-disable<enter>",
+  "<wait10s>admin<enter>",
+  "<wait10s><leftAltOn>q<leftAltOff>",
+
+  # Open "System Settings"
   "<wait10s><leftAltOn><spacebar><leftAltOff>System Settings<enter>",
 
   # Navigate to "Sharing"
-  "<wait10s><leftCtrlOn><leftShiftOn>/<leftShiftOff><leftCtrlOff>Sharing<down><enter>",
+  "<wait10s><leftAltOn><leftShiftOn>/<leftShiftOff><leftAltOff>Sharing<down><enter>",
 
   # Navigate to "Screen Sharing" and enable it
   "<wait10s><tab><tab><tab><tab><tab><tab><tab><spacebar>",
@@ -181,19 +187,9 @@ macos_15_sequoia_boot_command = [
   # Navigate to "Remote Login" and enable it
   "<wait10s><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><spacebar>",
 
-  # Quit System Settings
-  "<wait10s><leftAltOn>q<leftAltOff>",
-
-  # Disable Gatekeeper (1/2)
-  "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<enter>",
-  "<wait10s>sudo spctl --global-disable<enter>",
-  "<wait10s>admin<enter>",
-  "<wait10s><leftAltOn>q<leftAltOff>",
-
   # Disable Gatekeeper (2/2)
-  "<wait10s><leftAltOn><spacebar><leftAltOff>System Settings<enter>",
-  "<wait10s><leftCtrlOn><leftShiftOn>/<leftShiftOff><leftCtrlOff>Privacy & Security<down><enter>",
-  "<wait10s><leftShiftOn><tab><leftShiftOff><leftShiftOn><tab><leftShiftOff><leftShiftOn><tab><leftShiftOff><leftShiftOn><tab><leftShiftOff><leftShiftOn><tab><leftShiftOff><leftShiftOn><tab><leftShiftOff><leftShiftOn><tab><leftShiftOff>",
+  "<wait10s><leftAltOn><leftShiftOn>/<leftShiftOff><leftAltOff>Privacy & Security<down><enter>",
+  "<wait10s><leftShiftOn><tab><tab><tab><tab><tab><tab><tab><leftShiftOff>",
   "<wait10s><down><wait1s><down><wait1s><enter>",
   "<wait10s>admin<enter>",
   "<wait10s><leftShiftOn><tab><leftShiftOff><wait1s><spacebar>",
