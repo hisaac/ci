@@ -18,7 +18,7 @@ packer {
 }
 
 variable "macos_version" {
-  type    = string
+  type = string
 }
 
 variable "boot_command" {
@@ -65,6 +65,19 @@ source "tart-cli" "tart" {
 
 build {
   sources = ["source.tart-cli.tart"]
+
+  provisioner "breakpoint" {
+    disable = true
+    note    = "waiting post-install"
+  }
+
+  provisioner "shell" {
+    script = "${path.root}/scripts/enable-auto-login.bash"
+    env = {
+      "AUTO_LOGIN_USERNAME" = "admin",
+      "AUTO_LOGIN_PASSWORD" = "admin",
+    }
+  }
 
   # provisioner "ansible" {
   #   playbook_file    = "playbooks/playbook-system-updater.yml"
