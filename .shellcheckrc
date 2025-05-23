@@ -1,7 +1,2 @@
 # These settings allow us to source external files without warnings
 external-sources=true
-
-# This setting throws a warning when we include more than one argument in a shebang.
-# This is not allowed in most OSs, but is allowed in macOS.
-# Since we know that we are only using this in macOS, we can safely disable this warning.
-disable=SC2096
