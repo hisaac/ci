@@ -19,17 +19,9 @@ packer {
 
 variable "macos_version" {
   type    = string
-  validation {
-    condition     = can(regex("^14", var.macos_version)) || can(regex("^15", var.macos_version))
-    error_message = "Only macOS 14 and 15 are currently supported."
-  }
 }
 
-variable "macos_14_sonoma_boot_command" {
-  type = list(string)
-}
-
-variable "macos_15_sequoia_boot_command" {
+variable "boot_command" {
   type = list(string)
 }
 
@@ -40,17 +32,12 @@ data "ipsw" "macos" {
 }
 
 locals {
+  # Create a version string from the major, minor, and patch components
   version_string = join(".", [
     data.ipsw.macos.version_components.major,
     data.ipsw.macos.version_components.minor,
     data.ipsw.macos.version_components.patch,
   ])
-
-  boot_command = (
-    can(regex("^14", data.ipsw.macos.version)) ? var.macos_14_sonoma_boot_command :
-    can(regex("^15", data.ipsw.macos.version)) ? var.macos_15_sequoia_boot_command :
-    []
-  )
 }
 
 source "tart-cli" "tart" {
@@ -63,7 +50,7 @@ source "tart-cli" "tart" {
   ssh_username       = "admin"
   ssh_timeout        = "300s"
   recovery_partition = "keep"
-  boot_command       = local.boot_command
+  boot_command       = var.boot_command
 
   # A (hopefully) temporary workaround for Virtualization.Framework's
   # installation process not fully finishing in a timely manner
