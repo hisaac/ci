@@ -1,2 +1,0 @@
-# Have to disable SC2154 because shellcheck doesn't know about the variables we get from `usage`
-disable=SC2154

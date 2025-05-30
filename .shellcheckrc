@@ -1,2 +1,9 @@
 # These settings allow us to source external files without warnings
 external-sources=true
+
+# On most OS, shebangs can only specify a single parameter.
+# macOS currently allows multiple words in the shebang. Scripts running on macOS exclusively can ignore this warning.
+disable=SC2096
+
+# Have to disable SC2154 because shellcheck doesn't know about the variables we get from `usage`
+disable=SC2154

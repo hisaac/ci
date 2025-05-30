@@ -1,20 +1,10 @@
-#!/usr/bin/env bash
-
-set -o errexit  # Exit on error
-set -o nounset  # Exit on unset variable
-set -o pipefail # Exit on pipe failure
-IFS=$'\n\t'
-
-if [[ "${TRACE:-}" == true ]]; then
-	set -o xtrace # Trace the execution of the script (debug)
-fi
+#!/bin/bash -euo pipefail
 
 # This is based off of https://github.com/freegeek-pdx/mkuser
 # Specifically: https://github.com/freegeek-pdx/mkuser/blob/b7a7900d2e6ef01dfafad1ba085c94f7302677d9/mkuser.sh#L6460-L6631
 function main() {
-	declare -r username="${2:-${AUTO_LOGIN_USERNAME}}"
-	declare -r password="${3:-${AUTO_LOGIN_PASSWORD}}"
-	unset AUTO_LOGIN_USERNAME AUTO_LOGIN_PASSWORD
+	declare -r username="${1:-${VM_USERNAME}}"
+	declare -r password="${2:-${VM_PASSWORD}}"
 
 	echo "Enabling auto login for ${username} user..."
 
@@ -50,13 +40,6 @@ function main() {
 	fi
 
 	sudo defaults write '/Library/Preferences/com.apple.loginwindow' autoLoginUser -string "${username}"
-}
-
-trap exit_handler EXIT
-function exit_handler() {
-	declare -ri exit_code="$?"
-	declare -r script_name="${0##*/}"
-	echo -e "\n==> ${script_name} exited with code ${exit_code}"
 }
 
 main "$@"

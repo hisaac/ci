@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:hisaac-ci}/configulator",
+            "name": "Debug configulator (configulator)",
+            "program": "${workspaceFolder:hisaac-ci}/configulator/.build/debug/configulator",
+            "preLaunchTask": "swift: Build Debug configulator (configulator)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:hisaac-ci}/configulator",
+            "name": "Release configulator (configulator)",
+            "program": "${workspaceFolder:hisaac-ci}/configulator/.build/release/configulator",
+            "preLaunchTask": "swift: Build Release configulator (configulator)"
+        }
+    ]
+}

@@ -1,6 +1,10 @@
-#!/bin/bash -euo pipefail
+#!/bin/bash
 
-source "$(dirname "$0")/xcode-utils.bash"
+# shellcheck source=../lib/base.bash
+source "$(dirname -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")")/lib/base.bash"
+
+# shellcheck source=../lib/xcode-utils.bash
+source "$(dirname -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")")/lib/xcode-utils.bash"
 
 function main() {
 	# Color codes

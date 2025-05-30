@@ -1,4 +1,4 @@
-#!/bin/bash -euo pipefail
+#!/bin/bash
 
 function select_xcode_version() {
 	declare -r xcode_version="$(normalize_xcode_version "$1")"

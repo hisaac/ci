@@ -8,25 +8,23 @@ packer {
 }
 
 variable "vm_name" {
-  type = string
-}
-
-variable "username" {
   type    = string
-  default = "admin"
+  default = "macos-14-base"
 }
 
-variable "password" {
-  type    = string
-  default = "admin"
+variable "vm_username" {
+  type      = string
+  sensitive = true
+  default   = "admin"
 }
 
-source "tart-cli" "tart" {
-  vm_name      = var.vm_name
-  recovery     = true
-  ssh_username = var.username
-  ssh_password = var.password
+variable "vm_password" {
+  type      = string
+  sensitive = true
+  default   = "admin"
+}
 
+locals {
   boot_command = [
     # Skip over "Macintosh" and select "Options" to boot into recovery mode
     "<wait60s><right><right><enter>",
@@ -37,13 +35,21 @@ source "tart-cli" "tart" {
     # Disable SIP
     "<wait10s>csrutil disable<enter>",
     "<wait10s>y<enter>",
-    "<wait10s>${password}<enter>",
+    "<wait10s>${var.vm_password}<enter>",
 
     # Shutdown
     "<wait10s>halt<enter>",
   ]
 }
 
+source "tart-cli" "recovery" {
+  vm_name      = var.vm_name
+  ssh_username = var.vm_username
+  ssh_password = var.vm_password
+  boot_command = local.boot_command
+  recovery     = true
+}
+
 build {
-  sources = ["source.tart-cli.tart"]
+  sources = ["source.tart-cli.recovery"]
 }

@@ -2,6 +2,7 @@
 	"cSpell.words": [
 		"bootstatus",
 		"cirruslabs",
+		"configulator",
 		"csrutil",
 		"dseditgroup",
 		"dyld",
@@ -37,6 +38,7 @@
 		"sysadminctl",
 		"systemsetup",
 		"tipsd",
+		"toplevel",
 		"torarnv",
 		"tostring",
 		"trimspace",

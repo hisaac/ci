@@ -7,3 +7,6 @@ xcodes/
 
 # Packer
 packer_cache/
+
+# Ansible
+.ansible
