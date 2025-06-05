@@ -93,25 +93,30 @@ function get_xcode_version_at_path() {
 }
 
 function get_path_to_xcode_version() {
-	declare -r xcode_version="$(normalize_xcode_version "$1")"
+        declare -r xcode_version="$(normalize_xcode_version "$1")"
 
-	for installed_xcode_path in $(get_paths_to_installed_xcode_versions); do
-		declare installed_xcode_version
-		installed_xcode_version="$(get_xcode_version_at_path "${installed_xcode_path}")"
+        declare -a installed_xcode_paths=()
+        while IFS= read -r path; do
+                installed_xcode_paths+=("${path}")
+        done < <(get_paths_to_installed_xcode_versions)
 
-		if [[ "${installed_xcode_version}" == "${xcode_version}" ]]; then
-			echo "${installed_xcode_path}"
-			return
-		fi
-	done
+        for installed_xcode_path in "${installed_xcode_paths[@]}"; do
+                declare installed_xcode_version
+                installed_xcode_version="$(get_xcode_version_at_path "${installed_xcode_path}")"
+
+                if [[ "${installed_xcode_version}" == "${xcode_version}" ]]; then
+                        echo "${installed_xcode_path}"
+                        return
+                fi
+        done
 }
 
 function get_paths_to_installed_xcode_versions() {
-	declare -a installed_xcode_paths
-	while read -r xcode_path; do
-		installed_xcode_paths+=("${xcode_path}")
-	done < <(
-		/usr/bin/mdfind -onlyin "/" "kMDItemCFBundleIdentifier='com.apple.dt.Xcode'"
-	)
-	echo "${installed_xcode_paths[@]}"
+        declare -a installed_xcode_paths
+        while read -r xcode_path; do
+                installed_xcode_paths+=("${xcode_path}")
+        done < <(
+                /usr/bin/mdfind -onlyin "/" "kMDItemCFBundleIdentifier='com.apple.dt.Xcode'"
+        )
+        printf '%s\n' "${installed_xcode_paths[@]}"
 }
