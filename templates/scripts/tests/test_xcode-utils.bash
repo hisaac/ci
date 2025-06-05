@@ -36,34 +36,46 @@ function test_get_selected_xcode_version() {
 }
 
 function test_get_xcode_version_at_path() {
-	local all_ok=0
-	for xcode_path in $(get_paths_to_installed_xcode_versions); do
-		local version
-		version=$(get_xcode_version_at_path "$xcode_path")
-		[[ -n "$version" ]] || all_ok=1
-	done
-	return $all_ok
+       local all_ok=0
+       local xcode_paths=()
+       while IFS= read -r path; do
+               xcode_paths+=("${path}")
+       done < <(get_paths_to_installed_xcode_versions)
+       for xcode_path in "${xcode_paths[@]}"; do
+               local version
+               version=$(get_xcode_version_at_path "$xcode_path")
+               [[ -n "$version" ]] || all_ok=1
+       done
+       return $all_ok
 }
 
 function test_get_path_to_xcode_version() {
-	local all_ok=0
-	for xcode_path in $(get_paths_to_installed_xcode_versions); do
-		local version found_path
-		version=$(get_xcode_version_at_path "$xcode_path")
-		found_path=$(get_path_to_xcode_version "$version")
-		[[ "$found_path" == "$xcode_path" ]] || all_ok=1
-	done
-	return $all_ok
+       local all_ok=0
+       local xcode_paths=()
+       while IFS= read -r path; do
+               xcode_paths+=("${path}")
+       done < <(get_paths_to_installed_xcode_versions)
+       for xcode_path in "${xcode_paths[@]}"; do
+               local version found_path
+               version=$(get_xcode_version_at_path "$xcode_path")
+               found_path=$(get_path_to_xcode_version "$version")
+               [[ "$found_path" == "$xcode_path" ]] || all_ok=1
+       done
+       return $all_ok
 }
 
 function test_check_xcode_version_is_installed() {
-	local all_ok=0
-	for xcode_path in $(get_paths_to_installed_xcode_versions); do
-		local version
-		version=$(get_xcode_version_at_path "$xcode_path")
-		check_xcode_version_is_installed "$version" || all_ok=1
-	done
-	return $all_ok
+       local all_ok=0
+       local xcode_paths=()
+       while IFS= read -r path; do
+               xcode_paths+=("${path}")
+       done < <(get_paths_to_installed_xcode_versions)
+       for xcode_path in "${xcode_paths[@]}"; do
+               local version
+               version=$(get_xcode_version_at_path "$xcode_path")
+               check_xcode_version_is_installed "$version" || all_ok=1
+       done
+       return $all_ok
 }
 
 function test_check_xcode_version_is_selected() {

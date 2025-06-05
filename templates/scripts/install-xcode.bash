@@ -44,11 +44,14 @@ function install_xcode() {
 	sudo DevToolsSecurity -enable
 	sudo dseditgroup -o edit -t group -a staff _developer
 
-	declare -ra installed_xcode_paths="$(get_paths_to_installed_xcode_versions)"
+       declare -a installed_xcode_paths=()
+       while IFS= read -r path; do
+               installed_xcode_paths+=("${path}")
+       done < <(get_paths_to_installed_xcode_versions)
 
-	for xcode_path in "${installed_xcode_paths[@]}"; do
-		declare xcode_version
-		xcode_version="$(get_xcode_version_at_path "$xcode_path")"
+       for xcode_path in "${installed_xcode_paths[@]}"; do
+               declare xcode_version
+               xcode_version="$(get_xcode_version_at_path "$xcode_path")"
 		sudo xcode-select --switch "$xcode_path"
 		sudo xcodebuild -license accept
 
