@@ -149,38 +149,32 @@ source "tart-cli" "initialize" {
 build {
   sources = ["source.tart-cli.initialize"]
 
-  # Provision the VM with initial setup scripts
   provisioner "shell" {
     scripts = [
       "${path.root}/scripts/enable-passwordless-sudo.bash",
       "${path.root}/scripts/enable-auto-login.bash",
-      "${path.root}/scripts/disable-screen-lock.bash",
-      "${path.root}/scripts/install-xcode-command-line-tools.bash",
-    ]
-    env = {
-      "VM_USERNAME" = var.vm_username,
-      "VM_PASSWORD" = var.vm_password,
-    }
-  }
-
-  # Run additional configuration and installation scripts
-  provisioner "shell" {
-    scripts = [
-      "${path.root}/scripts/configure-defaults.bash",
-      "${path.root}/scripts/configure-ssh-known-hosts.bash",
       "${path.root}/scripts/disable-automatic-updates.bash",
+      "${path.root}/scripts/disable-screen-lock.bash",
       "${path.root}/scripts/disable-screensaver-at-login-window.bash",
       "${path.root}/scripts/disable-screensaver-for-current-user.bash",
       "${path.root}/scripts/disable-sleep.bash",
-      "${path.root}/scripts/install-homebrew.bash",
+      "${path.root}/scripts/disable-spctl.bash",
       "${path.root}/scripts/install-rosetta-2.bash",
+      "${path.root}/scripts/update-safari.bash",
+      "${path.root}/scripts/configure-defaults.bash",
     ]
+    env = {
+      "VM_USERNAME" = var.vm_username
+      "VM_PASSWORD" = var.vm_password
+    }
   }
 
-  # Finally, configure the shell profile for the VM
   provisioner "shell" {
-    scripts = [
-      "${path.root}/scripts/configure-shell-profile.bash",
-    ]
+    script = "${path.root}/scripts/update-macos.bash"
+    expect_disconnect = true
+    env = {
+      "VM_USERNAME" = var.vm_username
+      "VM_PASSWORD" = var.vm_password
+    }
   }
 }

@@ -7,10 +7,24 @@
 #USAGE }
 
 function main() {
-	packer init -upgrade "${MISE_PROJECT_ROOT}/templates/macos-${usage_macos_version}-base.pkr.hcl"
-	# packer build "${MISE_PROJECT_ROOT}/templates/macos-${usage_macos_version}-base.pkr.hcl"
-	# packer build "${MISE_PROJECT_ROOT}/templates/macos-${usage_macos_version}-disable-sip.pkr.hcl"
-	packer build "${MISE_PROJECT_ROOT}/templates/macos-${usage_macos_version}-configured.pkr.hcl"
+	case "${usage_macos_version}" in
+		14)
+			packer init -upgrade "${MISE_PROJECT_ROOT}/templates/macos-14-base.pkr.hcl"
+			packer init -upgrade "${MISE_PROJECT_ROOT}/templates/macos-14-disable-sip.pkr.hcl"
+
+			packer build "${MISE_PROJECT_ROOT}/templates/macos-14-base.pkr.hcl"
+			packer build "${MISE_PROJECT_ROOT}/templates/macos-14-disable-sip.pkr.hcl"
+			;;
+		15)
+			echo "macOS 15 is not yet supported"
+			;;
+		26)
+			echo "macOS 26 is not yet supported"
+			;;
+		*)
+			echo "macOS ${usage_macos_version} is not yet supported"
+			;;
+	esac
 }
 
 main "$@"

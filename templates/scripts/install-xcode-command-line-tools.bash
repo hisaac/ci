@@ -1,13 +1,22 @@
 #!/bin/bash -euo pipefail
 
 function main() {
-	# based on https://github.com/timsutton/osx-vm-templates/blob/d3de634fc09aed981e8ec53ba302163c4624f039/scripts/xcode-cli-tools.sh#L12-L19
-	echo "Installing Xcode command line tools..."
-	touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-	declare -r newest_command_line_tools="$(softwareupdate --list | grep "\*.*Command Line" | tail --lines=1)"
-	declare -r newest_command_line_tools_name="${newest_command_line_tools#'* Label: '}"
-	softwareupdate --install "$newest_command_line_tools_name" --verbose
-	rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+	declare -r placeholder_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
+	touch "${placeholder_file}"
+
+	declare -r command_line_tools_label="$(
+		softwareupdate --list |
+			grep --extended-regexp --only-matching 'Label: Command Line Tools for Xcode-[0-9.]+' |
+			sort --key=2 --field-separator=- --version-sort --reverse |
+			head --lines=1 |
+			cut -d':' -f2 |
+			sed 's/^ //'
+	)"
+
+	echo "Installing ${command_line_tools_label}..."
+
+	softwareupdate --install "${command_line_tools_label}" --verbose
+	rm -f "${placeholder_file}"
 }
 
 main "$@"

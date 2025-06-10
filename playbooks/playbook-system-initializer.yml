@@ -1,7 +1,0 @@
----
-- name: Run system initializer role
-  hosts: default
-  roles:
-    - system-initializer
-  vars:
-    ansible_password: admin

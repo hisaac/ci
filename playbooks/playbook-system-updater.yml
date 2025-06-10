@@ -1,7 +1,0 @@
----
-- name: Run system updater role
-  hosts: default
-  roles:
-    - system-updater
-  vars:
-    ansible_password: admin

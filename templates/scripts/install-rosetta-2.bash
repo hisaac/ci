@@ -2,7 +2,7 @@
 
 function main() {
 	echo "Installing Rosetta 2..."
-	sudo softwareupdate --install-rosetta --agree-to-license
+	softwareupdate --install-rosetta --agree-to-license --verbose
 }
 
 main "$@"
