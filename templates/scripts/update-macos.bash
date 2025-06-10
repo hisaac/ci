@@ -4,7 +4,7 @@ function main() {
 	declare -r username="${1:-"${VM_USERNAME:-"admin"}"}"
 	declare -r password="${2:-"${VM_PASSWORD:-"admin"}"}"
 
-	declare -r setup_assistant_overrides=(
+	declare -ra setup_assistant_overrides=(
 		DidSeeAccessibility
 		DidSeeActivationLock
 		DidSeeAppStore
