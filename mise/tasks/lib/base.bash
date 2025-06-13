@@ -5,7 +5,7 @@ function main() {
 }
 
 function export_global_variables() {
-	declare -r PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+	local -r PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
 	# Load environment variables from the .env file if it exists
 	if [[ -f "${PROJECT_ROOT}/.env" ]]; then

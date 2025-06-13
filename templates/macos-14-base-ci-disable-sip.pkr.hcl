@@ -7,21 +7,24 @@ packer {
   }
 }
 
+variable "vm_base_name" {
+  type    = string
+  default = "macos-14-vanilla"
+}
+
 variable "vm_name" {
   type    = string
-  default = "macos-14-base"
+  default = "macos-14-base-ci-sip-disabled"
 }
 
 variable "vm_username" {
-  type      = string
-  sensitive = true
-  default   = "admin"
+  type    = string
+  default = "admin"
 }
 
 variable "vm_password" {
-  type      = string
-  sensitive = true
-  default   = "admin"
+  type    = string
+  default = "admin"
 }
 
 locals {
@@ -43,11 +46,13 @@ locals {
 }
 
 source "tart-cli" "recovery" {
-  vm_name      = var.vm_name
-  ssh_username = var.vm_username
-  ssh_password = var.vm_password
-  boot_command = local.boot_command
-  recovery     = true
+  vm_name            = var.vm_name
+  vm_base_name       = var.vm_base_name
+  ssh_username       = var.vm_username
+  ssh_password       = var.vm_password
+  boot_command       = local.boot_command
+  recovery_partition = "keep"
+  recovery           = true
 }
 
 build {

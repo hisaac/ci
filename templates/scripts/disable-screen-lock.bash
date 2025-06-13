@@ -1,7 +1,7 @@
 #!/bin/bash -euo pipefail
 
 function main() {
-	declare -r password="${1:-${VM_PASSWORD}}"
+	local -r password="${1:-${PASSWORD}}"
 
 	echo "Disabling screen lock..."
 	sysadminctl -screenLock off -password "${password}"

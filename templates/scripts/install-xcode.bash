@@ -4,8 +4,8 @@
 source "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")/lib/xcode-utils.bash"
 
 function main() {
-	declare -r xcode_versions="${1:-${XCODE_VERSIONS}}"
-	declare -r simulator_runtimes="${2:-${SIMULATOR_RUNTIMES}}"
+	local -r xcode_versions="${1:-${XCODE_VERSIONS}}"
+	local -r simulator_runtimes="${2:-${SIMULATOR_RUNTIMES}}"
 	unset USERNAME PASSWORD XCODE_VERSIONS SIMULATOR_RUNTIMES
 
 	for xcode_version in ${xcode_versions//,/ }; do
@@ -15,6 +15,18 @@ function main() {
 		fi
 		prewarm_simulators
 	done
+
+	echo "==> Xcode: Disabling default simulator set creation"
+	# CoreSimulator now supports a mode in which the developer has full control over devices in the default device set.
+	# The system won’t create default devices nor manage pairing relationships between watches and phones in that set when placed into this mode.
+	# source: https://developer.apple.com/documentation/xcode-release-notes/xcode-16_2-release-notes#Simulator
+	defaults write com.apple.CoreSimulator EnableDefaultSetCreation -bool NO
+
+	echo "==> Xcode: Disabling Xcode Cloud upsell"
+	defaults write com.apple.dt.Xcode XcodeCloudUpsellPromptEnabled -bool false
+
+	echo "==> Xcode: Disabling file extensions"
+	defaults write com.apple.dt.Xcode IDEFileExtensionDisplayMode -int 1
 }
 
 function install_xcode() {
@@ -44,10 +56,10 @@ function install_xcode() {
 	sudo DevToolsSecurity -enable
 	sudo dseditgroup -o edit -t group -a staff _developer
 
-	declare -ra installed_xcode_paths="$(get_paths_to_installed_xcode_versions)"
+	local -ra installed_xcode_paths="$(get_paths_to_installed_xcode_versions)"
 
 	for xcode_path in "${installed_xcode_paths[@]}"; do
-		declare xcode_version
+		local xcode_version
 		xcode_version="$(get_xcode_version_at_path "$xcode_path")"
 		sudo xcode-select --switch "$xcode_path"
 		sudo xcodebuild -license accept
@@ -61,9 +73,9 @@ function install_xcode() {
 
 		# TODO: Figure out what this is actually doing.
 		# I'm not sure why we create this file, but xcodes does it, so we'll do it too.
-		declare -r user_cache_dir="$(getconf DARWIN_USER_CACHE_DIR)"
-		declare -r macos_build_version="$(sw_vers -buildVersion)"
-		declare -r xcode_build_version="$(
+		local -r user_cache_dir="$(getconf DARWIN_USER_CACHE_DIR)"
+		local -r macos_build_version="$(sw_vers -buildVersion)"
+		local -r xcode_build_version="$(
 			/usr/libexec/PlistBuddy -c "Print :ProductBuildVersion" "${xcode_path}/Contents/version.plist"
 		)"
 		touch "${user_cache_dir}/com.apple.dt.Xcode.InstallCheckCache_${macos_build_version}_${xcode_build_version}"
@@ -71,8 +83,8 @@ function install_xcode() {
 }
 
 function install_simulator_runtimes() {
-	declare -r arg_simulator_runtimes="${1}"
-	declare -r simulator_runtimes="$(echo "${arg_simulator_runtimes}" | tr ',' ' ')"
+	local -r arg_simulator_runtimes="${1}"
+	local -r simulator_runtimes="$(echo "${arg_simulator_runtimes}" | tr ',' ' ')"
 	for simulator_runtime in ${simulator_runtimes}; do
 		echo "Installing simulator runtime: ${simulator_runtime}..."
 		xcrun xcodebuild -downloadPlatform "${simulator_runtime}"
@@ -84,7 +96,7 @@ function prewarm_simulators() {
 	# This bit is based on https://github.com/biscuitehh/yeetd/blob/main/Resources/prewarm_simulators.sh
 	echo "Prewarming simulators..."
 
-	declare -r simulator_udids=("$(xcrun simctl list devices --json | jq '.devices[] | .[] | .udid')")
+	local -r simulator_udids=("$(xcrun simctl list devices --json | jq '.devices[] | .[] | .udid')")
 	for simulator_udid in "${simulator_udids[@]}"; do
 		# Remove leading and trailing quotes
 		simulator_udid="${simulator_udid%\"}"
@@ -103,7 +115,7 @@ function prewarm_simulators() {
 	#   - https://stackoverflow.com/a/68394101/9316533
 	echo "Waiting for simulator shared cache to update..."
 
-	declare -r selected_xcode_version="$(get_selected_xcode_version)"
+	local -r selected_xcode_version="$(get_selected_xcode_version)"
 	if [[ "$(printf '%s\n' "${selected_xcode_version}" "16.4" | sort -V | head -n1)" == "16.4" ]]; then
 		# If the selected Xcode version is 16.4 or greater, we can use the new simulator shared cache update process
 		xcrun simctl runtime dyld_shared_cache update --all

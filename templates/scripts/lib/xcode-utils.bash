@@ -1,21 +1,21 @@
 #!/bin/bash
 
 function select_xcode_version() {
-	declare -r xcode_version="$(normalize_xcode_version "$1")"
-	declare -r xcode_path="$(get_path_to_xcode_version "${xcode_version}")"
-	declare -r xcode_developer_dir="${xcode_path%/Contents/Developer}"
+	local -r xcode_version="$(normalize_xcode_version "$1")"
+	local -r xcode_path="$(get_path_to_xcode_version "${xcode_version}")"
+	local -r xcode_developer_dir="${xcode_path%/Contents/Developer}"
 	sudo /usr/bin/xcrun xcode-select --switch "${xcode_developer_dir}"
 }
 
 function install_xcode_version() {
-	declare -r xcode_version="$(normalize_xcode_version "$1")"
+	local -r xcode_version="$(normalize_xcode_version "$1")"
 	xcodes update &>/dev/null
 	xcodes install "${xcode_version}" --experimental-unxip
 }
 
 function check_user_has_admin_privileges() {
-	declare -r user="$1"
-	declare -r user_group_membership="$(id -Gn "$user")"
+	local -r user="$1"
+	local -r user_group_membership="$(id -Gn "$user")"
 	if [[ $user_group_membership == *"admin"* ]]; then
 		return 0
 	else
@@ -33,8 +33,8 @@ function normalize_xcode_version() {
 }
 
 function check_xcode_version_is_selected() {
-	declare -r xcode_version="$(normalize_xcode_version "$1")"
-	declare -r selected_xcode_version="$(get_selected_xcode_version)"
+	local -r xcode_version="$(normalize_xcode_version "$1")"
+	local -r selected_xcode_version="$(get_selected_xcode_version)"
 	if [[ "${selected_xcode_version}" == "${xcode_version}" ]]; then
 		return 0
 	else
@@ -43,10 +43,10 @@ function check_xcode_version_is_selected() {
 }
 
 function check_xcode_version_is_installed() {
-	declare -r xcode_version="$(normalize_xcode_version "$1")"
+	local -r xcode_version="$(normalize_xcode_version "$1")"
 
 	# Find paths to all locally installed Xcode versions
-	declare -a installed_xcode_paths
+	local -a installed_xcode_paths
 	while read -r xcode_path; do
 		installed_xcode_paths+=("${xcode_path}")
 	done < <(
@@ -55,7 +55,7 @@ function check_xcode_version_is_installed() {
 
 	# If the desired Xcode version is installed, return true
 	for installed_xcode_path in "${installed_xcode_paths[@]}"; do
-		declare installed_xcode_version
+		local installed_xcode_version
 		installed_xcode_version="$(get_xcode_version_at_path "${installed_xcode_path}")"
 
 		if [[ "$(normalize_xcode_version "${installed_xcode_version}")" == "$(normalize_xcode_version "${xcode_version}")" ]]; then
@@ -68,18 +68,19 @@ function check_xcode_version_is_installed() {
 }
 
 function get_selected_xcode_version() {
-	declare -r selected_xcode_developer_dir="$(/usr/bin/xcrun xcode-select --print-path)"
-	declare -r selected_xcode_app_path="${selected_xcode_developer_dir%/Contents/Developer}"
-	declare -r selected_xcode_version="$(get_xcode_version_at_path "${selected_xcode_app_path}")"
+	local -r selected_xcode_developer_dir="$(/usr/bin/xcrun xcode-select --print-path)"
+	local -r selected_xcode_app_path="${selected_xcode_developer_dir%/Contents/Developer}"
+	local -r selected_xcode_version="$(get_xcode_version_at_path "${selected_xcode_app_path}")"
 	normalize_xcode_version "${selected_xcode_version}"
 }
 
 function get_xcode_version_at_path() {
-	declare -r xcode_path="$1"
-	declare xcode_version
+	local -r xcode_path="$1"
+	local xcode_version
 
 	# First try getting the version from Spotlight's metadata database
 	xcode_version="$(/usr/bin/mdls --raw -name "kMDItemVersion" "${xcode_path}")"
+	readonly xcode_version
 
 	# If the Xcode version is not found in Spotlight's metadata database,
 	# try reading it from the Info.plist
@@ -93,10 +94,10 @@ function get_xcode_version_at_path() {
 }
 
 function get_path_to_xcode_version() {
-	declare -r xcode_version="$(normalize_xcode_version "$1")"
+	local -r xcode_version="$(normalize_xcode_version "$1")"
 
 	for installed_xcode_path in $(get_paths_to_installed_xcode_versions); do
-		declare installed_xcode_version
+		local installed_xcode_version
 		installed_xcode_version="$(get_xcode_version_at_path "${installed_xcode_path}")"
 
 		if [[ "${installed_xcode_version}" == "${xcode_version}" ]]; then
@@ -107,7 +108,7 @@ function get_path_to_xcode_version() {
 }
 
 function get_paths_to_installed_xcode_versions() {
-	declare -a installed_xcode_paths
+	local -a installed_xcode_paths
 	while read -r xcode_path; do
 		installed_xcode_paths+=("${xcode_path}")
 	done < <(

@@ -19,19 +19,17 @@ variable "macos_version" {
 
 variable "vm_name" {
   type    = string
-  default = "macos-14-base"
+  default = "macos-14-vanilla"
 }
 
 variable "vm_username" {
-  type      = string
-  sensitive = true
-  default   = "admin"
+  type    = string
+  default = "admin"
 }
 
 variable "vm_password" {
-  type      = string
-  sensitive = true
-  default   = "admin"
+  type    = string
+  default = "admin"
 }
 
 data "ipsw" "macos" {
@@ -152,29 +150,28 @@ build {
   provisioner "shell" {
     scripts = [
       "${path.root}/scripts/enable-passwordless-sudo.bash",
-      "${path.root}/scripts/enable-auto-login.bash",
-      "${path.root}/scripts/disable-automatic-updates.bash",
       "${path.root}/scripts/disable-screen-lock.bash",
-      "${path.root}/scripts/disable-screensaver-at-login-window.bash",
-      "${path.root}/scripts/disable-screensaver-for-current-user.bash",
-      "${path.root}/scripts/disable-sleep.bash",
-      "${path.root}/scripts/disable-spctl.bash",
-      "${path.root}/scripts/install-rosetta-2.bash",
-      "${path.root}/scripts/update-safari.bash",
-      "${path.root}/scripts/configure-defaults.bash",
+      "${path.root}/scripts/enable-auto-login.bash",
     ]
     env = {
-      "VM_USERNAME" = var.vm_username
-      "VM_PASSWORD" = var.vm_password
+      "USERNAME" = var.vm_username
+      "PASSWORD" = var.vm_password
     }
   }
 
   provisioner "shell" {
-    script = "${path.root}/scripts/update-macos.bash"
+    scripts = [
+      "${path.root}/scripts/update-safari.bash",
+      "${path.root}/scripts/update-macos.bash",
+    ]
     expect_disconnect = true
     env = {
-      "VM_USERNAME" = var.vm_username
-      "VM_PASSWORD" = var.vm_password
+      "USERNAME" = var.vm_username
+      "PASSWORD" = var.vm_password
     }
+  }
+
+  provisioner "shell" {
+    script = "${path.root}/scripts/wait-for-finder.bash"
   }
 }

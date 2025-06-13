@@ -184,8 +184,8 @@ build {
       "${path.root}/scripts/configure-defaults.bash",
     ]
     env = {
-      "VM_USERNAME" = var.vm_username,
-      "VM_PASSWORD" = var.vm_password,
+      "USERNAME" = var.vm_username,
+      "PASSWORD" = var.vm_password,
     }
   }
 }

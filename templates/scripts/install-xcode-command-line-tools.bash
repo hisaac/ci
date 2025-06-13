@@ -1,10 +1,10 @@
 #!/bin/bash -euo pipefail
 
 function main() {
-	declare -r placeholder_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
+	local -r placeholder_file="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
 	touch "${placeholder_file}"
 
-	declare -r command_line_tools_label="$(
+	local -r command_line_tools_label="$(
 		softwareupdate --list |
 			grep --extended-regexp --only-matching 'Label: Command Line Tools for Xcode-[0-9.]+' |
 			sort --key=2 --field-separator=- --version-sort --reverse |

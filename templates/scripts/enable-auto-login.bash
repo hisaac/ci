@@ -3,17 +3,17 @@
 # This is based off of https://github.com/freegeek-pdx/mkuser
 # Specifically: https://github.com/freegeek-pdx/mkuser/blob/b7a7900d2e6ef01dfafad1ba085c94f7302677d9/mkuser.sh#L6460-L6631
 function main() {
-	declare -r username="${1:-${VM_USERNAME}}"
-	declare -r password="${2:-${VM_PASSWORD}}"
+	local -r username="${1:-${USERNAME}}"
+	local -r password="${2:-${PASSWORD}}"
 
-	echo "Enabling auto login for ${username} user..."
+	echo "Enabling auto-login for ${username}..."
 
 	# These are the special "kcpassword" repeating cipher hex characters.
-	declare -ra cipher_key=( '7d' '89' '52' '23' 'd2' 'bc' 'dd' 'ea' 'a3' 'b9' '1f' )
-	declare -ri cipher_key_length="${#cipher_key[@]}"
+	local -ra cipher_key=( '7d' '89' '52' '23' 'd2' 'bc' 'dd' 'ea' 'a3' 'b9' '1f' )
+	local -ri cipher_key_length="${#cipher_key[@]}"
 
-	declare encoded_password_hex_string
-	declare -i this_password_hex_char_index=0
+	local encoded_password_hex_string
+	local -i this_password_hex_char_index=0
 	while IFS='' read -r this_password_hex_char; do
 		printf -v this_encoded_password_hex_char '%02x' "$(( 0x${this_password_hex_char} ^ 0x${cipher_key[this_password_hex_char_index % cipher_key_length]} ))"
 		encoded_password_hex_string+="${this_encoded_password_hex_char} "
