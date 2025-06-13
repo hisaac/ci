@@ -2,8 +2,8 @@
 .DS_Store
 .env
 
-# Xcode downloads
-xcodes/
+# Cached files
+caches/
 
 # Packer
 packer_cache/

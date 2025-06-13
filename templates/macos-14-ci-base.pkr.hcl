@@ -8,13 +8,12 @@ packer {
 }
 
 variable "vm_base_name" {
-  type    = string
-  default = "macos-14-base-ci-sip-disabled"
+  type = string
 }
 
 variable "vm_name" {
   type    = string
-  default = "macos-14-base-ci-configured"
+  default = "macos-14-ci-base"
 }
 
 variable "vm_username" {
@@ -47,11 +46,22 @@ build {
     scripts = [
       "${path.root}/scripts/cleanup-spotlight-index.bash",
       "${path.root}/scripts/configure-ssh-known-hosts.bash",
-      "${path.root}/scripts/configure-system-post-sip-disabled.bash",
       "${path.root}/scripts/configure-system.bash",
+      "${path.root}/scripts/disable-protected-services.bash",
       "${path.root}/scripts/disable-spctl.bash",
       "${path.root}/scripts/install-homebrew.bash",
       "${path.root}/scripts/install-rosetta-2.bash",
+    ]
+  }
+
+  provisioner "file" {
+    source      = "${path.root}/data/.profile"
+    destination = "~/.profile"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "ln -s ~/.profile ~/.zprofile",
     ]
   }
 }

@@ -171,7 +171,9 @@ build {
     }
   }
 
+  # Pause to make sure the OS is fully booted
   provisioner "shell" {
     script = "${path.root}/scripts/wait-for-finder.bash"
+    pause_after = "30s"
   }
 }

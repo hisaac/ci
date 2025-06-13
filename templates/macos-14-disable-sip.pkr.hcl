@@ -8,13 +8,12 @@ packer {
 }
 
 variable "vm_base_name" {
-  type    = string
-  default = "macos-14-vanilla"
+  type = string
 }
 
 variable "vm_name" {
   type    = string
-  default = "macos-14-base-ci-sip-disabled"
+  default = "macos-14-disable-sip"
 }
 
 variable "vm_username" {

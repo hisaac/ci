@@ -1,5 +1,7 @@
 #!/bin/bash -euo pipefail
 
+# Note: This script can only be run after SIP has been disabled
+
 function main() {
 	# If a service is not running, `launchctl bootout` will return a non-zero exit code,
 	# so we use `|| true` to ignore that.
