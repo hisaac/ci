@@ -6,8 +6,13 @@ function main() {
 	# If a service is not running, `launchctl bootout` will return a non-zero exit code,
 	# so we use `|| true` to ignore that.
 
+	local -r user_id="$(id -u)"
+
 	echo "==> Disabling notification center agent"
-	launchctl bootout "gui/$(id -u)" /System/Library/LaunchAgents/com.apple.notificationcenterui.plist || true
+	launchctl bootout "gui/${user_id}" /System/Library/LaunchAgents/com.apple.notificationcenterui.plist || true
+
+	echo "==> Disabling Tips daemon"
+	launchctl bootout "gui/${user_id}" /System/Library/LaunchAgents/com.apple.tipsd.plist || true
 
 	echo "==> Disabling Time Machine daemon"
 	sudo launchctl bootout system /System/Library/LaunchDaemons/com.apple.backupd.plist || true

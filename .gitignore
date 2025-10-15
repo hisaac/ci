@@ -4,6 +4,7 @@
 
 # Cached files
 caches/
+xcodes/
 
 # Packer
 packer_cache/

@@ -4,6 +4,9 @@ export LANG=en_US.UTF-8
 export SHELL_SESSIONS_DISABLE=1
 
 # Set up Homebrew environment
-eval "$(/opt/homebrew/bin/brew shellenv)"
-export HOMEBREW_NO_AUTO_UPDATE=1
-export HOMEBREW_NO_INSTALL_CLEANUP=1
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+	eval "$(/opt/homebrew/bin/brew shellenv)"
+	export HOMEBREW_NO_AUTO_UPDATE=1
+	export HOMEBREW_NO_INSTALL_CLEANUP=1
+	export HOMEBREW_CASK_OPTS="--no-quarantine"
+fi

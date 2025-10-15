@@ -8,7 +8,8 @@ packer {
 }
 
 variable "vm_base_name" {
-  type = string
+  type    = string
+  default = "macos-14-vanilla"
 }
 
 variable "vm_name" {

@@ -13,10 +13,13 @@ function main() {
 			packer build "${MISE_PROJECT_ROOT}/templates/macos-14-vanilla.pkr.hcl"
 
 			packer init -upgrade "${MISE_PROJECT_ROOT}/templates/macos-14-disable-sip.pkr.hcl"
-			packer build -var "vm_base_name=macos-14-vanilla" "${MISE_PROJECT_ROOT}/templates/macos-14-disable-sip.pkr.hcl"
+			packer build "${MISE_PROJECT_ROOT}/templates/macos-14-disable-sip.pkr.hcl"
 
 			packer init -upgrade "${MISE_PROJECT_ROOT}/templates/macos-14-ci-base.pkr.hcl"
-			packer build -var "vm_base_name=macos-14-disable-sip" "${MISE_PROJECT_ROOT}/templates/macos-14-ci-base.pkr.hcl"
+			packer build "${MISE_PROJECT_ROOT}/templates/macos-14-ci-base.pkr.hcl"
+
+			packer init -upgrade "${MISE_PROJECT_ROOT}/templates/macos-14-ci-ios.pkr.hcl"
+			packer build "${MISE_PROJECT_ROOT}/templates/macos-14-ci-ios.pkr.hcl"
 			;;
 		*)
 			echo "macOS ${usage_macos_version} is not yet supported"

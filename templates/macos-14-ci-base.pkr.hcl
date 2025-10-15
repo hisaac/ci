@@ -8,7 +8,8 @@ packer {
 }
 
 variable "vm_base_name" {
-  type = string
+  type    = string
+  default = "macos-14-disable-sip"
 }
 
 variable "vm_name" {
@@ -37,6 +38,22 @@ source "tart-cli" "boot" {
 build {
   sources = ["source.tart-cli.boot"]
 
+  provisioner "file" {
+    sources = [
+      "${path.root}/data/.bash_profile",
+      "${path.root}/data/.bashrc",
+      "${path.root}/data/.profile",
+    ]
+    destination = "/Users/${var.vm_username}/"
+  }
+
+  provisioner "shell" {
+    script = "${path.root}/scripts/configure-shell.bash"
+    env = {
+      USERNAME = var.vm_username
+    }
+  }
+
   # Install Xcode Command Line Tools first, as it is required for many other scripts
   provisioner "shell" {
     script = "${path.root}/scripts/install-xcode-command-line-tools.bash"
@@ -54,14 +71,10 @@ build {
     ]
   }
 
-  provisioner "file" {
-    source      = "${path.root}/data/.profile"
-    destination = "~/.profile"
-  }
-
   provisioner "shell" {
-    inline = [
-      "ln -s ~/.profile ~/.zprofile",
-    ]
+    script = "${path.root}/scripts/install-homebrew-formulae.bash"
+    env = {
+      BREW_FORMULAE = "jq"
+    }
   }
 }

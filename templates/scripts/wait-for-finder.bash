@@ -8,7 +8,7 @@ function main() {
 
 	echo "Waiting ${timeout} seconds for Finder to start..."
 
-	until pgrep -x "Finder" > /dev/null; do
+	until pgrep -qx "Finder"; do
 		sleep 1
 		if [[ "$SECONDS" -ge "$timeout" ]]; then
 			echo "Finder did not start within ${timeout} seconds."
