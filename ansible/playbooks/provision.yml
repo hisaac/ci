@@ -1,0 +1,7 @@
+---
+- name: Install Xcode Command Line Tools
+  hosts: macos_agents
+  gather_facts: false
+
+  roles:
+    - role: xcode-clt

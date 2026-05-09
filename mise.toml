@@ -1,12 +1,83 @@
-# The minimum version of Mise that is required to run this project.
-min_version = "2025.6.0"
-
 [settings]
+activate_aggressive = true
 experimental = true
+lockfile = true
 
 [tools]
-"aqua:cirruslabs/tart" = "latest"
-"aqua:XcodesOrg/xcodes" = "latest"
 jq = "latest"
 packer = "latest"
 usage = "latest"
+tart = "latest"
+ansible = { version = "latest", pipx_args = "--include-deps", uvx = false }
+python = "latest"
+tombi = "latest"
+
+# Tasks
+
+[tasks.bootstrap]
+dir = "ansible"
+run = [
+	"ansible-galaxy role install --roles-path ./galaxy_roles -r requirements.yml",
+	"ansible-galaxy collection install -r requirements.yml",
+]
+
+[tasks.setup-ssh-key]
+depends = ["run-tart-vms"]
+depends_post = ["stop-tart-vms"]
+run = """
+if [[ ! -f ~/.ssh/ansible_ci ]]; then
+    ssh-keygen -t ed25519 -C "ansible-ci" -f ~/.ssh/ansible_ci -N ""
+else
+    echo "~/.ssh/ansible_ci already exists, skipping key generation"
+fi
+
+for vm in macos:15 macos:26; do
+    echo "Installing key on $vm..."
+    ssh-copy-id -o PubkeyAuthentication=no -i ~/.ssh/ansible_ci.pub admin@$(tart ip "$vm")
+done
+"""
+
+[tasks.run-tart-vms]
+run = """
+for vm in macos:15 macos:26; do
+    nohup tart run "$vm" > /dev/null 2>&1 &
+    echo "Waiting for $vm to be reachable..."
+    until tart ip "$vm" &>/dev/null; do sleep 2; done
+    echo "$vm is ready"
+done
+"""
+
+[tasks.stop-tart-vms]
+run = """
+for vm in macos:15 macos:26; do
+    ip=$(tart ip "$vm" 2>/dev/null) || continue
+    echo "Shutting down $vm..."
+    ssh -i ~/.ssh/ansible_ci -o StrictHostKeyChecking=no admin@"$ip" "sudo shutdown -h now" || true
+done
+"""
+
+[tasks.provision]
+depends = ["run-tart-vms"]
+dir = "ansible"
+run = "ansible-playbook playbooks/provision.yml -v"
+
+[tasks.refresh-tart-vms]
+alias = "r"
+run = [
+	"tart delete macos:15 || true",
+	"tart delete macos:26 || true",
+	"tart clone macos:15.6.1-frozen macos:15",
+	"tart clone macos:26.4.1-frozen macos:26",
+]
+
+[tasks.upd]
+run = [
+	"mise upgrade",
+	"mise lock",
+]
+
+[tasks.upg]
+run = [
+	"mise upgrade --bump",
+	"mise lock",
+]
