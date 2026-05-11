@@ -4,7 +4,7 @@ function main() {
 	# Erase all indexes and wait until the rebuilding process ends,
 	# for now there is no clear way to get status of indexing process on macOS, it takes around 3-6 minutes to accomplish
 	echo "Erase all MDS indexes and wait until the rebuilding process ends"
-	sudo mdutil -E / > /dev/null
+	sudo mdutil -E / >/dev/null
 
 	echo "Wait for 6 minutes or until the indexing process end signal is found in logs"
 	for _ in {1..12}; do

@@ -9,7 +9,7 @@ function select_xcode_version() {
 
 function normalize_version_number() {
 	local version="$1"
-	IFS='.' read -r major minor patch <<< "$version"
+	IFS='.' read -r major minor patch <<<"$version"
 	major="${major:-0}"
 	minor="${minor:-0}"
 	patch="${patch:-0}"
@@ -105,7 +105,6 @@ function install_simulator_runtime() {
 function prewarm_simulators() {
 	# This bit is based on https://github.com/biscuitehh/yeetd/blob/main/Resources/prewarm_simulators.sh
 	echo "Prewarming simulators..."
-
 
 	while IFS= read -r simulator_udid; do
 		# Remove leading and trailing quotes

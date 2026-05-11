@@ -23,13 +23,15 @@ function main() {
 function test_get_paths_to_installed_xcode_versions() {
 	local paths
 	paths=$(get_paths_to_installed_xcode_versions)
-	[[ -n "$paths" ]]; return $?
+	[[ -n "$paths" ]]
+	return $?
 }
 
 function test_get_selected_xcode_version() {
 	local version
 	version=$(get_selected_xcode_version)
-	[[ -n "$version" ]]; return $?
+	[[ -n "$version" ]]
+	return $?
 }
 
 function test_get_xcode_version_at_path() {
@@ -66,7 +68,8 @@ function test_check_xcode_version_is_installed() {
 function test_check_xcode_version_is_selected() {
 	local selected_version
 	selected_version=$(get_selected_xcode_version)
-	check_xcode_version_is_selected "$selected_version"; return $?
+	check_xcode_version_is_selected "$selected_version"
+	return $?
 }
 
 function test_normalize_xcode_version() {

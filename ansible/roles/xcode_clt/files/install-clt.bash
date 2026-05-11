@@ -8,12 +8,12 @@ declare clt_label=""
 while [[ -z "${clt_label}" ]]; do
 	clt_label="$(
 		softwareupdate --list 2>/dev/null |
-		grep --after-context=1 '\* Label: Command Line Tools' |
-		paste - - |
-		sed 's/.*\* Label: //; s/\tTitle:.*Version: /\t/' |
-		sort --field-separator=$'\t' --key=2 --version-sort |
-		tail -n1 |
-		cut -f1
+			grep --after-context=1 '\* Label: Command Line Tools' |
+			paste - - |
+			sed 's/.*\* Label: //; s/\tTitle:.*Version: /\t/' |
+			sort --field-separator=$'\t' --key=2 --version-sort |
+			tail -n1 |
+			cut -f1
 	)"
 done
 
