@@ -1,5 +1,5 @@
 ---
-setup_assistant_bool_keys:
+macos_updates_setup_assistant_bool_keys:
   - DidSeeAccessibility
   - DidSeeActivationLock
   - DidSeeAppearanceSetup

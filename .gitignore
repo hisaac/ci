@@ -12,8 +12,9 @@ packer_cache/
 # Ansible
 .ansible
 
-# External roles installed via ansible-galaxy
+# External roles/collections installed via ansible-galaxy
 galaxy_roles/
+ansible/galaxy_collections/
 
 # Ansible retry files
 *.retry

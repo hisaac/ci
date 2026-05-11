@@ -51,7 +51,7 @@
     type: bool
     value: true
   become: true
-  loop: "{{ setup_assistant_bool_keys }}"
+  loop: "{{ macos_updates_setup_assistant_bool_keys }}"
 
 # Per-user Setup Assistant preferences
 
@@ -63,7 +63,7 @@
     value: true
   become: true
   become_user: "{{ macos_admin_user }}"
-  loop: "{{ setup_assistant_bool_keys }}"
+  loop: "{{ macos_updates_setup_assistant_bool_keys }}"
 
 - name: Set per-user Setup Assistant version markers to sentinel values
   community.general.osx_defaults:

@@ -8,8 +8,8 @@ env {
 
 local custom_linters = new Mapping<String, Step> {
 	["ansible-lint"] {
-		check = "ansible-lint"
-		fix = "ansible-lint --fix"
+		check = "cd ansible && ansible-lint"
+		fix = "cd ansible && ansible-lint --fix"
 	}
 }
 
