@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# shellcheck source=../lib/base.bash
-source "$(dirname -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")")/lib/base.bash"
-
 # shellcheck source=../lib/xcode-utils.bash
 source "$(dirname -- "$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")")/lib/xcode-utils.bash"
 
