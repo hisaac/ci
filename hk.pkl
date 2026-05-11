@@ -3,38 +3,41 @@ import "package://github.com/jdx/hk/releases/download/v1.45.0/hk@1.45.0#/Builtin
 
 fail_fast = false
 env {
-	["HK_MISE"] = "true"
+  ["HK_MISE"] = "true"
 }
 
 local custom_linters = new Mapping<String, Step> {
-	["ansible-lint"] {
-		glob = List("ansible/**/*.yml", "ansible/**/*.yaml", "ansible/ansible.cfg", "ansible/.ansible-lint")
-		check = "cd ansible && ansible-lint"
-		fix = "cd ansible && ansible-lint --fix"
-	}
+  ["ansible-lint"] {
+    glob =
+      List("ansible/**/*.yml", "ansible/**/*.yaml", "ansible/ansible.cfg", "ansible/.ansible-lint")
+    check = "cd ansible && ansible-lint"
+    fix = "cd ansible && ansible-lint --fix"
+  }
 }
 
 local all_linters = new Mapping<String, Step> {
-	...custom_linters
-	["mise"] = Builtins.mise
-	["pkl"] = Builtins.pkl
-	["shellcheck"] = Builtins.shellcheck
-	["shfmt"] = Builtins.shfmt
-	["tombi"] = Builtins.tombi
-	["yamlfmt"] = Builtins.yamlfmt
+  ...custom_linters
+  ["mise"] = Builtins.mise
+  ["pkl"] = Builtins.pkl
+  ["pkl-format"] = Builtins.pkl_format
+  ["ruff"] = Builtins.ruff
+  ["shellcheck"] = Builtins.shellcheck
+  ["shfmt"] = Builtins.shfmt
+  ["tombi"] = Builtins.tombi
+  ["yamlfmt"] = Builtins.yamlfmt
 }
 
 hooks {
-	["pre-commit"] {
-		fix = true
-		stash = "git"
-		steps = all_linters
-	}
-	["fix"] {
-		fix = true
-		steps = all_linters
-	}
-	["check"] {
-		steps = all_linters
-	}
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps = all_linters
+  }
+  ["fix"] {
+    fix = true
+    steps = all_linters
+  }
+  ["check"] {
+    steps = all_linters
+  }
 }

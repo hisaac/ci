@@ -13,7 +13,7 @@ packer_cache/
 .ansible
 
 # External roles/collections installed via ansible-galaxy
-galaxy_roles/
+ansible/galaxy_roles/
 ansible/galaxy_collections/
 
 # Ansible retry files
@@ -21,3 +21,6 @@ ansible/galaxy_collections/
 
 # Vault password file (if used locally)
 .vault_pass
+
+# Python
+.ruff_cache

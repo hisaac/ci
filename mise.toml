@@ -17,6 +17,8 @@ tart = "latest"
 tombi = "latest"
 usage = "latest"
 yamlfmt = "latest"
+ruff = "latest"
+uv = "latest"
 
 [hooks]
 postinstall = '''
