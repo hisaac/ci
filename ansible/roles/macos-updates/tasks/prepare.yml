@@ -1,0 +1,88 @@
+---
+# Marker files - checked by Setup Assistant on boot
+
+- name: Mark Setup Assistant as completed at system level
+  ansible.builtin.file:
+    path: /private/var/db/.AppleSetupDone
+    state: touch
+    owner: root
+    mode: "0400"
+  become: true
+
+- name: Create legacy setup registration complete marker
+  ansible.builtin.file:
+    path: /Library/Receipts/.SetupRegComplete
+    state: touch
+    owner: root
+    mode: "0644"
+  become: true
+
+- name: Create .skipbuddy marker in admin user home directory
+  ansible.builtin.file:
+    path: "/Users/{{ macos_admin_user }}/.skipbuddy"
+    state: touch
+    owner: "{{ macos_admin_user }}"
+    mode: "0644"
+  become: true
+
+# System Setup Assistant preferences
+
+- name: Skip welcome/setup panes via managed preferences
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.SetupAssistant.managed
+    key: "{{ item }}"
+    type: bool
+    value: true
+  become: true
+  loop:
+    - SkipAppearance
+    - SkipCloudSetup
+    - SkipiCloudStorageSetup
+    - SkipPrivacySetup
+    - SkipScreenTime
+    - SkipSiriSetup
+    - SkipTouchIDSetup
+    - SkipTrueTone
+
+- name: Set system-wide Setup Assistant bool gates as completed
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.SetupAssistant
+    key: "{{ item }}"
+    type: bool
+    value: true
+  become: true
+  loop: "{{ setup_assistant_bool_keys }}"
+
+# Per-user Setup Assistant preferences
+
+- name: Mark per-user Setup Assistant bool gates as completed
+  community.general.osx_defaults:
+    domain: com.apple.SetupAssistant
+    key: "{{ item }}"
+    type: bool
+    value: true
+  become: true
+  become_user: "{{ macos_admin_user }}"
+  loop: "{{ setup_assistant_bool_keys }}"
+
+- name: Set per-user Setup Assistant version markers to sentinel values
+  community.general.osx_defaults:
+    domain: com.apple.SetupAssistant
+    key: "{{ item.key }}"
+    type: string
+    value: "{{ item.value }}"
+  become: true
+  become_user: "{{ macos_admin_user }}"
+  loop:
+    - key: LastPrivacyBundleVersion
+      value: "999999"
+    - key: LastSeenAgeRangeSelectionProductVersion
+      value: "99.99.99"
+    - key: LastSeenBuddyBuildVersion
+      value: "99Z999"
+    - key: LastSeenCloudProductVersion
+      value: "99.99.99"
+    - key: LastSeenDiagnosticsProductVersion
+      value: "99.99.99"
+    - key: LastSeenSiriProductVersion
+      value: "99.99.99"

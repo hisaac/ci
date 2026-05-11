@@ -21,9 +21,9 @@ yamlfmt = "latest"
 [hooks]
 postinstall = '''
 if [ "$CI" = "true" ]; then
-  mise run bootstrap-ci
+	mise run bootstrap-ci
 else
-  mise run bootstrap
+	mise run bootstrap
 fi
 '''
 
@@ -53,17 +53,20 @@ run = "hk fix --all"
 
 [tasks.setup-ssh-key]
 depends = ["run-tart-vms"]
-depends_post = ["shutdown-tart-vms"]
 run = """
 if [[ ! -f ~/.ssh/ansible_ci ]]; then
-    ssh-keygen -t ed25519 -C "ansible-ci" -f ~/.ssh/ansible_ci -N ""
+	ssh-keygen -t ed25519 -C "ansible-ci" -f ~/.ssh/ansible_ci -N ""
 else
-    echo "~/.ssh/ansible_ci already exists, skipping key generation"
+	echo "~/.ssh/ansible_ci already exists, skipping key generation"
 fi
 
-for vm in macos:15 macos:26; do
-    echo "Installing key on $vm..."
-    ssh-copy-id -o PubkeyAuthentication=no -i ~/.ssh/ansible_ci.pub admin@$(tart ip "$vm")
+declare -a vms=(
+	macos:15
+	# macos:26
+)
+for vm in "${vms[@]}"; do
+	echo "Installing key on $vm..."
+	ssh-copy-id -o PubkeyAuthentication=no -i ~/.ssh/ansible_ci.pub admin@$(tart ip "$vm")
 done
 """
 

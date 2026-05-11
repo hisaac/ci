@@ -1,47 +1,6 @@
 ---
-- name: Disable automatic update check
-  community.general.osx_defaults:
-    domain: /Library/Preferences/com.apple.SoftwareUpdate
-    key: AutomaticCheckEnabled
-    type: bool
-    value: false
-  become: true
+- name: Prepare system for macOS update
+  ansible.builtin.import_tasks: prepare.yml
 
-- name: Check for available updates
-  ansible.builtin.command: softwareupdate --all --list
-  register: swupdate_list
-  changed_when: false
-  failed_when: false
-
-- name: Parse available updates
-  ansible.builtin.set_fact:
-    available_updates: >-
-      {{ swupdate_list.stdout
-         | regex_findall('\* Label: (.*)\n\tTitle: (.*), Version: (.*), Size: (.*), Recommended: (.*), Action: (.*),')
-         | map('zip', ['label', 'title', 'version', 'size', 'recommended', 'action'])
-         | map('map', 'reverse')
-         | map('community.general.dict')
-         | list }}
-
-- name: Print available updates
-  ansible.builtin.debug:
-    var: available_updates
-
-- name: Install available updates
-  ansible.builtin.command:
-    cmd: "softwareupdate --install --agree-to-license --force --restart --user {{ macos_admin_user }} --stdinpass '{{ item.label }}'"
-    stdin: "{{ macos_admin_password }}"
-  become: true
-  register: swupdate_install
-  ignore_unreachable: true
-  ignore_errors: true
-  loop: "{{ available_updates }}"
-  when: >-
-    not item.label.startswith('macOS') or
-    item.version.split('.')[0] == ansible_facts['distribution_version'].split('.')[0]
-
-- name: Wait for VM to come back after update
-  ansible.builtin.wait_for_connection:
-    delay: 60
-    timeout: 1800
-  when: available_updates | length > 0
+- name: Install macOS updates
+  ansible.builtin.import_tasks: update.yml

@@ -1,0 +1,20 @@
+---
+setup_assistant_bool_keys:
+  - DidSeeAccessibility
+  - DidSeeActivationLock
+  - DidSeeAppearanceSetup
+  - DidSeeApplePaySetup
+  - DidSeeAppStore
+  - DidSeeCloudSetup
+  - DidSeeiCloudLoginForStorageServices
+  - DidSeeLockdownMode
+  - DidSeePrivacy
+  - DidSeeScreenTime
+  - DidSeeSiriSetup
+  - DidSeeSyncSetup
+  - DidSeeSyncSetup2
+  - DidSeeTermsOfAddress
+  - DidSeeTouchIDSetup
+  - DidSeeTrueTonePrivacy
+  - InitialAccountOnMac
+  - MiniBuddyLaunchedPostMigration
