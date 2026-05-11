@@ -33,15 +33,10 @@ fi
 includes = ["scripts"]
 
 [tasks.bootstrap]
-run = [
-	{ task = "_bootstrap_hk" },
-	{ task = "_bootstrap_ansible" },
-]
+run = [{ task = "_bootstrap_hk" }, { task = "_bootstrap_ansible" }]
 
 [tasks.bootstrap_ci]
-run = [
-	{ task = "_bootstrap_ansible" },
-]
+run = [{ task = "_bootstrap_ansible" }]
 
 [tasks.check]
 alias = ["chk", "lint"]
@@ -108,23 +103,17 @@ run = "ansible-playbook playbooks/provision.yml -v"
 [tasks.refresh-tart-vms]
 alias = "r"
 run = [
-	"tart delete macos:15 || true",
-	"tart delete macos:26 || true",
-	"tart clone macos:15.6.1-frozen macos:15",
-	"tart clone macos:26.4.1-frozen macos:26",
+  "tart delete macos:15 || true",
+  "tart delete macos:26 || true",
+  "tart clone macos:15.6.1-frozen macos:15",
+  "tart clone macos:26.4.1-frozen macos:26",
 ]
 
 [tasks.upd]
-run = [
-	"mise upgrade",
-	"mise lock",
-]
+run = ["mise upgrade", "mise lock"]
 
 [tasks.upg]
-run = [
-	"mise upgrade --bump",
-	"mise lock",
-]
+run = ["mise upgrade --bump", "mise lock"]
 
 # Hidden Tasks
 
@@ -136,6 +125,6 @@ run = ["hk install --mise", { task = "update-hk-import" }]
 dir = "ansible"
 hide = true
 run = [
-	"ansible-galaxy role install --roles-path ./galaxy_roles -r requirements.yml",
-	"ansible-galaxy collection install --collections-path ./galaxy_collections -r requirements.yml",
+  "ansible-galaxy role install --roles-path ./galaxy_roles -r requirements.yml",
+  "ansible-galaxy collection install --collections-path ./galaxy_collections -r requirements.yml",
 ]
