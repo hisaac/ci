@@ -9,10 +9,11 @@ function main() {
 	# Trick macOS into thinking the setup assistant has already been run
 	defaults write com.apple.SetupAssistant DidSeeAccessibility -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeeActivationLock -bool TRUE
-	defaults write com.apple.SetupAssistant DidSeeAppStore -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeeAppearanceSetup -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeeApplePaySetup -bool TRUE
+	defaults write com.apple.SetupAssistant DidSeeAppStore -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeeCloudSetup -bool TRUE
+	defaults write com.apple.SetupAssistant DidSeeiCloudLoginForStorageServices -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeeLockdownMode -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeePrivacy -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeeScreenTime -bool TRUE
@@ -21,12 +22,16 @@ function main() {
 	defaults write com.apple.SetupAssistant DidSeeSyncSetup2 -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeeTermsOfAddress -bool TRUE
 	defaults write com.apple.SetupAssistant DidSeeTouchIDSetup -bool TRUE
-	defaults write com.apple.SetupAssistant DidSeeiCloudLoginForStorageServices -bool TRUE
+	defaults write com.apple.SetupAssistant InitialAccountOnMac -bool TRUE
+	defaults write com.apple.SetupAssistant MiniBuddyLaunchedPostMigration -bool TRUE
 
 	# Trick macOS into thinking this version/build has already been set up
 	defaults write com.apple.SetupAssistant LastPrivacyBundleVersion "999999"
+	defaults write com.apple.SetupAssistant LastSeenAgeRangeSelectionProductVersion "99.99.99"
 	defaults write com.apple.SetupAssistant LastSeenBuddyBuildVersion "99Z999"
 	defaults write com.apple.SetupAssistant LastSeenCloudProductVersion "99.99.99"
+	defaults write com.apple.SetupAssistant LastSeenDiagnosticsProductVersion "99.99.99"
+	defaults write com.apple.SetupAssistant LastSeenSiriProductVersion "99.99.99"
 
 	# For some reason this is required. Without it, the final `softwareupdate` command fails at the very end.
 	sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled -boolean FALSE

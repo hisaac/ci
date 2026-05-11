@@ -5,3 +5,18 @@
 
   roles:
     - role: xcode-clt
+
+- name: Install macOS updates
+  hosts: macos_agents
+
+  roles:
+    - role: macos-updates
+
+# - name: Shut down VMs
+#   hosts: macos_agents
+
+  # tasks:
+  #   - name: Shut down
+  #     ansible.builtin.command: shutdown -h now
+  #     become: true
+  #     ignore_errors: true

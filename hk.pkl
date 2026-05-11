@@ -1,0 +1,39 @@
+amends "package://github.com/jdx/hk/releases/download/v1.40.0/hk@1.40.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.40.0/hk@1.40.0#/Builtins.pkl"
+
+fail_fast = false
+env {
+	["HK_MISE"] = "true"
+}
+
+local custom_linters = new Mapping<String, Step> {
+	["ansible-lint"] {
+		check = "ansible-lint"
+		fix = "ansible-lint --fix"
+	}
+}
+
+local all_linters = new Mapping<String, Step> {
+	...custom_linters
+	["mise"] = Builtins.mise
+	["pkl"] = Builtins.pkl
+	["shellcheck"] = Builtins.shellcheck
+	["shfmt"] = Builtins.shfmt
+	["yamlfmt"] = Builtins.yamlfmt
+	["tombi"] = Builtins.tombi
+}
+
+hooks {
+	["pre-commit"] {
+		// fix = true
+		// stash = "git"
+		// steps = all_linters
+	}
+	["fix"] {
+		fix = true
+		steps = all_linters
+	}
+	["check"] {
+		steps = all_linters
+	}
+}

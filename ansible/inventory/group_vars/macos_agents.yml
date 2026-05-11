@@ -1,0 +1,15 @@
+---
+macos_admin_user: admin
+macos_admin_password: admin
+
+homebrew_taps:
+  - cirruslabs/cli
+
+homebrew_installed_packages:
+  - bash
+  - curl
+  - git
+  - mise
+  - python
+  - tart-guest-agent
+  - xcodes

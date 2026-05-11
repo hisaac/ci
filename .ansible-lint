@@ -1,0 +1,3 @@
+---
+exclude_paths:
+  - galaxy_roles/

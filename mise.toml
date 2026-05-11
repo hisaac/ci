@@ -4,26 +4,56 @@ experimental = true
 lockfile = true
 
 [tools]
+"pipx:ansible-lint" = "latest"
+ansible = { version = "latest", pipx_args = "--include-deps", uvx = false }
+hk = "latest"
 jq = "latest"
 packer = "latest"
-usage = "latest"
-tart = "latest"
-ansible = { version = "latest", pipx_args = "--include-deps", uvx = false }
+pkl = "latest"
 python = "latest"
+shellcheck = "latest"
+shfmt = "latest"
+tart = "latest"
 tombi = "latest"
+usage = "latest"
+yamlfmt = "latest"
+
+[hooks]
+postinstall = '''
+if [ "$CI" = "true" ]; then
+  mise run bootstrap-ci
+else
+  mise run bootstrap
+fi
+'''
 
 # Tasks
 
+[task_config]
+includes = ["scripts"]
+
 [tasks.bootstrap]
-dir = "ansible"
 run = [
-	"ansible-galaxy role install --roles-path ./galaxy_roles -r requirements.yml",
-	"ansible-galaxy collection install -r requirements.yml",
+	{ task = "_bootstrap_hk" },
+	{ task = "_bootstrap_ansible" },
 ]
+
+[tasks.bootstrap_ci]
+run = [
+	{ task = "_bootstrap_ansible" },
+]
+
+[tasks.check]
+alias = ["chk", "lint"]
+run = "hk check --all"
+
+[tasks.fix]
+alias = ["fmt", "format"]
+run = "hk fix --all"
 
 [tasks.setup-ssh-key]
 depends = ["run-tart-vms"]
-depends_post = ["stop-tart-vms"]
+depends_post = ["shutdown-tart-vms"]
 run = """
 if [[ ! -f ~/.ssh/ansible_ci ]]; then
     ssh-keygen -t ed25519 -C "ansible-ci" -f ~/.ssh/ansible_ci -N ""
@@ -39,20 +69,31 @@ done
 
 [tasks.run-tart-vms]
 run = """
-for vm in macos:15 macos:26; do
-    nohup tart run "$vm" > /dev/null 2>&1 &
-    echo "Waiting for $vm to be reachable..."
-    until tart ip "$vm" &>/dev/null; do sleep 2; done
-    echo "$vm is ready"
+declare -a vms=(
+	macos:15
+	# macos:26
+)
+for vm in "${vms[@]}"; do
+	nohup tart run "$vm" > /dev/null 2>&1 &
+	echo "Waiting for $vm to have an IP..."
+	until tart ip "$vm" &>/dev/null; do sleep 2; done
+	ip=$(tart ip "$vm")
+	echo "Waiting for $vm SSH to be ready..."
+	until nc -z "$ip" 22 &>/dev/null; do sleep 2; done
+	echo "$vm is ready"
 done
 """
 
-[tasks.stop-tart-vms]
+[tasks.shutdown-tart-vms]
 run = """
-for vm in macos:15 macos:26; do
-    ip=$(tart ip "$vm" 2>/dev/null) || continue
-    echo "Shutting down $vm..."
-    ssh -i ~/.ssh/ansible_ci -o StrictHostKeyChecking=no admin@"$ip" "sudo shutdown -h now" || true
+declare -a vms=(
+	macos:15
+	# macos:26
+)
+for vm in "${vms[@]}"; do
+	ip=$(tart ip "$vm" 2>/dev/null) || continue
+	echo "Shutting down $vm..."
+	ssh -i ~/.ssh/ansible_ci -o StrictHostKeyChecking=no admin@"$ip" "sudo shutdown -h now" || true
 done
 """
 
@@ -80,4 +121,18 @@ run = [
 run = [
 	"mise upgrade --bump",
 	"mise lock",
+]
+
+# Hidden Tasks
+
+[tasks._bootstrap_hk]
+hide = true
+run = ["hk install --mise", { task = "update-hk-import" }]
+
+[tasks._bootstrap_ansible]
+dir = "ansible"
+hide = true
+run = [
+	"ansible-galaxy role install --roles-path ./galaxy_roles -r requirements.yml",
+	"ansible-galaxy collection install -r requirements.yml",
 ]

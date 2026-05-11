@@ -3,6 +3,7 @@
 .env
 
 # Cached files
+.cache/
 .caches/
 
 # Packer
