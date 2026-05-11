@@ -19,8 +19,8 @@ local all_linters = new Mapping<String, Step> {
 	["pkl"] = Builtins.pkl
 	["shellcheck"] = Builtins.shellcheck
 	["shfmt"] = Builtins.shfmt
-	["yamlfmt"] = Builtins.yamlfmt
 	["tombi"] = Builtins.tombi
+	["yamlfmt"] = Builtins.yamlfmt
 }
 
 hooks {

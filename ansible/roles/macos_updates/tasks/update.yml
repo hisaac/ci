@@ -38,8 +38,7 @@
   ignore_errors: true
   loop: "{{ macos_updates_available_updates }}"
   when: >-
-    not item.label.startswith('macOS') or
-    item.version.split('.')[0] == ansible_facts['distribution_version'].split('.')[0]
+    not item.label.startswith('macOS') or item.version.split('.')[0] == ansible_facts['distribution_version'].split('.')[0]
 
 - name: Wait for VM to come back after update
   ansible.builtin.wait_for_connection:
