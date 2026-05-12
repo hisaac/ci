@@ -135,6 +135,9 @@ group) before calling the galaxy role. Platform groups are children of `macos_ag
 - `simulators.yml` — creates simulators defined in `xcode_simulators` (group_vars); skips
   any simulator whose name already exists; `com.apple.CoreSimulator EnableDefaultSetCreation`
   is set to `false` in `configure.yml` so Xcode does not auto-create simulators on runtime install
+- `prewarm.yml` — boots each configured simulator via `xcrun simctl bootstatus -b` (which
+  blocks until migration completes), then shuts it down; eliminates cold-start cost on
+  first CI job
 
 Populate `.cache/xcode/` and `.cache/simruntime/` on the control node before running the
 playbook. Both directories are gitignored.
@@ -147,7 +150,7 @@ playbook. Both directories are gitignored.
 - [x] Spot-check each role's effect on the VM
 - [x] Add idempotency to `auth_config` tasks (auto-login, screen lock)
 - [x] Add ability to create specific simulators (currently just installs runtimes, which are necessary but not sufficient)
-- [ ] Add simulator pre-warming after simulator creation (reference: https://github.com/biscuitehh/yeetd/blob/main/Resources/prewarm_simulators.sh)
+- [x] Add simulator pre-warming after simulator creation (reference: https://github.com/biscuitehh/yeetd/blob/main/Resources/prewarm_simulators.sh)
 
 ---
 

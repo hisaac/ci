@@ -13,3 +13,6 @@
 
 - name: Create simulators
   ansible.builtin.import_tasks: simulators.yml
+
+- name: Prewarm simulators
+  ansible.builtin.import_tasks: prewarm.yml

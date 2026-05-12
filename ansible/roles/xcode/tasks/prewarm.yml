@@ -1,0 +1,63 @@
+---
+- name: Prewarm configured simulators
+  when: xcode_simulators | length > 0
+  block:
+    - name: Get simulator list for prewarming
+      ansible.builtin.command:
+        argv:
+          - xcrun
+          - simctl
+          - list
+          - devices
+          - --json
+      register: xcode_prewarm_simctl_list
+      changed_when: false
+
+    - name: Build simulator UDID list for prewarming
+      ansible.builtin.set_fact:
+        xcode_prewarm_udids: >-
+          {{
+            xcode_prewarm_udids | default([]) + [
+              (xcode_prewarm_simctl_list.stdout | from_json)['devices']
+              | dict2items
+              | map(attribute='value')
+              | flatten
+              | selectattr('name', 'equalto', item.name)
+              | map(attribute='udid')
+              | first
+            ]
+          }}
+      loop: "{{ xcode_simulators }}"
+
+    - name: Ensure simulators are shut down before prewarming
+      ansible.builtin.command:
+        argv:
+          - xcrun
+          - simctl
+          - shutdown
+          - "{{ item }}"
+      loop: "{{ xcode_prewarm_udids }}"
+      changed_when: true
+      failed_when: false
+
+    - name: Boot simulators and wait for migration to complete
+      ansible.builtin.command:
+        argv:
+          - xcrun
+          - simctl
+          - bootstatus
+          - "{{ item }}"
+          - -b
+      loop: "{{ xcode_prewarm_udids }}"
+      changed_when: true
+
+    - name: Shut down simulators after prewarming
+      ansible.builtin.command:
+        argv:
+          - xcrun
+          - simctl
+          - shutdown
+          - "{{ item }}"
+      loop: "{{ xcode_prewarm_udids }}"
+      changed_when: true
+      failed_when: false
