@@ -140,10 +140,11 @@ playbook. Both directories are gitignored.
 
 ## ⏳ Phase 7 — Finalize
 
-- [ ] Run the full playbook against a fresh Tart VM end-to-end
-- [ ] Spot-check each role's effect on the VM
-- [ ] Add idempotency to `auth_config` tasks (auto-login, screen lock)
-- [ ] Add simulator pre-warming after Xcode install
+- [x] Run the full playbook against a fresh Tart VM end-to-end
+- [x] Spot-check each role's effect on the VM
+- [x] Add idempotency to `auth_config` tasks (auto-login, screen lock)
+- [ ] Add ability to create specific simulators (currently just installs runtimes, which are necessary but not sufficient)
+- [ ] Add simulator pre-warming after simulator creation (reference: https://github.com/biscuitehh/yeetd/blob/main/Resources/prewarm_simulators.sh)
 
 ---
 

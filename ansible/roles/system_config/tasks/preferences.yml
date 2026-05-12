@@ -166,21 +166,46 @@
 
 # Keyboard
 
+- name: Check Keyboard Setup Assistant preference
+  ansible.builtin.shell:
+    cmd: set -o pipefail && defaults read /Library/Preferences/com.apple.keyboardtype keyboardtype 2>/dev/null | grep -q '"3-7582-0" = 40;'
+    executable: /bin/bash
+  become: true
+  register: system_config_keyboard_setup_assistant_check
+  changed_when: false
+  failed_when: false
+
 - name: Disable Keyboard Setup Assistant
   ansible.builtin.command:
     cmd: defaults write /Library/Preferences/com.apple.keyboardtype keyboardtype -dict-add "3-7582-0" -int 40
   become: true
   changed_when: true
+  when: system_config_keyboard_setup_assistant_check.rc != 0
 
 # Filesystem visibility
+
+- name: Check ~/Library hidden flag
+  ansible.builtin.command:
+    cmd: stat -f %Sf /Users/{{ macos_admin_user }}/Library
+  register: system_config_admin_library_flags
+  changed_when: false
 
 - name: Unhide ~/Library folder
   ansible.builtin.command:
     cmd: chflags nohidden /Users/{{ macos_admin_user }}/Library
   changed_when: true
+  when: "'hidden' in system_config_admin_library_flags.stdout"
+
+- name: Check /Volumes hidden flag
+  ansible.builtin.command:
+    cmd: stat -f %Sf /Volumes
+  become: true
+  register: system_config_volumes_flags
+  changed_when: false
 
 - name: Unhide /Volumes folder
   ansible.builtin.command:
     cmd: chflags nohidden /Volumes
   become: true
   changed_when: true
+  when: "'hidden' in system_config_volumes_flags.stdout"

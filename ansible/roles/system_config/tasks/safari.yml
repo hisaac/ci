@@ -1,7 +1,17 @@
 ---
+- name: Check for available Safari updates
+  ansible.builtin.command:
+    cmd: softwareupdate --list
+  become: true
+  register: system_config_safari_updates
+  changed_when: false
+  failed_when: false
+
 - name: Install Safari update
   ansible.builtin.command:
     cmd: softwareupdate --install --safari-only --verbose
   become: true
   changed_when: true
   failed_when: false
+  when: >-
+    'Safari' in ((system_config_safari_updates.stdout | default('')) + (system_config_safari_updates.stderr | default('')))

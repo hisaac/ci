@@ -1,34 +1,53 @@
 ---
-- name: Create temp directory for certificates
-  ansible.builtin.tempfile:
-    state: directory
-    suffix: certs
-  register: xcode_cert_tmpdir
-
-- name: Download Apple WWDR CA G3 certificate
-  ansible.builtin.get_url:
-    url: https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
-    dest: "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG3.cer"
-    mode: "0644"
-
-- name: Download Developer ID G2 CA certificate
-  ansible.builtin.get_url:
-    url: https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
-    dest: "{{ xcode_cert_tmpdir.path }}/DeveloperIDG2CA.cer"
-    mode: "0644"
-
-- name: Import certificates into system keychain
+- name: Check for Apple WWDR certificate in system keychain
   ansible.builtin.command:
-    cmd: security import {{ item }} -k /Library/Keychains/System.keychain
+    cmd: security find-certificate -a -c 'Apple Worldwide Developer Relations Certification Authority' /Library/Keychains/System.keychain
   become: true
-  register: xcode_certificate_import
-  changed_when: xcode_certificate_import.rc == 0
-  failed_when: xcode_certificate_import.rc != 0 and 'The specified item already exists in the keychain.' not in xcode_certificate_import.stderr
-  loop:
-    - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG3.cer"
-    - "{{ xcode_cert_tmpdir.path }}/DeveloperIDG2CA.cer"
+  register: xcode_wwdr_certificate_check
+  changed_when: false
+  failed_when: false
 
-- name: Remove certificate temp directory
-  ansible.builtin.file:
-    path: "{{ xcode_cert_tmpdir.path }}"
-    state: absent
+- name: Check for Developer ID certificate in system keychain
+  ansible.builtin.command:
+    cmd: security find-certificate -a -c 'Developer ID Certification Authority' /Library/Keychains/System.keychain
+  become: true
+  register: xcode_developer_id_certificate_check
+  changed_when: false
+  failed_when: false
+
+- name: Install missing Apple certificates into system keychain
+  when: xcode_wwdr_certificate_check.rc != 0 or xcode_developer_id_certificate_check.rc != 0
+  block:
+    - name: Create temp directory for certificates
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: certs
+      register: xcode_cert_tmpdir
+
+    - name: Download Apple WWDR CA G3 certificate
+      ansible.builtin.get_url:
+        url: https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
+        dest: "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG3.cer"
+        mode: "0644"
+
+    - name: Download Developer ID G2 CA certificate
+      ansible.builtin.get_url:
+        url: https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
+        dest: "{{ xcode_cert_tmpdir.path }}/DeveloperIDG2CA.cer"
+        mode: "0644"
+
+    - name: Import certificates into system keychain
+      ansible.builtin.command:
+        cmd: security import {{ item }} -k /Library/Keychains/System.keychain
+      become: true
+      register: xcode_certificate_import
+      changed_when: xcode_certificate_import.rc == 0
+      failed_when: xcode_certificate_import.rc != 0 and 'The specified item already exists in the keychain.' not in xcode_certificate_import.stderr
+      loop:
+        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG3.cer"
+        - "{{ xcode_cert_tmpdir.path }}/DeveloperIDG2CA.cer"
+
+    - name: Remove certificate temp directory
+      ansible.builtin.file:
+        path: "{{ xcode_cert_tmpdir.path }}"
+        state: absent

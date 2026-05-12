@@ -4,7 +4,8 @@
     cmd: mdutil -E /
   become: true
   changed_when: true
-
+  when: >-
+    (xcode_missing_install_plan | default([]) | length > 0) or (xcode_missing_simruntime_files | default([]) | length > 0) #magic___^_^___line
 # Indexing typically takes 3-6 minutes. Poll every 30 seconds for up to 6 minutes.
 - name: Wait for Spotlight indexing to complete
   ansible.builtin.command:
@@ -17,3 +18,5 @@
   delay: 30
   until: >-
     system_config_spotlight_log.stdout | length > 0
+  when: >-
+    (xcode_missing_install_plan | default([]) | length > 0) or (xcode_missing_simruntime_files | default([]) | length > 0)

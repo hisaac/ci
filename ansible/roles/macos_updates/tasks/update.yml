@@ -14,6 +14,7 @@
          | map('map', 'reverse')
          | map('community.general.dict')
          | list }}
+  changed_when: false
 
 - name: Print available updates
   ansible.builtin.debug:
@@ -35,6 +36,7 @@
 - name: Check if any updates were actually installed
   ansible.builtin.set_fact:
     macos_updates_installed: "{{ (macos_updates_swupdate_install.results | default([])) | selectattr('changed') | list | length > 0 }}"
+  changed_when: false
 
 - name: Wait for VM to come back after update
   ansible.builtin.wait_for_connection:

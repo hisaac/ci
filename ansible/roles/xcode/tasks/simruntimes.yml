@@ -10,12 +10,14 @@
 - name: Select simulator runtime .dmg files to install
   ansible.builtin.set_fact:
     xcode_selected_simruntime_files: []
+  changed_when: false
 
 - name: Build simulator runtime .dmg selection list
   ansible.builtin.set_fact:
     xcode_selected_simruntime_files: "{{ xcode_selected_simruntime_files + [item] }}"
   loop: "{{ xcode_simruntime_files.files }}"
   when: (xcode_cache_simruntime_dmg_files | length == 0) or ((item.path | basename) in xcode_cache_simruntime_dmg_files)
+  changed_when: false
 
 - name: List installed simulator runtimes
   ansible.builtin.command:
@@ -39,10 +41,12 @@
         | unique
         | list
       }}
+  changed_when: false
 
 - name: Initialize missing simulator runtime list
   ansible.builtin.set_fact:
     xcode_missing_simruntime_files: []
+  changed_when: false
 
 - name: Build missing simulator runtime list
   ansible.builtin.set_fact:
@@ -50,6 +54,7 @@
   loop: "{{ xcode_selected_simruntime_files }}"
   when: >-
     ((item.path | basename | regex_search('[0-9]+(\\.[0-9]+){1,2}')) | regex_replace('(\\.0)+$', '')) not in xcode_installed_simruntime_versions
+  changed_when: false
 
 - name: Install missing simulator runtimes from cache
   when: xcode_missing_simruntime_files | length > 0

@@ -20,6 +20,7 @@
 - name: Set SIP disabled fact
   ansible.builtin.set_fact:
     system_config_sip_disabled: "{{ 'disabled' in system_config_csrutil_status.stdout }}"
+  changed_when: false
 
 - name: Disable protected services
   ansible.builtin.include_tasks: services.yml

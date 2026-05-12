@@ -71,3 +71,4 @@
       ansible.builtin.reboot:
         reboot_timeout: 900
       become: true
+      changed_when: false

@@ -10,16 +10,19 @@
 - name: Select Xcode .xip files to install
   ansible.builtin.set_fact:
     xcode_selected_xip_files: []
+  changed_when: false
 
 - name: Build Xcode .xip selection list
   ansible.builtin.set_fact:
     xcode_selected_xip_files: "{{ xcode_selected_xip_files + [item] }}"
   loop: "{{ xcode_xip_files.files }}"
   when: (xcode_cache_xip_files | length == 0) or ((item.path | basename) in xcode_cache_xip_files)
+  changed_when: false
 
 - name: Initialize Xcode install plan
   ansible.builtin.set_fact:
     xcode_install_plan: []
+  changed_when: false
 
 - name: Build Xcode install plan
   ansible.builtin.set_fact:
@@ -30,6 +33,7 @@
       source_path: "{{ item.path }}"
       filename: "{{ item.path | basename }}"
   loop: "{{ xcode_selected_xip_files }}"
+  changed_when: false
 
 - name: Check standard xcodes install paths
   ansible.builtin.stat:
@@ -42,6 +46,7 @@
 - name: Set xcodes binary path
   ansible.builtin.set_fact:
     xcode_xcodes_path: "{{ (xcode_xcodes_candidates.results | selectattr('stat.exists') | map(attribute='item') | list | first) | default('') }}"
+  changed_when: false
 
 - name: Ensure xcodes is installed on remote host
   ansible.builtin.assert:
@@ -58,12 +63,23 @@
 - name: Initialize missing Xcode install plan
   ansible.builtin.set_fact:
     xcode_missing_install_plan: []
+  changed_when: false
 
 - name: Build missing Xcode install plan
   ansible.builtin.set_fact:
     xcode_missing_install_plan: "{{ xcode_missing_install_plan + [item.1] }}"
   loop: "{{ xcode_installed_apps.results | zip(xcode_install_plan) | list }}"
   when: not item.0.stat.exists
+  changed_when: false
+
+- name: Check current Xcode selection
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/xcode-select
+      - -p
+  register: xcode_current_selection
+  changed_when: false
+  failed_when: false
 
 - name: Install missing Xcode versions from cache
   when: xcode_missing_install_plan | length > 0
@@ -108,7 +124,9 @@
       - "{{ xcode_default_version }}"
   become: true
   changed_when: true
-  when: xcode_default_version | length > 0
+  when:
+    - xcode_default_version | length > 0
+    - xcode_current_selection.stdout | default('') | trim != '/Applications/Xcode-' ~ xcode_default_version ~ '.app/Contents/Developer'
 
 - name: Reset Xcode selection when no default is configured
   ansible.builtin.command:
@@ -117,4 +135,6 @@
       - --reset
   become: true
   changed_when: true
-  when: xcode_default_version | length == 0
+  when:
+    - xcode_default_version | length == 0
+    - (xcode_current_selection.stdout | default('') | trim) != '/Library/Developer/CommandLineTools'

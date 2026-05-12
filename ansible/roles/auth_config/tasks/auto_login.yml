@@ -1,5 +1,18 @@
 ---
-# todo: add idempotency to check if admin user already has auto-login enabled
+- name: Check configured auto-login user
+  ansible.builtin.command:
+    cmd: defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser
+  become: true
+  register: auth_config_auto_login_user
+  changed_when: false
+  failed_when: false
+
+- name: Check auto-login password file
+  ansible.builtin.stat:
+    path: /private/etc/kcpassword
+  become: true
+  register: auth_config_auto_login_password_file
+
 - name: Enable auto-login for admin user
   ansible.builtin.script: enable-auto-login.bash
   environment:
@@ -7,3 +20,5 @@
     PASSWORD: "{{ macos_admin_password }}"
   become: true
   changed_when: true
+  when: >-
+    (not auth_config_auto_login_password_file.stat.exists) or ((auth_config_auto_login_user.stdout | default('') | trim) != macos_admin_user)

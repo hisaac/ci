@@ -1,84 +1,115 @@
 ---
+- name: Check system sleep state
+  ansible.builtin.command:
+    cmd: systemsetup -getsleep
+  become: true
+  register: system_config_sleep_state
+  changed_when: false
+
 - name: Disable system sleep
   ansible.builtin.command:
     cmd: systemsetup -setsleep Off
   become: true
   changed_when: true
+  when: "'Never' not in system_config_sleep_state.stdout"
 
-- name: Disable energy saving sleep
+- name: Check pmset settings
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail && pmset -g custom | awk 'BEGIN { found=0; bad=0 } $1 == "{{ item.key }}" { found=1; if ($2 != "{{ item.value }}") bad=1 } END { exit bad ? 1 : 0 }'
+    executable: /bin/bash
+  become: true
+  register: system_config_pmset_setting_checks
+  changed_when: false
+  failed_when: false
+  loop:
+    - key: sleep
+      value: "0"
+      command: pmset -a sleep 0
+    - key: displaysleep
+      value: "0"
+      command: pmset -a displaysleep 0
+    - key: disksleep
+      value: "0"
+      command: pmset -a disksleep 0
+    - key: hibernatemode
+      value: "0"
+      command: pmset -a hibernatemode 0
+    - key: powernap
+      value: "0"
+      command: pmset -a powernap 0
+    - key: networkoversleep
+      value: "1"
+      command: pmset -a networkoversleep 1
+    - key: ttyskeepawake
+      value: "1"
+      command: pmset -a ttyskeepawake 1
+    - key: tcpkeepalive
+      value: "1"
+      command: pmset -a tcpkeepalive 1
+    - key: standby
+      value: "0"
+      command: pmset -a standby 0
+
+- name: Apply pmset settings
   ansible.builtin.command:
-    cmd: pmset -a sleep 0 displaysleep 0 disksleep 0
+    cmd: "{{ item.item.command }}"
   become: true
   changed_when: true
+  loop: "{{ system_config_pmset_setting_checks.results }}"
+  when: item.rc != 0
 
-- name: Disable hibernation
+- name: Check AC power mode
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail && pmset -g custom | awk 'BEGIN { in_ac=0; found=0; bad=0 } /^AC Power:/ { in_ac=1; next } /^[^[:space:]]/ { in_ac=0 } in_ac && $1 == "powermode" { found=1; if ($2 != "2") bad=1 } END { exit bad ? 1 : 0 }'
+    executable: /bin/bash
+  become: true
+  register: system_config_pmset_ac_powermode_check
+  changed_when: false
+  failed_when: false
+
+- name: Check AC Wake-on-LAN setting
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail && pmset -g custom | awk 'BEGIN { in_ac=0; found=0; bad=0 } /^AC Power:/ { in_ac=1; next } /^[^[:space:]]/ { in_ac=0 } in_ac && $1 == "womp" { found=1; if ($2 != "1") bad=1 } END { exit bad ? 1 : 0 }'
+    executable: /bin/bash
+  become: true
+  register: system_config_pmset_ac_womp_check
+  changed_when: false
+  failed_when: false
+
+- name: Enable Wake-on-LAN on AC power
   ansible.builtin.command:
-    cmd: pmset -a hibernatemode 0
+    cmd: pmset -c womp 1
   become: true
   changed_when: true
+  when: system_config_pmset_ac_womp_check.rc != 0
 
-- name: Disable Power Nap
+- name: Check AC auto-restart setting
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail && pmset -g custom | awk 'BEGIN { in_ac=0; found=0; bad=0 } /^AC Power:/ { in_ac=1; next } /^[^[:space:]]/ { in_ac=0 } in_ac && $1 == "autorestart" { found=1; if ($2 != "1") bad=1 } END { exit bad ? 1 : 0 }'
+    executable: /bin/bash
+  become: true
+  register: system_config_pmset_ac_autorestart_check
+  changed_when: false
+  failed_when: false
+
+- name: Enable auto-restart after power failure on AC power
   ansible.builtin.command:
-    cmd: pmset -a powernap 0
+    cmd: pmset -c autorestart 1
   become: true
   changed_when: true
+  when: system_config_pmset_ac_autorestart_check.rc != 0
 
-- name: Keep network reachability prioritized during sleep
+- name: Attempt to set AC power mode to high performance
   ansible.builtin.command:
-    cmd: pmset -a networkoversleep 1
-  become: true
-  changed_when: true
-
-- name: Prevent sleep when SSH/TTY sessions are active
-  ansible.builtin.command:
-    cmd: pmset -a ttyskeepawake 1
-  become: true
-  changed_when: true
-
-- name: Maintain TCP connections during light sleep
-  ansible.builtin.command:
-    cmd: pmset -a tcpkeepalive 1
-  become: true
-  changed_when: true
-
-- name: Disable standby (deep idle sleep)
-  ansible.builtin.command:
-    cmd: pmset -a standby 0
-  become: true
-  changed_when: true
-
-- name: Enable Wake-on-LAN
-  ansible.builtin.command:
-    cmd: pmset -a womp 1
-  become: true
-  changed_when: true
-
-- name: Enable auto-restart after power failure
-  ansible.builtin.command:
-    cmd: pmset -a autorestart 1
-  become: true
-  changed_when: true
-
-# powermode has three modes:
-#   0 = Balanced (default)
-#   1 = Low Power Mode
-#   2 = High Power Mode (if supported)
-# It's not super easy to determine if the system supports High Power Mode,
-# so we set it to Balanced first, then attempt to switch to High Power Mode.
-# If the system doesn't support High Power Mode, the command will print a warning,
-# but the command will still succeed.
-- name: Set power mode to balanced
-  ansible.builtin.command:
-    cmd: pmset -a powermode 0
-  become: true
-  changed_when: true
-
-- name: Attempt to set power mode to high performance
-  ansible.builtin.command:
-    cmd: pmset -a powermode 2
+    cmd: pmset -c powermode 2
   become: true
   changed_when: true
   failed_when: false
+  when: system_config_pmset_ac_powermode_check.rc != 0
 
 - name: Delete sleep image file
   ansible.builtin.file:
@@ -86,8 +117,18 @@
     state: absent
   become: true
 
+- name: Check if Time Machine automatic backups are disabled
+  ansible.builtin.shell:
+    cmd: set -o pipefail && defaults read /Library/Preferences/com.apple.TimeMachine AutoBackup 2>/dev/null | grep -qx '0'
+    executable: /bin/bash
+  become: true
+  register: system_config_time_machine_disabled
+  changed_when: false
+  failed_when: false
+
 - name: Disable Time Machine
   ansible.builtin.command:
     cmd: tmutil disable
   become: true
   changed_when: true
+  when: system_config_time_machine_disabled.rc != 0
