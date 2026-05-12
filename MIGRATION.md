@@ -8,7 +8,7 @@ A script only moves to `scripts/` once its equivalent Ansible role/task is compl
 
 ---
 
-## Target directory layout
+## Current directory layout
 
 ```
 scripts/
@@ -52,175 +52,104 @@ scripts/
 
 ---
 
-## Phase 1 — `rosetta` role
-
-Converts `install-rosetta-2.bash`. Single command; pure YAML in Ansible.
+## ✅ Phase 1 — `rosetta` role
 
 **Script:** `scripts/rosetta/install-rosetta-2.bash`
 **Role:** `ansible/roles/rosetta/`
 
-- [ ] Create `ansible/roles/rosetta/tasks/main.yml`
-  - `ansible.builtin.command: softwareupdate --install-rosetta --agree-to-license`
-  - Guard with `when: ansible_facts['architecture'] == 'arm64'`
-  - Idempotency: skip if already installed
-- [ ] Add play to `ansible/playbooks/provision.yml`
-- [ ] Move `templates/scripts/install-rosetta-2.bash` → `scripts/rosetta/`
-- [ ] Verify: `hk check --all` passes
+Checks if Rosetta 2 is installed via `arch -arch x86_64 /usr/bin/true`, installs via
+`softwareupdate --install-rosetta --agree-to-license` if not. Skipped on non-arm64 hosts.
 
 ---
 
-## Phase 2 — `ssh_config` role
-
-Converts `configure-ssh-known-hosts.bash` (adds GitHub SSH host keys to `~/.ssh/known_hosts`).
+## ✅ Phase 2 — `ssh_config` role
 
 **Script:** `scripts/ssh_config/configure-ssh-known-hosts.bash`
 **Role:** `ansible/roles/ssh_config/`
 
-- [ ] Create `ansible/roles/ssh_config/tasks/main.yml`
-  - `ansible.builtin.known_hosts` for each key (ed25519, ECDSA, RSA)
-- [ ] Add play to `ansible/playbooks/provision.yml`
-- [ ] Move `templates/scripts/configure-ssh-known-hosts.bash` → `scripts/ssh_config/`
-- [ ] Verify: `hk check --all` passes
+Adds GitHub's three SSH host keys (ed25519, ECDSA, RSA) to `~/.ssh/known_hosts` via
+`ansible.builtin.known_hosts`. Idempotent.
 
 ---
 
-## Phase 3 — `system_config` role
-
-Largest migration. Covers: `configure-system.bash`, `disable-protected-services.bash`,
-`disable-spctl.bash`, `configure-shell.bash`, `cleanup-spotlight-index.bash`,
-`update-safari.bash`, `wait-for-finder.bash`.
+## ✅ Phase 3 — `system_config` role
 
 **Scripts:** `scripts/system_config/`
 **Role:** `ansible/roles/system_config/`
 
-**Note:** `configure-system.bash` has ~80 `defaults write` calls. Audit each for CI VM relevance before migrating — flag uncertain settings for review rather than silently dropping.
+Structured as an orchestrator (`main.yml`) importing seven task files:
 
-- [ ] Audit `configure-system.bash` — mark each setting keep/drop/query
-- [ ] Create `ansible/roles/system_config/tasks/main.yml` (orchestrator)
-- [ ] Create `ansible/roles/system_config/tasks/preferences.yml`
-  - `community.general.osx_defaults` tasks from `configure-system.bash`
-- [ ] Create `ansible/roles/system_config/tasks/services.yml`
-  - `launchctl` tasks from `disable-protected-services.bash`
-  - `spctl` task from `disable-spctl.bash`
-- [ ] Create `ansible/roles/system_config/tasks/shell.yml`
-  - `ansible.builtin.user: shell: /bin/bash` from `configure-shell.bash`
-- [ ] Create `ansible/roles/system_config/tasks/spotlight.yml`
-  - `mdutil` + async wait from `cleanup-spotlight-index.bash`
-- [ ] Add Safari update task (`softwareupdate`) and Finder wait task
-- [ ] Create `ansible/roles/system_config/vars/main.yml` for key lists
-- [ ] Add play to `ansible/playbooks/provision.yml`
-- [ ] Move scripts to `scripts/system_config/`:
-  - `templates/scripts/configure-system.bash`
-  - `templates/scripts/configure-shell.bash`
-  - `templates/scripts/cleanup-spotlight-index.bash`
-  - `templates/scripts/disable-protected-services.bash`
-  - `templates/scripts/disable-spctl.bash`
-  - `templates/scripts/update-safari.bash`
-  - `templates/scripts/wait-for-finder.bash`
-- [ ] Verify: `hk check --all` passes
+- `preferences.yml` — all `defaults write` settings via `community.general.osx_defaults`
+- `power.yml` — individual `pmset` tasks, `systemsetup`, `tmutil`, sleep image removal
+- `services.yml` — `launchctl bootout` for notification center, Tips, Time Machine, analytics, apsd
+- `shell.yml` — sets `/bin/bash` as shell for admin user and root via `ansible.builtin.user`
+- `spotlight.yml` — erases Spotlight indexes, polls logs for completion (up to 6 min)
+- `gatekeeper.yml` — disables Gatekeeper, enables Terminal developer mode
+- `safari.yml` — installs Safari update via `softwareupdate`
+
+`services.yml` and `gatekeeper.yml` are gated behind a SIP check (`csrutil status`) and
+skipped if SIP is enabled. `wait-for-finder.bash` has no Ansible equivalent (Packer-only).
 
 ---
 
-## Phase 4 — `auth_config` role
-
-Covers `enable-passwordless-sudo.bash`, `enable-auto-login.bash`, `disable-screen-lock.bash`.
-Uses existing `macos_admin_user` / `macos_admin_password` group vars.
+## ✅ Phase 4 — `auth_config` role
 
 **Scripts:** `scripts/auth_config/`
 **Role:** `ansible/roles/auth_config/`
 
-- [ ] Create `ansible/roles/auth_config/tasks/main.yml` (orchestrator)
-- [ ] Create `ansible/roles/auth_config/tasks/sudo.yml`
-  - `ansible.builtin.template` → `/etc/sudoers.d/{{ macos_admin_user }}`
-  - `validate: /usr/sbin/visudo -cf %s`
-- [ ] Create `ansible/roles/auth_config/tasks/auto_login.yml`
-  - XOR password logic is complex — keep as `ansible.builtin.script`
-- [ ] Create `ansible/roles/auth_config/tasks/screen_lock.yml`
-  - `ansible.builtin.command: sysadminctl -screenLock off -password ...`
-- [ ] Add play to `ansible/playbooks/provision.yml`
-- [ ] Move scripts to `scripts/auth_config/`:
-  - `templates/scripts/enable-passwordless-sudo.bash`
-  - `templates/scripts/enable-auto-login.bash`
-  - `templates/scripts/disable-screen-lock.bash`
-- [ ] Verify: `hk check --all` passes
+- `sudo.yml` — writes `/etc/sudoers.d/{{ macos_admin_user }}-nopasswd` via
+  `ansible.builtin.template`, validated with `visudo`
+- `auto_login.yml` — runs `enable-auto-login.bash` via `ansible.builtin.script`
+  (XOR kcpassword cipher logic kept as script; `no_log: true`)
+- `screen_lock.yml` — `sysadminctl -screenLock off` (`no_log: true`)
+
+**Open:** idempotency checks not yet implemented for auto-login and screen lock.
 
 ---
 
-## Phase 5 — `homebrew` role
+## ✅ Phase 5 — `homebrew` role
 
-Wraps `geerlingguy.mac.homebrew` (already in `requirements.yml`).
-`group_vars/macos_agents.yml` already has `homebrew_installed_packages` and `homebrew_taps`.
-
-**Scripts:** `scripts/homebrew/` (reference only — Ansible uses the galaxy role)
+**Scripts:** `scripts/homebrew/` (reference only)
 **Role:** `ansible/roles/homebrew/`
 
-- [ ] Create `ansible/roles/homebrew/tasks/main.yml`
-  - `ansible.builtin.import_role: name: geerlingguy.mac.homebrew`
-- [ ] Add `homebrew_cask_apps` to `group_vars/macos_agents.yml` if casks are needed
-- [ ] Add play to `ansible/playbooks/provision.yml` (after `auth_config`)
-- [ ] Move scripts to `scripts/homebrew/`:
-  - `templates/scripts/install-homebrew.bash`
-  - `templates/scripts/install-homebrew-formulae.bash`
-  - `templates/scripts/install-homebrew-casks.bash`
-- [ ] Verify: `hk check --all` passes
+Wraps `geerlingguy.mac.homebrew`. Combines `homebrew_base_packages` (defined in
+`group_vars/macos_agents.yml`) with `homebrew_platform_packages` (defined per platform
+group) before calling the galaxy role. Platform groups are children of `macos_agents`:
+
+- `tart_agents` — adds `tart-guest-agent`
+- `orka_agents` (future) — will add the Orka equivalent
 
 ---
 
-## Phase 6 — `xcode` role
-
-Covers `configure-xcode.bash`, `install-developer-certificates.bash`,
-`install-cached-xcode-versions.bash` + `lib/xcode-utils.bash`.
-
-`install-cached-xcode-versions.bash` and `xcode-utils.bash` are complex enough to keep as scripts;
-Ansible copies and runs them via `ansible.builtin.script`.
+## ✅ Phase 6 — `xcode` role
 
 **Scripts:** `scripts/xcode/`
 **Role:** `ansible/roles/xcode/`
 
-- [ ] Create `ansible/roles/xcode/tasks/main.yml` (orchestrator)
-- [ ] Create `ansible/roles/xcode/tasks/configure.yml`
-  - `community.general.osx_defaults` tasks from `configure-xcode.bash`
-- [ ] Create `ansible/roles/xcode/tasks/certificates.yml`
-  - `ansible.builtin.get_url` for Apple WWDR + Developer ID certs
-  - `ansible.builtin.command: security import ...`
-- [ ] Create `ansible/roles/xcode/tasks/install.yml`
-  - `ansible.builtin.script` calling `install-cached-xcode-versions.bash`
-- [ ] Add play to `ansible/playbooks/provision.yml`
-- [ ] Move scripts to `scripts/xcode/`:
-  - `templates/scripts/configure-xcode.bash`
-  - `templates/scripts/install-developer-certificates.bash`
-  - `templates/scripts/install-cached-xcode-versions.bash`
-  - `templates/scripts/lib/xcode-utils.bash` → `scripts/xcode/lib/`
-  - `templates/scripts/tests/test_xcode-utils.bash` → `scripts/xcode/tests/`
-- [ ] Verify: `hk check --all` passes
+- `configure.yml` — Xcode/XCTest/Simulator preferences via `community.general.osx_defaults`
+- `certificates.yml` — downloads and imports Apple WWDR CA G3 and Developer ID G2 CA certs
+- `install.yml` — finds `.xip` files in `.cache/xcode/` on the control node; skips if empty,
+  otherwise copies to remote, runs `install-cached-xcode-versions.bash`, cleans up
+- `sdks.yml` — finds `.dmg` simulator runtime files in `.cache/apple_sdk/`; installs via
+  `xcrun simctl runtime add`, cleans up
+
+Populate `.cache/xcode/` and `.cache/apple_sdk/` on the control node before running the
+playbook. Both directories are gitignored.
 
 ---
 
-## Future work
+## ⏳ Phase 7 — Finalize
 
-These items are not yet addressed by any role and will need dedicated tasks:
-
-- **Xcode version installation workflow** — `install.yml` assumes `.xip` files are already staged in `xcode_cache_dir`; the process for downloading, caching, and transferring them to agents is undefined
-- **Apple SDK installation** — no tasks for installing additional platform SDKs (visionOS, watchOS, etc.) beyond those bundled with Xcode
-- **Simulator pre-warming** — no tasks to boot simulators after install; the first CI job on a freshly provisioned agent will pay a significant cold-start cost
-
----
-
-## Phase 7 — Finalize
-
-Wire everything together and verify end-to-end.
-
-Final play order in `provision.yml`:
-```
-xcode_clt → rosetta → ssh_config → system_config → auth_config → homebrew → macos_updates → xcode
-```
-
-- [ ] Confirm `provision.yml` play order is correct
-- [ ] Move remaining scripts not yet migrated:
-  - `templates/scripts/install-xcode-command-line-tools.bash` → `scripts/xcode_clt/`
-  - `templates/scripts/update-macos.bash` → `scripts/macos_updates/`
-  - `templates/data/` → `scripts/shell_profile/`
-- [ ] Delete `templates/` (should now be empty)
-- [ ] Update `.shellcheckrc` source paths if needed after moves
-- [ ] Run `mise run provision` against a fresh Tart VM
+- [ ] Run the full playbook against a fresh Tart VM end-to-end
 - [ ] Spot-check each role's effect on the VM
+- [ ] Add idempotency to `auth_config` tasks (auto-login, screen lock)
+- [ ] Add simulator pre-warming after Xcode install
+
+---
+
+## Open items
+
+- **Simulator pre-warming** — no tasks to boot simulators after install; the first CI job on a
+  freshly provisioned agent will pay a significant cold-start cost
+- **Xcode/SDK version pinning** — currently installs whatever is in `.cache/`; no mechanism
+  yet to specify which versions are required
