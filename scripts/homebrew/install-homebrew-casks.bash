@@ -1,13 +1,13 @@
 #!/bin/bash -euo pipefail
 
-# shellcheck source=../data/.profile
+# shellcheck source=../../templates/data/.profile
 source "${HOME}/.profile"
 
 function main() {
-	local -r formulae="${1:-${BREW_FORMULAE}}"
+	local -r casks="${1:-${BREW_CASKS}}"
 
 	brew update
-	brew install "${formulae}"
+	brew install --cask "${casks}"
 	brew autoremove
 	brew cleanup
 }
