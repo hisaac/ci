@@ -83,16 +83,16 @@
     type: bool
     value: true
   loop:
-    - AppleShowAllFiles
-    - ShowStatusBar
-    - ShowPathbar
     - _FXShowPosixPathInTitle
     - _FXSortFoldersFirst
     - _FXSortFoldersFirstOnDesktop
+    - AppleShowAllFiles
     - ShowExternalHardDrivesOnDesktop
     - ShowHardDrivesOnDesktop
     - ShowMountedServersOnDesktop
+    - ShowPathbar
     - ShowRemovableMediaOnDesktop
+    - ShowStatusBar
 
 - name: Disable Finder extension change warning
   community.general.osx_defaults:

@@ -196,6 +196,16 @@ Ansible copies and runs them via `ansible.builtin.script`.
 
 ---
 
+## Future work
+
+These items are not yet addressed by any role and will need dedicated tasks:
+
+- **Xcode version installation workflow** — `install.yml` assumes `.xip` files are already staged in `xcode_cache_dir`; the process for downloading, caching, and transferring them to agents is undefined
+- **Apple SDK installation** — no tasks for installing additional platform SDKs (visionOS, watchOS, etc.) beyond those bundled with Xcode
+- **Simulator pre-warming** — no tasks to boot simulators after install; the first CI job on a freshly provisioned agent will pay a significant cold-start cost
+
+---
+
 ## Phase 7 — Finalize
 
 Wire everything together and verify end-to-end.
