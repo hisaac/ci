@@ -20,7 +20,8 @@ VMS = [
     # "macos:26",
 ]
 
-GROUP = "macos_agents"
+GROUP = "tart_agents"
+PARENT_GROUP = "macos_agents"
 
 
 def get_ip(vm_name: str) -> str | None:
@@ -45,6 +46,9 @@ def list_inventory() -> dict:
             print(f"Warning: could not get IP for VM '{vm}' — skipping", file=sys.stderr)
 
     return {
+        PARENT_GROUP: {
+            "children": [GROUP],
+        },
         GROUP: {
             "hosts": reachable_hosts,
         },
