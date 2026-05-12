@@ -34,3 +34,8 @@
   hosts: macos_agents
   roles:
     - role: macos_updates
+
+- name: Configure and install Xcode
+  hosts: macos_agents
+  roles:
+    - role: xcode

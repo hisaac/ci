@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 export LANG=en_US.UTF-8
 
 # Don't restore shell sessions

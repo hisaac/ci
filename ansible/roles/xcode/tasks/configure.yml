@@ -1,0 +1,50 @@
+---
+- name: Configure Xcode preferences
+  community.general.osx_defaults:
+    domain: com.apple.dt.Xcode
+    key: "{{ item.key }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+  loop:
+    - key: XcodeCloudUpsellPromptEnabled
+      type: bool
+      value: false
+    - key: DVTWelcomeWindowLastShownVersion
+      type: string
+      value: "9999.0"
+    - key: IDEDisableCrashReporting
+      type: bool
+      value: true
+    - key: IDENeverShowSVNConversionWarning
+      type: bool
+      value: true
+    - key: IDESkipPackagePluginFingerprintValidation
+      type: bool
+      value: true
+    - key: IDETrustAllCertificates
+      type: bool
+      value: true
+    - key: IDEProvisioningStyle
+      type: string
+      value: Manual
+
+- name: Configure Xcode test preferences
+  community.general.osx_defaults:
+    domain: com.apple.dt.XCTest
+    key: AutomaticallyCollectTestResults
+    type: bool
+    value: false
+
+- name: Configure iOS Simulator preferences
+  community.general.osx_defaults:
+    domain: com.apple.iphonesimulator
+    key: "{{ item.key }}"
+    type: bool
+    value: "{{ item.value }}"
+  loop:
+    - key: AutomaticMinimizedWindowShowingEnabled
+      value: false
+    - key: CleanLaunchesEnabled
+      value: true
+    - key: DeviceDiscoveryDisabled
+      value: true

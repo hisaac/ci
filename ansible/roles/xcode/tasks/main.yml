@@ -1,0 +1,9 @@
+---
+- name: Configure Xcode preferences
+  ansible.builtin.import_tasks: configure.yml
+
+- name: Install developer certificates
+  ansible.builtin.import_tasks: certificates.yml
+
+- name: Install cached Xcode versions
+  ansible.builtin.import_tasks: install.yml

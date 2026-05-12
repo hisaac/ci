@@ -1,6 +1,6 @@
 #!/bin/bash -euo pipefail
 
-# shellcheck source=../../templates/data/.profile
+# shellcheck source=../shell_profile/.profile
 source "${HOME}/.profile"
 
 function main() {
