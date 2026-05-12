@@ -1,0 +1,7 @@
+---
+- name: Install Safari update
+  ansible.builtin.command:
+    cmd: softwareupdate --install --safari-only --verbose
+  become: true
+  changed_when: true
+  failed_when: false

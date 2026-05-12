@@ -1,0 +1,21 @@
+---
+- name: Configure system preferences
+  ansible.builtin.import_tasks: preferences.yml
+
+- name: Configure power management
+  ansible.builtin.import_tasks: power.yml
+
+- name: Disable protected services
+  ansible.builtin.import_tasks: services.yml
+
+- name: Configure user shell
+  ansible.builtin.import_tasks: shell.yml
+
+- name: Clean up Spotlight index
+  ansible.builtin.import_tasks: spotlight.yml
+
+- name: Configure Gatekeeper
+  ansible.builtin.import_tasks: gatekeeper.yml
+
+- name: Update Safari
+  ansible.builtin.import_tasks: safari.yml

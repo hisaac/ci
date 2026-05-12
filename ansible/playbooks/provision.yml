@@ -15,6 +15,11 @@
   roles:
     - role: ssh_config
 
+- name: Configure system settings
+  hosts: macos_agents
+  roles:
+    - role: system_config
+
 - name: Install macOS updates
   hosts: macos_agents
   roles:

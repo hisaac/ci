@@ -1,0 +1,12 @@
+---
+# GUI-level LaunchAgents to unload (run as the admin user's GUI session)
+system_config_launchagents:
+  - /System/Library/LaunchAgents/com.apple.notificationcenterui.plist
+  - /System/Library/LaunchAgents/com.apple.tipsd.plist
+
+# System-level LaunchDaemons to unload (run as root)
+system_config_launchdaemons:
+  - /System/Library/LaunchDaemons/com.apple.backupd.plist
+  - /System/Library/LaunchDaemons/com.apple.backupd-helper.plist
+  - /System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist
+  - /System/Library/LaunchDaemons/com.apple.apsd.plist

@@ -1,0 +1,18 @@
+---
+- name: Erase Spotlight MDS indexes
+  ansible.builtin.command:
+    cmd: mdutil -E /
+  become: true
+  changed_when: true
+
+# Indexing typically takes 3-6 minutes. Poll every 30 seconds for up to 6 minutes.
+- name: Wait for Spotlight indexing to complete
+  ansible.builtin.command:
+    cmd: log show --last 1m
+  become: true
+  register: system_config_spotlight_log
+  changed_when: false
+  retries: 12
+  delay: 30
+  until: >-
+    'mds' in system_config_spotlight_log.stdout and 'Released' in system_config_spotlight_log.stdout and 'BackgroundTask' in system_config_spotlight_log.stdout

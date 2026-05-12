@@ -1,0 +1,40 @@
+---
+- name: Disable system sleep
+  ansible.builtin.command:
+    cmd: systemsetup -setsleep Off
+  become: true
+  changed_when: true
+
+- name: Configure power management settings
+  ansible.builtin.command:
+    cmd: >-
+      pmset -a sleep 0 displaysleep 0 disksleep 0 hibernatemode 0 powernap 0 networkoversleep 1 ttyskeepawake 1 tcpkeepalive 1 standby 0 womp 1 autorestart 1
+  become: true
+  changed_when: true
+
+# powermode: 0 = Balanced, 2 = High Performance (if supported).
+# Setting 0 first ensures success even if High Performance is unsupported.
+- name: Set power mode to balanced
+  ansible.builtin.command:
+    cmd: pmset -a powermode 0
+  become: true
+  changed_when: true
+
+- name: Set power mode to high performance
+  ansible.builtin.command:
+    cmd: pmset -a powermode 2
+  become: true
+  changed_when: true
+  failed_when: false
+
+- name: Delete sleep image file
+  ansible.builtin.file:
+    path: /var/vm/sleepimage
+    state: absent
+  become: true
+
+- name: Disable Time Machine
+  ansible.builtin.command:
+    cmd: tmutil disable
+  become: true
+  changed_when: true

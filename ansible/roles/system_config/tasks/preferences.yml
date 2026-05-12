@@ -1,0 +1,181 @@
+---
+# Window Manager
+
+- name: Disable Click to Show Desktop
+  community.general.osx_defaults:
+    domain: com.apple.WindowManager
+    key: EnableStandardClickToShowDesktop
+    type: bool
+    value: false
+
+# Tips
+
+- name: Disable Tips feature and notifications
+  community.general.osx_defaults:
+    domain: com.apple.tipsd
+    key: "{{ item }}"
+    type: bool
+    value: true
+  loop:
+    - SiriTipsDisabled
+    - TipsDisabled
+
+# Software Update
+
+- name: Suppress macOS upgrade notification
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.SoftwareUpdate
+    key: DoNotOfferNewVersion
+    type: bool
+    value: true
+  become: true
+
+- name: Disable automatic software updates
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.SoftwareUpdate
+    key: "{{ item }}"
+    type: bool
+    value: false
+  become: true
+  loop:
+    - AutomaticCheckEnabled
+    - AutomaticDownload
+
+# Login window
+
+- name: Disable reopening of apps on login
+  community.general.osx_defaults:
+    domain: com.apple.loginwindow
+    key: "{{ item }}"
+    type: bool
+    value: false
+  loop:
+    - TALLogoutSavesState
+    - LoginwindowLaunchesRelaunchApps
+
+# Finder
+
+- name: Set Finder default view to column view
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: FXPreferredViewStyle
+    type: string
+    value: clmv
+
+- name: Set Finder default search scope to current folder
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: FXDefaultSearchScope
+    type: string
+    value: SCcf
+
+- name: Set Finder default new window to OS volume
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: NewWindowTarget
+    type: string
+    value: OS volume
+
+- name: Enable Finder boolean preferences
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: "{{ item }}"
+    type: bool
+    value: true
+  loop:
+    - AppleShowAllFiles
+    - ShowStatusBar
+    - ShowPathbar
+    - _FXShowPosixPathInTitle
+    - _FXSortFoldersFirst
+    - _FXSortFoldersFirstOnDesktop
+    - ShowExternalHardDrivesOnDesktop
+    - ShowHardDrivesOnDesktop
+    - ShowMountedServersOnDesktop
+    - ShowRemovableMediaOnDesktop
+
+- name: Disable Finder extension change warning
+  community.general.osx_defaults:
+    domain: com.apple.finder
+    key: FXEnableExtensionChangeWarning
+    type: bool
+    value: false
+
+# Global domain
+
+- name: Show all filename extensions
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleShowAllExtensions
+    type: bool
+    value: true
+
+- name: Disable App Nap
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: NSAppSleepDisabled
+    type: bool
+    value: true
+
+# Handoff
+
+- name: Disable Handoff and Continuity
+  community.general.osx_defaults:
+    domain: com.apple.coreservices.useractivityd
+    key: "{{ item }}"
+    type: bool
+    value: false
+  loop:
+    - ActivityReceivingEnabled
+    - ActivityAdvertisingAllowed
+
+# Universal Access
+
+- name: Disable graphic effects
+  community.general.osx_defaults:
+    domain: com.apple.universalaccess
+    key: "{{ item }}"
+    type: bool
+    value: true
+  loop:
+    - reduceMotion
+    - reduceTransparency
+
+# Screensaver
+
+- name: Disable screensaver for current user
+  community.general.osx_defaults:
+    domain: com.apple.screensaver
+    key: idleTime
+    type: int
+    value: 0
+    host: currentHost
+
+- name: Disable screensaver at login window
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.screensaver
+    key: loginWindowIdleTime
+    type: int
+    value: 0
+  become: true
+
+# Keyboard
+
+- name: Disable Keyboard Setup Assistant
+  ansible.builtin.command:
+    cmd: defaults write /Library/Preferences/com.apple.keyboardtype keyboardtype -dict-add "3-7582-0" -int 40
+  become: true
+  changed_when: true
+
+# Filesystem visibility
+
+- name: Unhide ~/Library folder
+  ansible.builtin.command:
+    cmd: chflags nohidden /Users/{{ macos_admin_user }}/Library
+  changed_when: true
+
+- name: Unhide /Volumes folder
+  ansible.builtin.command:
+    cmd: chflags nohidden /Volumes
+  become: true
+  changed_when: true

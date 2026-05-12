@@ -1,0 +1,12 @@
+---
+- name: Set admin user shell to bash
+  ansible.builtin.user:
+    name: "{{ macos_admin_user }}"
+    shell: /bin/bash
+  become: true
+
+- name: Set root shell to bash
+  ansible.builtin.user:
+    name: root
+    shell: /bin/bash
+  become: true

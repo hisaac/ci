@@ -1,0 +1,14 @@
+---
+# Note: These tasks require SIP to be disabled on the target system.
+
+- name: Disable Gatekeeper
+  ansible.builtin.command:
+    cmd: spctl --master-disable
+  become: true
+  changed_when: true
+
+- name: Enable Developer Mode for Terminal
+  ansible.builtin.command:
+    cmd: spctl developer-mode enable-terminal
+  become: true
+  changed_when: true
