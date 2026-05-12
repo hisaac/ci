@@ -1,4 +1,5 @@
 ---
+# todo: add idempotency to check if admin user already has auto-login enabled
 - name: Enable auto-login for admin user
   ansible.builtin.script: enable-auto-login.bash
   environment:

@@ -1,4 +1,5 @@
 ---
+# todo: add idempotency
 - name: Ensure /etc/sudoers.d directory exists
   ansible.builtin.file:
     path: /etc/sudoers.d

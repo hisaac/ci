@@ -1,0 +1,36 @@
+---
+- name: Find Apple SDK .dmg files in local cache
+  ansible.builtin.find:
+    paths: "{{ playbook_dir }}/../../.cache/apple_sdk"
+    patterns: "*.dmg"
+  delegate_to: localhost
+  become: false
+  register: xcode_sdk_files
+
+- name: Install Apple SDKs from cache
+  when: xcode_sdk_files.files | length > 0
+  block:
+    - name: Create temp directory for SDK cache on remote
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: sdk_cache
+      register: xcode_sdk_tmpdir
+
+    - name: Copy Apple SDK .dmg files to remote
+      ansible.builtin.copy:
+        src: "{{ item.path }}"
+        dest: "{{ xcode_sdk_tmpdir.path }}/"
+        mode: "0644"
+      loop: "{{ xcode_sdk_files.files }}"
+
+    - name: Install Apple SDKs
+      ansible.builtin.command:
+        cmd: xcrun simctl runtime add {{ xcode_sdk_tmpdir.path }}/{{ item.path | basename }}
+      become: true
+      changed_when: true
+      loop: "{{ xcode_sdk_files.files }}"
+
+    - name: Remove SDK cache from remote
+      ansible.builtin.file:
+        path: "{{ xcode_sdk_tmpdir.path }}"
+        state: absent

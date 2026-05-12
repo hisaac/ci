@@ -4,7 +4,6 @@
 
 # Cached files
 .cache/
-.caches/
 
 # Packer
 packer_cache/
