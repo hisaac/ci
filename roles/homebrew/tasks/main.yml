@@ -1,7 +1,7 @@
 ---
 - name: Set combined package list
   ansible.builtin.set_fact:
-    homebrew_installed_packages: "{{ homebrew_base_packages + (homebrew_platform_packages | default([])) }}"
+    homebrew_installed_packages: "{{ homebrew_base_packages + homebrew_platform_packages }}"
 
 - name: Install Homebrew and packages
   ansible.builtin.import_role:
