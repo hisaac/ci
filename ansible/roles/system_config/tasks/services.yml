@@ -5,7 +5,9 @@
 - name: Disable GUI-level launch agents
   ansible.builtin.command:
     cmd: launchctl bootout "gui/{{ ansible_user_uid }}" {{ item }}
-  loop: "{{ system_config_launchagents }}"
+  loop:
+    - /System/Library/LaunchAgents/com.apple.notificationcenterui.plist
+    - /System/Library/LaunchAgents/com.apple.tipsd.plist
   failed_when: false
   changed_when: true
 
@@ -13,6 +15,10 @@
   ansible.builtin.command:
     cmd: launchctl bootout system {{ item }}
   become: true
-  loop: "{{ system_config_launchdaemons }}"
+  loop:
+    - /System/Library/LaunchDaemons/com.apple.backupd.plist
+    - /System/Library/LaunchDaemons/com.apple.backupd-helper.plist
+    - /System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist
+    - /System/Library/LaunchDaemons/com.apple.apsd.plist
   failed_when: false
   changed_when: true
