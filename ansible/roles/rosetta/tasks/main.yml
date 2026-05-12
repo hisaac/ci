@@ -1,0 +1,19 @@
+---
+- name: Check if Rosetta 2 is installed
+  ansible.builtin.command:
+    cmd: arch -arch x86_64 /usr/bin/true
+  register: rosetta_check
+  changed_when: false
+  failed_when: false
+  when: ansible_facts['architecture'] == 'arm64'
+
+# On macOS Sonoma (14.0) a benign "Package Authoring Error" may appear in output but installation succeeds.
+- name: Install Rosetta 2
+  ansible.builtin.command:
+    cmd: softwareupdate --install-rosetta --agree-to-license
+  become: true
+  changed_when: true
+  when:
+    - ansible_facts['architecture'] == 'arm64'
+    - rosetta_check.rc is defined
+    - rosetta_check.rc != 0

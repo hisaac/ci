@@ -34,7 +34,7 @@ function install_xcode_from_xip() (
 	cd "${xip_file_containing_dir}" || exit 1
 	xip --expand "$xip_file_name"
 
-	local -r xcode_version="$(get_xcode_version_at_path "${xcode_cache_dir}/Xcode.app")"
+	local -r xcode_version="$(get_xcode_version_at_path "${xip_file_containing_dir}/Xcode.app")"
 	local -r xcode_app_name="Xcode-${xcode_version}.app"
 	local -r xcode_app_destination="/Applications/${xcode_app_name}"
 
