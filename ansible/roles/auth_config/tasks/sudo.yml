@@ -1,0 +1,19 @@
+---
+- name: Ensure /etc/sudoers.d directory exists
+  ansible.builtin.file:
+    path: /etc/sudoers.d
+    state: directory
+    mode: "0755"
+    owner: root
+    group: wheel
+  become: true
+
+- name: Configure passwordless sudo for admin user
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: /etc/sudoers.d/{{ macos_admin_user }}-nopasswd
+    mode: "0440"
+    owner: root
+    group: wheel
+    validate: /usr/sbin/visudo -cf %s
+  become: true

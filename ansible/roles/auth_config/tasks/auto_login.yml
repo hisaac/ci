@@ -1,0 +1,9 @@
+---
+- name: Enable auto-login for admin user
+  ansible.builtin.script: enable-auto-login.bash
+  environment:
+    USERNAME: "{{ macos_admin_user }}"
+    PASSWORD: "{{ macos_admin_password }}"
+  become: true
+  changed_when: true
+  no_log: true

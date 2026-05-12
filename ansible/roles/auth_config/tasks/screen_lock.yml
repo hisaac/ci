@@ -1,0 +1,6 @@
+---
+- name: Disable screen lock
+  ansible.builtin.command:
+    cmd: sysadminctl -screenLock off -password {{ macos_admin_password }}
+  changed_when: true
+  no_log: true

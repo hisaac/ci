@@ -1,0 +1,9 @@
+---
+- name: Configure passwordless sudo
+  ansible.builtin.import_tasks: sudo.yml
+
+- name: Enable auto-login
+  ansible.builtin.import_tasks: auto_login.yml
+
+- name: Disable screen lock
+  ansible.builtin.import_tasks: screen_lock.yml
