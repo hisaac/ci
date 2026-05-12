@@ -2,40 +2,63 @@
 - name: Install Xcode Command Line Tools
   hosts: macos_agents
   gather_facts: false
+  tags: [xcode_clt]
   roles:
     - role: xcode_clt
 
+- name: Install macOS updates
+  hosts: macos_agents
+  tags: [macos_updates]
+  roles:
+    - role: macos_updates
+
 - name: Install Rosetta 2
   hosts: macos_agents
+  tags: [rosetta]
   roles:
     - role: rosetta
 
 - name: Configure SSH known hosts
   hosts: macos_agents
+  tags: [ssh_config]
   roles:
     - role: ssh_config
 
 - name: Configure system settings
   hosts: macos_agents
+  tags: [system_config]
   roles:
     - role: system_config
 
 - name: Configure authentication
   hosts: macos_agents
+  tags: [auth_config]
   roles:
     - role: auth_config
 
 - name: Install Homebrew and packages
   hosts: macos_agents
+  tags: [homebrew]
   roles:
     - role: homebrew
 
-- name: Install macOS updates
+- name: Configure Dock
   hosts: macos_agents
+  tags: [dock]
+  environment:
+    PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
   roles:
-    - role: macos_updates
+    - role: geerlingguy.mac.dock
 
 - name: Configure and install Xcode
   hosts: macos_agents
+  tags: [xcode]
   roles:
     - role: xcode
+
+- name: Re-index Spotlight
+  hosts: macos_agents
+  tags: [spotlight]
+  tasks:
+    - name: Clean up Spotlight index
+      ansible.builtin.import_tasks: "{{ playbook_dir }}/../roles/system_config/tasks/spotlight.yml"

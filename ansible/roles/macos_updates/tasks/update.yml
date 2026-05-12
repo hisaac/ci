@@ -1,12 +1,4 @@
 ---
-- name: Disable automatic update check
-  community.general.osx_defaults:
-    domain: /Library/Preferences/com.apple.SoftwareUpdate
-    key: AutomaticCheckEnabled
-    type: bool
-    value: false
-  become: true
-
 - name: Check for available updates
   ansible.builtin.command: softwareupdate --all --list
   register: macos_updates_swupdate_list
@@ -40,8 +32,12 @@
   when: >-
     not item.label.startswith('macOS') or item.version.split('.')[0] == ansible_facts['distribution_version'].split('.')[0]
 
+- name: Check if any updates were actually installed
+  ansible.builtin.set_fact:
+    macos_updates_installed: "{{ (macos_updates_swupdate_install.results | default([])) | selectattr('changed') | list | length > 0 }}"
+
 - name: Wait for VM to come back after update
   ansible.builtin.wait_for_connection:
     delay: 60
     timeout: 1800
-  when: macos_updates_available_updates | length > 0
+  when: macos_updates_installed | default(false)

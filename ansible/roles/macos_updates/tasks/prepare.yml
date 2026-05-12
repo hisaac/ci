@@ -1,12 +1,25 @@
 ---
 # Marker files - checked by Setup Assistant on boot
 
+- name: Check if Setup Assistant marker exists
+  ansible.builtin.stat:
+    path: /private/var/db/.AppleSetupDone
+  register: macos_updates_setup_assistant_marker
+  become: true
+
 - name: Mark Setup Assistant as completed at system level
   ansible.builtin.file:
     path: /private/var/db/.AppleSetupDone
     state: touch
     owner: root
     mode: "0400"
+  become: true
+  when: not macos_updates_setup_assistant_marker.stat.exists
+
+- name: Check if legacy setup registration marker exists
+  ansible.builtin.stat:
+    path: /Library/Receipts/.SetupRegComplete
+  register: macos_updates_setup_reg_complete_marker
   become: true
 
 - name: Create legacy setup registration complete marker
@@ -16,6 +29,13 @@
     owner: root
     mode: "0644"
   become: true
+  when: not macos_updates_setup_reg_complete_marker.stat.exists
+
+- name: Check if .skipbuddy marker exists
+  ansible.builtin.stat:
+    path: "/Users/{{ macos_admin_user }}/.skipbuddy"
+  register: macos_updates_skipbuddy_marker
+  become: true
 
 - name: Create .skipbuddy marker in admin user home directory
   ansible.builtin.file:
@@ -24,6 +44,7 @@
     owner: "{{ macos_admin_user }}"
     mode: "0644"
   become: true
+  when: not macos_updates_skipbuddy_marker.stat.exists
 
 # System Setup Assistant preferences
 
@@ -86,3 +107,33 @@
       value: "99.99.99"
     - key: LastSeenSiriProductVersion
       value: "99.99.99"
+
+# Software Update preferences
+
+- name: Disable automatic software updates
+  community.general.osx_defaults:
+    domain: com.apple.SoftwareUpdate
+    key: "{{ item }}"
+    type: bool
+    value: false
+  become: true
+  loop:
+    - AutomaticCheckEnabled
+    - AutomaticDownload
+    - AllowPreReleaseInstallation
+
+- name: Suppress macOS upgrade notification
+  community.general.osx_defaults:
+    domain: com.apple.SoftwareUpdate
+    key: DoNotOfferNewVersion
+    type: bool
+    value: true
+  become: true
+
+- name: Suppress major OS upgrade notification date prompt
+  # MajorOSUserNotificationDate controls when macOS next nags about a major
+  # upgrade. Setting it to a far-future sentinel prevents the notification.
+  # osx_defaults doesn't support date type, so use defaults write directly.
+  ansible.builtin.command:
+    cmd: defaults write com.apple.SoftwareUpdate MajorOSUserNotificationDate -date "2099-01-01 00:00:00 +0000"
+  changed_when: false

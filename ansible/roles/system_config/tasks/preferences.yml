@@ -20,27 +20,6 @@
     - SiriTipsDisabled
     - TipsDisabled
 
-# Software Update
-
-- name: Suppress macOS upgrade notification
-  community.general.osx_defaults:
-    domain: /Library/Preferences/com.apple.SoftwareUpdate
-    key: DoNotOfferNewVersion
-    type: bool
-    value: true
-  become: true
-
-- name: Disable automatic software updates
-  community.general.osx_defaults:
-    domain: /Library/Preferences/com.apple.SoftwareUpdate
-    key: "{{ item }}"
-    type: bool
-    value: false
-  become: true
-  loop:
-    - AutomaticCheckEnabled
-    - AutomaticDownload
-
 # Login window
 
 - name: Disable reopening of apps on login
@@ -147,8 +126,8 @@
   community.general.osx_defaults:
     domain: com.apple.screensaver
     key: idleTime
-    type: int
-    value: 0
+    type: string
+    value: "0"
     host: currentHost
 
 - name: Disable screensaver at login window

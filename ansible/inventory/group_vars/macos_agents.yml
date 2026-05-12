@@ -2,6 +2,8 @@
 macos_admin_user: admin
 macos_admin_password: admin
 
+# Homebrew
+
 homebrew_taps:
   - cirruslabs/cli
 
@@ -12,3 +14,31 @@ homebrew_base_packages:
   - mise
   - python
   - xcodes
+
+# Dock
+
+dockitems_remove:
+  - Launchpad
+  - Messages
+  - Mail
+  - Maps
+  - Photos
+  - Facetime
+  - Calendar
+  - Contacts
+  - Reminders
+  - Notes
+  - Freeform
+  - TV
+  - Music
+  - News
+  - App Store
+dockitems_persist:
+  - name: Safari
+    path: /Applications/Safari.app/
+  - name: Terminal
+    path: /System/Applications/Utilities/Terminal.app/
+  - name: System Settings
+    path: /System/Applications/System Settings.app/
+  - name: Downloads
+    path: ~/Downloads

@@ -36,18 +36,27 @@ def get_ip(vm_name: str) -> str | None:
 def list_inventory() -> dict:
     hostvars = {}
     reachable_hosts = []
+    os_major_groups = {}
 
     for vm in VMS:
         ip = get_ip(vm)
         if ip:
             reachable_hosts.append(vm)
             hostvars[vm] = {"ansible_host": ip}
+
+            # Group hosts by macOS major version (e.g. macos_15_agents).
+            # This allows version-specific presets via group_vars.
+            vm_parts = vm.split(":", 1)
+            if len(vm_parts) == 2:
+                major = vm_parts[1].split(".", 1)[0]
+                group_name = f"macos_{major}_agents"
+                os_major_groups.setdefault(group_name, []).append(vm)
         else:
             print(f"Warning: could not get IP for VM '{vm}' — skipping", file=sys.stderr)
 
-    return {
+    inventory = {
         PARENT_GROUP: {
-            "children": [GROUP],
+            "children": [GROUP, *sorted(os_major_groups.keys())],
         },
         GROUP: {
             "hosts": reachable_hosts,
@@ -56,6 +65,11 @@ def list_inventory() -> dict:
             "hostvars": hostvars,
         },
     }
+
+    for group_name, hosts in os_major_groups.items():
+        inventory[group_name] = {"hosts": hosts}
+
+    return inventory
 
 
 def host_vars(vm_name: str) -> dict:

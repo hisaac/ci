@@ -7,8 +7,18 @@
   become: false
   register: xcode_xip_files
 
+- name: Select Xcode .xip files to install
+  ansible.builtin.set_fact:
+    xcode_selected_xip_files: []
+
+- name: Build Xcode .xip selection list
+  ansible.builtin.set_fact:
+    xcode_selected_xip_files: "{{ xcode_selected_xip_files + [item] }}"
+  loop: "{{ xcode_xip_files.files }}"
+  when: (xcode_cache_xip_files | length == 0) or ((item.path | basename) in xcode_cache_xip_files)
+
 - name: Install Xcode versions from cache
-  when: xcode_xip_files.files | length > 0
+  when: xcode_selected_xip_files | length > 0
   block:
     - name: Create temp directory for Xcode cache on remote
       ansible.builtin.tempfile:
@@ -21,20 +31,20 @@
         src: "{{ item.path }}"
         dest: "{{ xcode_remote_tmpdir.path }}/"
         mode: "0644"
-      loop: "{{ xcode_xip_files.files }}"
+      loop: "{{ xcode_selected_xip_files }}"
 
     # todo: remove reliance on the xcode-utils.bash and install-cached-xcode-versions.bash scripts if possible
 
     - name: Copy xcode-utils library to remote
       ansible.builtin.copy:
-        src: "{{ role_path }}/../../../../scripts/xcode/lib/xcode-utils.bash"
+        src: "{{ role_path }}/../../scripts/xcode/lib/xcode-utils.bash"
         dest: /tmp/xcode-utils.bash
         mode: "0644"
 
     - name: Install Xcode versions
       ansible.builtin.script:
         cmd: >-
-          {{ role_path }}/../../../../scripts/xcode/install-cached-xcode-versions.bash {{ xcode_remote_tmpdir.path }} {{ xcode_default_version }}
+          {{ role_path }}/../../scripts/xcode/install-cached-xcode-versions.bash {{ xcode_remote_tmpdir.path }} {{ xcode_default_version }}
       become: true
       changed_when: true
 

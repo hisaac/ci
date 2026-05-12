@@ -19,6 +19,7 @@ usage = "latest"
 yamlfmt = "latest"
 ruff = "latest"
 uv = "latest"
+xcodes = "latest"
 
 [hooks]
 postinstall = '''

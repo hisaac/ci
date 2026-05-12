@@ -8,9 +8,6 @@
 - name: Configure user shell
   ansible.builtin.import_tasks: shell.yml
 
-- name: Clean up Spotlight index
-  ansible.builtin.import_tasks: spotlight.yml
-
 - name: Update Safari
   ansible.builtin.import_tasks: safari.yml
 

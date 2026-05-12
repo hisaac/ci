@@ -130,10 +130,10 @@ group) before calling the galaxy role. Platform groups are children of `macos_ag
 - `certificates.yml` — downloads and imports Apple WWDR CA G3 and Developer ID G2 CA certs
 - `install.yml` — finds `.xip` files in `.cache/xcode/` on the control node; skips if empty,
   otherwise copies to remote, runs `install-cached-xcode-versions.bash`, cleans up
-- `sdks.yml` — finds `.dmg` simulator runtime files in `.cache/apple_sdk/`; installs via
+- `sdks.yml` — finds `.dmg` simulator runtime files in `.cache/simruntime/`; installs via
   `xcrun simctl runtime add`, cleans up
 
-Populate `.cache/xcode/` and `.cache/apple_sdk/` on the control node before running the
+Populate `.cache/xcode/` and `.cache/simruntime/` on the control node before running the
 playbook. Both directories are gitignored.
 
 ---
