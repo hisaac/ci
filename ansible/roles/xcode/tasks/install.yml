@@ -76,7 +76,7 @@
   ansible.builtin.command:
     argv:
       - /usr/bin/xcode-select
-      - -p
+      - --print-path
   register: xcode_current_selection
   changed_when: false
   failed_when: false

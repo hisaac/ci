@@ -1,5 +1,8 @@
 ---
 # Preset for hosts in inventory group macos_26_agents.
+
+# Xcode
+
 # Use exact cache filenames from .cache/xcode and .cache/simruntime.
 xcode_default_version: "26.5.0"
 xcode_cache_xip_files:
@@ -8,3 +11,7 @@ xcode_cache_xip_files:
 xcode_cache_simruntime_dmg_files:
   - iphonesimulator-26.0.1.dmg
   - iphonesimulator-26.5.0.dmg
+xcode_simulators:
+  - name: "iPhone 16"
+    device_type: "iPhone 16"
+    runtime: "iOS-18-5"

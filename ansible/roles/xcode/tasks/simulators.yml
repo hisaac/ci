@@ -1,0 +1,37 @@
+---
+- name: Create configured simulators
+  when: xcode_simulators | length > 0
+  block:
+    - name: Get existing simulator names
+      ansible.builtin.command:
+        argv:
+          - xcrun
+          - simctl
+          - list
+          - devices
+          - --json
+      register: xcode_existing_simulators_raw
+      changed_when: false
+
+    - name: Create simulators
+      ansible.builtin.command:
+        argv:
+          - xcrun
+          - simctl
+          - create
+          - "{{ item.name }}"
+          - "{{ item.device_type }}"
+          - "{{ item.runtime }}"
+      loop: "{{ xcode_simulators }}"
+      vars:
+        existing_names: >-
+          {{
+            (xcode_existing_simulators_raw.stdout | from_json)['devices']
+            | dict2items
+            | map(attribute='value')
+            | flatten
+            | map(attribute='name')
+            | list
+          }}
+      when: item.name not in existing_names
+      changed_when: true

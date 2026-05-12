@@ -48,3 +48,10 @@
       value: true
     - key: DeviceDiscoveryDisabled
       value: true
+
+- name: Disable automatic simulator creation on runtime install
+  community.general.osx_defaults:
+    domain: com.apple.CoreSimulator
+    key: EnableDefaultSetCreation
+    type: bool
+    value: false

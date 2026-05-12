@@ -15,8 +15,7 @@
 
 - name: Check pmset settings
   ansible.builtin.shell:
-    cmd: >-
-      set -o pipefail && pmset -g custom | awk 'BEGIN { found=0; bad=0 } $1 == "{{ item.key }}" { found=1; if ($2 != "{{ item.value }}") bad=1 } END { exit bad ? 1 : 0 }'
+    cmd: set -o pipefail && pmset -g custom | awk '$1 == "{{ item.key }}" && $2 != "{{ item.value }}" { exit 1 }'
     executable: /bin/bash
   become: true
   register: system_config_pmset_setting_checks
@@ -61,8 +60,7 @@
 
 - name: Check AC power mode
   ansible.builtin.shell:
-    cmd: >-
-      set -o pipefail && pmset -g custom | awk 'BEGIN { in_ac=0; found=0; bad=0 } /^AC Power:/ { in_ac=1; next } /^[^[:space:]]/ { in_ac=0 } in_ac && $1 == "powermode" { found=1; if ($2 != "2") bad=1 } END { exit bad ? 1 : 0 }'
+    cmd: set -o pipefail && pmset -g custom | awk '/^AC Power:/{f=1;next} /^[^[:space:]]/{f=0} f && $1=="powermode" && $2!="2"{exit 1}'
     executable: /bin/bash
   become: true
   register: system_config_pmset_ac_powermode_check
@@ -71,8 +69,7 @@
 
 - name: Check AC Wake-on-LAN setting
   ansible.builtin.shell:
-    cmd: >-
-      set -o pipefail && pmset -g custom | awk 'BEGIN { in_ac=0; found=0; bad=0 } /^AC Power:/ { in_ac=1; next } /^[^[:space:]]/ { in_ac=0 } in_ac && $1 == "womp" { found=1; if ($2 != "1") bad=1 } END { exit bad ? 1 : 0 }'
+    cmd: set -o pipefail && pmset -g custom | awk '/^AC Power:/{f=1;next} /^[^[:space:]]/{f=0} f && $1=="womp" && $2!="1"{exit 1}'
     executable: /bin/bash
   become: true
   register: system_config_pmset_ac_womp_check
@@ -88,8 +85,7 @@
 
 - name: Check AC auto-restart setting
   ansible.builtin.shell:
-    cmd: >-
-      set -o pipefail && pmset -g custom | awk 'BEGIN { in_ac=0; found=0; bad=0 } /^AC Power:/ { in_ac=1; next } /^[^[:space:]]/ { in_ac=0 } in_ac && $1 == "autorestart" { found=1; if ($2 != "1") bad=1 } END { exit bad ? 1 : 0 }'
+    cmd: set -o pipefail && pmset -g custom | awk '/^AC Power:/{f=1;next} /^[^[:space:]]/{f=0} f && $1=="autorestart" && $2!="1"{exit 1}'
     executable: /bin/bash
   become: true
   register: system_config_pmset_ac_autorestart_check

@@ -10,3 +10,6 @@
 
 - name: Install simulator runtimes
   ansible.builtin.import_tasks: simruntimes.yml
+
+- name: Create simulators
+  ansible.builtin.import_tasks: simulators.yml
