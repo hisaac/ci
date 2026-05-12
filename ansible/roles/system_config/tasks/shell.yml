@@ -1,12 +1,14 @@
 ---
-- name: Set admin user shell to bash
-  ansible.builtin.user:
-    name: "{{ macos_admin_user }}"
-    shell: /bin/bash
-  become: true
-
-- name: Set root shell to bash
-  ansible.builtin.user:
-    name: root
-    shell: /bin/bash
+- name: Install shell profile files for admin user
+  ansible.builtin.copy:
+    src: "shell_profile/{{ item }}"
+    dest: "/Users/{{ macos_admin_user }}/{{ item }}"
+    owner: "{{ macos_admin_user }}"
+    mode: "0644"
+  loop:
+    - .bash_profile
+    - .bashrc
+    - .profile
+    - .zprofile
+    - .zshrc
   become: true

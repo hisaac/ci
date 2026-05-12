@@ -15,8 +15,7 @@ local custom_linters = new Mapping<String, Step> {
   }
 }
 
-local all_linters = new Mapping<String, Step> {
-  ...custom_linters
+local builtin_linters = new Mapping<String, Step> {
   ["mise"] = Builtins.mise
   ["pkl"] = Builtins.pkl
   ["pkl-format"] = Builtins.pkl_format
@@ -25,6 +24,26 @@ local all_linters = new Mapping<String, Step> {
   ["shfmt"] = Builtins.shfmt
   ["tombi"] = Builtins.tombi
   ["yamlfmt"] = Builtins.yamlfmt
+}
+
+local utility_linters = new Mapping<String, Step> {
+  ["byte-order-marker"] = Builtins.byte_order_marker
+  ["check-added-large-files"] = Builtins.check_added_large_files
+  ["check-case-conflict"] = Builtins.check_case_conflict
+  ["check-executables-have-shebangs"] = Builtins.check_executables_have_shebangs
+  ["check-merge-conflict"] = Builtins.check_merge_conflict
+  ["check-symlinks"] = Builtins.check_symlinks
+  ["detect-private-key"] = Builtins.detect_private_key
+  ["fix-smart-quotes"] = Builtins.fix_smart_quotes
+  ["mixed-line-ending"] = Builtins.mixed_line_ending
+  ["newlines"] = Builtins.newlines
+  ["trailing-whitespace"] = Builtins.trailing_whitespace
+}
+
+local all_linters = new Mapping<String, Step> {
+  ...custom_linters
+  ...builtin_linters
+  ...utility_linters
 }
 
 hooks {

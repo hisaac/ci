@@ -1,7 +1,78 @@
 ---
-# todo: add idempotency
-- name: Disable screen lock
-  ansible.builtin.command:
-    cmd: sysadminctl -screenLock off -password {{ macos_admin_password }}
-  changed_when: true
-  no_log: true
+# ─────────────────────────────────────────────────────────────────────────────
+# Screen lock config — why `defaults` and not `sysadminctl -screenLock`
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# `sysadminctl -screenLock off` is the obvious approach but unreliable in CI
+# VMs. It calls MobileKeyBag (MKB), which writes the grace period into the
+# user's keychain rather than a plist. That imposes three constraints we
+# can't reliably satisfy in provisioning:
+#
+#   1. Must run in the user's GUI session context, not root or bare SSH
+#      (failure: MKBDeviceSetGracePeriod error -14). Workaround:
+#      `launchctl asuser <uid> sudo -u <user> sysadminctl ...`
+#
+#   2. The user's keybag must be unlocked, which only happens when the user
+#      types their password at loginwindow. SSH, sudo, and auto-login all
+#      bypass this (failure: MKBDeviceSetGracePeriod error -3).
+#
+#   3. The user must have a Secure Token (check with
+#      `sysadminctl -secureTokenStatus <user>`).
+#
+# Even when the write succeeds, `-screenLock status` after reboot may report
+# "immediate" — MKB can't read the value back through a locked keybag and
+# returns the secure default. For a rebooting CI VM, this path is a dead end.
+#
+# The `defaults` approach below sidesteps MKB entirely. The screensaver keys
+# live in the per-user ByHost scope (hence `host: currentHost`), don't touch
+# the keychain, and persist across reboots like normal prefs.
+# `loginWindowIdleTime` is the exception: it controls pre-login behavior, so
+# it lives in the system domain and needs `become: true`.
+#
+# Refs:
+#   - https://www.kolide.com/blog/how-kolide-built-its-macos-screenlock-check
+#   - https://discussions.apple.com/thread/7610386
+#
+# Fallback ladder if `defaults` stops working:
+#   1. Wrap CI commands in `caffeinate -dimsu`
+#   2. Ship a com.apple.screensaver configuration profile in the base image
+#   3. Run `sysadminctl -screenLock off` during interactive base-image build
+#      (keybag is unlocked there) and let the snapshot carry the setting
+# ─────────────────────────────────────────────────────────────────────────────
+
+# - name: Disable screen lock
+#   ansible.builtin.command:
+#     cmd: sysadminctl -screenLock off -password {{ macos_admin_password }}
+#   changed_when: true
+
+- name: Disable screensaver for current user
+  community.general.osx_defaults:
+    domain: com.apple.screensaver
+    key: idleTime
+    type: string
+    value: "0"
+    host: currentHost
+
+- name: Disable asking for password after screensaver for current user
+  community.general.osx_defaults:
+    domain: com.apple.screensaver
+    key: askForPassword
+    type: bool
+    value: false
+    host: currentHost
+
+- name: Disable the asking for password delay for current user
+  community.general.osx_defaults:
+    domain: com.apple.screensaver
+    key: askForPasswordDelay
+    type: int
+    value: 0
+    host: currentHost
+
+- name: Disable screensaver at login window
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.screensaver
+    key: loginWindowIdleTime
+    type: int
+    value: 0
+  become: true

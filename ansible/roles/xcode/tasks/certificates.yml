@@ -21,7 +21,9 @@
   ansible.builtin.command:
     cmd: security import {{ item }} -k /Library/Keychains/System.keychain
   become: true
-  changed_when: true
+  register: xcode_certificate_import
+  changed_when: xcode_certificate_import.rc == 0
+  failed_when: xcode_certificate_import.rc != 0 and 'The specified item already exists in the keychain.' not in xcode_certificate_import.stderr
   loop:
     - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG3.cer"
     - "{{ xcode_cert_tmpdir.path }}/DeveloperIDG2CA.cer"

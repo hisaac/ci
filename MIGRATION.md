@@ -100,8 +100,8 @@ skipped if SIP is enabled. `wait-for-finder.bash` has no Ansible equivalent (Pac
 - `sudo.yml` — writes `/etc/sudoers.d/{{ macos_admin_user }}-nopasswd` via
   `ansible.builtin.template`, validated with `visudo`
 - `auto_login.yml` — runs `enable-auto-login.bash` via `ansible.builtin.script`
-  (XOR kcpassword cipher logic kept as script; `no_log: true`)
-- `screen_lock.yml` — `sysadminctl -screenLock off` (`no_log: true`)
+  (XOR kcpassword cipher logic kept as script)
+- `screen_lock.yml` — `sysadminctl -screenLock off`
 
 **Open:** idempotency checks not yet implemented for auto-login and screen lock.
 

@@ -5,5 +5,7 @@
 - name: Enable auto-login
   ansible.builtin.import_tasks: auto_login.yml
 
+# Not currently working using sysadminctl.
+# See note in `screen_lock.yml` for more details.
 - name: Disable screen lock
   ansible.builtin.import_tasks: screen_lock.yml

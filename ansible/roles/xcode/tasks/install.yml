@@ -33,25 +33,76 @@
         mode: "0644"
       loop: "{{ xcode_selected_xip_files }}"
 
-    # todo: remove reliance on the xcode-utils.bash and install-cached-xcode-versions.bash scripts if possible
+    - name: Initialize Xcode install plan
+      ansible.builtin.set_fact:
+        xcode_install_plan: []
 
-    - name: Copy xcode-utils library to remote
-      ansible.builtin.copy:
-        src: "{{ role_path }}/../../scripts/xcode/lib/xcode-utils.bash"
-        dest: /tmp/xcode-utils.bash
-        mode: "0644"
+    - name: Build Xcode install plan
+      ansible.builtin.set_fact:
+        xcode_install_plan: "{{ xcode_install_plan + [xcode_install_item] }}"
+      vars:
+        xcode_install_item:
+          version: "{{ item.path | basename | regex_search('[0-9]+(\\.[0-9]+){1,2}') }}"
+          xip_path: "{{ xcode_remote_tmpdir.path }}/{{ item.path | basename }}"
+      loop: "{{ xcode_selected_xip_files }}"
 
-    - name: Install Xcode versions
-      ansible.builtin.script:
-        cmd: >-
-          {{ role_path }}/../../scripts/xcode/install-cached-xcode-versions.bash {{ xcode_remote_tmpdir.path }} {{ xcode_default_version }}
+    - name: Check standard xcodes install paths
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /opt/homebrew/bin/xcodes
+        - /usr/local/bin/xcodes
+      register: xcode_xcodes_candidates
+
+    - name: Set xcodes binary path
+      ansible.builtin.set_fact:
+        xcode_xcodes_path: "{{ (xcode_xcodes_candidates.results | selectattr('stat.exists') | map(attribute='item') | list | first) | default('') }}"
+
+    - name: Ensure xcodes is installed on remote host
+      ansible.builtin.assert:
+        that:
+          - xcode_xcodes_path | length > 0
+        fail_msg: xcodes binary not found in /opt/homebrew/bin or /usr/local/bin on remote host.
+
+    - name: Check whether planned Xcode versions are already installed
+      ansible.builtin.stat:
+        path: "/Applications/Xcode-{{ item.version }}.app"
+      loop: "{{ xcode_install_plan }}"
+      register: xcode_installed_apps
+
+    - name: Install Xcode versions with xcodes
+      ansible.builtin.command:
+        argv:
+          - "{{ xcode_xcodes_path }}"
+          - install
+          - "{{ item.1.version }}"
+          - --path
+          - "{{ item.1.xip_path }}"
+          - --directory
+          - /Applications
       become: true
       changed_when: true
+      loop: "{{ xcode_installed_apps.results | zip(xcode_install_plan) | list }}"
+      when: not item.0.stat.exists
 
-    - name: Remove xcode-utils from temp
-      ansible.builtin.file:
-        path: /tmp/xcode-utils.bash
-        state: absent
+    - name: Select default Xcode version with xcodes
+      ansible.builtin.command:
+        argv:
+          - "{{ xcode_xcodes_path }}"
+          - select
+          - "{{ xcode_default_version }}"
+      become: true
+      changed_when: true
+      when: xcode_default_version | length > 0
+
+    - name: Reset Xcode selection when no default is configured
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/xcode-select
+          - --reset
+      become: true
+      changed_when: true
+      when: xcode_default_version | length == 0
 
     - name: Remove Xcode cache from remote
       ansible.builtin.file:

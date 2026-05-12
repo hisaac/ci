@@ -8,5 +8,5 @@
 - name: Install cached Xcode versions
   ansible.builtin.import_tasks: install.yml
 
-- name: Install Apple SDKs
-  ansible.builtin.import_tasks: sdks.yml
+- name: Install simulator runtimes
+  ansible.builtin.import_tasks: simruntimes.yml

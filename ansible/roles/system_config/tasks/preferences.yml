@@ -8,6 +8,16 @@
     type: bool
     value: false
 
+- name: Hide widgets on Desktop and in Stage Manager
+  community.general.osx_defaults:
+    domain: com.apple.WindowManager
+    key: "{{ item }}"
+    type: bool
+    value: true
+  loop:
+    - StandardHideWidgets
+    - StageManagerHideWidgets
+
 # Tips
 
 - name: Disable Tips feature and notifications
@@ -128,6 +138,22 @@
     key: idleTime
     type: string
     value: "0"
+    host: currentHost
+
+- name: Disable asking for password after screensaver for current user
+  community.general.osx_defaults:
+    domain: com.apple.screensaver
+    key: askForPassword
+    type: bool
+    value: false
+    host: currentHost
+
+- name: Disable the asking for password delay for current user
+  community.general.osx_defaults:
+    domain: com.apple.screensaver
+    key: askForPasswordDelay
+    type: int
+    value: 0
     host: currentHost
 
 - name: Disable screensaver at login window

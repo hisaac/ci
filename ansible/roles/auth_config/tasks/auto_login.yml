@@ -7,4 +7,3 @@
     PASSWORD: "{{ macos_admin_password }}"
   become: true
   changed_when: true
-  no_log: true

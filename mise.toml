@@ -59,8 +59,8 @@ else
 fi
 
 declare -a vms=(
-	macos:15
-	# macos:26
+	# macos:15
+	macos:26
 )
 for vm in "${vms[@]}"; do
 	echo "Installing key on $vm..."
@@ -71,8 +71,8 @@ done
 [tasks.run-tart-vms]
 run = """
 declare -a vms=(
-	macos:15
-	# macos:26
+	# macos:15
+	macos:26
 )
 for vm in "${vms[@]}"; do
 	nohup tart run "$vm" > /dev/null 2>&1 &
@@ -88,8 +88,8 @@ done
 [tasks.shutdown-tart-vms]
 run = """
 declare -a vms=(
-	macos:15
-	# macos:26
+	# macos:15
+	macos:26
 )
 for vm in "${vms[@]}"; do
 	ip=$(tart ip "$vm" 2>/dev/null) || continue

@@ -98,7 +98,7 @@ function main() {
 	# Disable Power Nap (background tasks during sleep)
 	sudo pmset -a powernap 0
 
-	# Keep network reachability prioritized during sleep (shouldn’t sleep anyway)
+	# Keep network reachability prioritized during sleep (shouldn't sleep anyway)
 	sudo pmset -a networkoversleep 1
 
 	# Prevent sleep when SSH/TTY sessions are active

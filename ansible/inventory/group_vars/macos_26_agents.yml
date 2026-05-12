@@ -5,6 +5,6 @@ xcode_default_version: "26.5.0"
 xcode_cache_xip_files:
   - xcode-26.0.1.xip
   - xcode-26.5.0.xip
-xcode_cache_sdk_dmg_files:
+xcode_cache_simruntime_dmg_files:
   - iphonesimulator-26.0.1.dmg
   - iphonesimulator-26.5.0.dmg
