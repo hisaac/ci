@@ -1,6 +1,6 @@
 #!/bin/bash -euo pipefail
 
-# shellcheck source=../../ansible/roles/system_config/files/shell_profile/.profile
+# shellcheck source=../../roles/system_config/files/shell_profile/.profile
 source "${HOME}/.profile"
 
 function main() {

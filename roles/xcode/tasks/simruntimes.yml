@@ -1,7 +1,7 @@
 ---
 - name: Find simulator runtime .dmg files in local cache
   ansible.builtin.find:
-    paths: "{{ playbook_dir }}/../../.cache/simruntime"
+    paths: "{{ playbook_dir }}/../.cache/simruntime"
     patterns: "*.dmg"
   delegate_to: localhost
   become: false

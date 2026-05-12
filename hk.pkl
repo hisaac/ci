@@ -9,9 +9,15 @@ env {
 local custom_linters = new Mapping<String, Step> {
   ["ansible-lint"] {
     glob =
-      List("ansible/**/*.yml", "ansible/**/*.yaml", "ansible/ansible.cfg", "ansible/.ansible-lint")
-    check = "cd ansible && ansible-lint"
-    fix = "cd ansible && ansible-lint --fix"
+      List(
+        "playbooks/**/*.yml",
+        "roles/**/*.yml",
+        "inventory/**/*.yml",
+        "ansible.cfg",
+        ".ansible-lint",
+      )
+    check = "ansible-lint"
+    fix = "ansible-lint --fix"
   }
 }
 

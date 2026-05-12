@@ -100,7 +100,6 @@ done
 
 [tasks.provision]
 depends = ["run-tart-vms"]
-dir = "ansible"
 run = "ansible-playbook playbooks/provision.yml -v"
 
 [tasks.refresh-tart-vms]
@@ -125,7 +124,6 @@ hide = true
 run = ["hk install --mise", { task = "update-hk-import" }]
 
 [tasks._bootstrap_ansible]
-dir = "ansible"
 hide = true
 run = [
   "ansible-galaxy role install --roles-path ./galaxy_roles -r requirements.yml",

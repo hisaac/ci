@@ -1,7 +1,7 @@
 ---
 - name: Find Xcode .xip files in local cache
   ansible.builtin.find:
-    paths: "{{ playbook_dir }}/../../.cache/xcode"
+    paths: "{{ playbook_dir }}/../.cache/xcode"
     patterns: "*.xip"
   delegate_to: localhost
   become: false
