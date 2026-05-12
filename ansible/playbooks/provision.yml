@@ -62,3 +62,12 @@
   tasks:
     - name: Clean up Spotlight index
       ansible.builtin.import_tasks: "{{ playbook_dir }}/../roles/system_config/tasks/spotlight.yml"
+
+- name: Restart macOS hosts
+  hosts: macos_agents
+  tags: [restart]
+  tasks:
+    - name: Reboot after provisioning completes
+      ansible.builtin.reboot:
+        reboot_timeout: 900
+      become: true

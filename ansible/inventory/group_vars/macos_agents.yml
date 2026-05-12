@@ -18,21 +18,26 @@ homebrew_base_packages:
 # Dock
 
 dockitems_remove:
-  - Launchpad
-  - Messages
-  - Mail
-  - Maps
-  - Photos
-  - Facetime
+  - App Store
+  - Apps
   - Calendar
   - Contacts
-  - Reminders
-  - Notes
+  - FaceTime
   - Freeform
-  - TV
+  - Games
+  - iPhone Mirroring
+  - Launchpad
+  - Mail
+  - Maps
+  - Messages
   - Music
   - News
-  - App Store
+  - Notes
+  - Phone
+  - Photos
+  - Reminders
+  - TV
+
 dockitems_persist:
   - name: Safari
     path: /Applications/Safari.app/
