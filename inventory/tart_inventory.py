@@ -16,7 +16,7 @@ import sys
 
 # Names of the Tart VMs to manage
 VMS = [
-    # "macos:15",
+    "macos:15",
     "macos:26",
 ]
 

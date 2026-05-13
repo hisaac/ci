@@ -6,6 +6,9 @@
   roles:
     - role: xcode_clt
 
+- name: Verify Xcode cache assets are available for installation
+  ansible.builtin.import_playbook: preflight-xcode-cache.yml
+
 - name: Install macOS updates
   hosts: macos_agents
   tags: [macos_updates]

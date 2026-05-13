@@ -59,11 +59,20 @@
 - name: Install missing simulator runtimes from cache
   when: xcode_missing_simruntime_files | length > 0
   block:
+    - name: Print simruntime install plan
+      ansible.builtin.debug:
+        msg: >-
+          Installing {{ xcode_missing_simruntime_files | length }} simulator runtime(s): {{ xcode_missing_simruntime_files | map(attribute='path') | map('basename') | join(', ') }} #magic___^_^___line
     - name: Create temp directory for simulator runtime cache on remote
       ansible.builtin.tempfile:
         state: directory
         suffix: simruntime_cache
       register: xcode_simruntime_tmpdir
+
+    - name: Print simruntime copy notice
+      ansible.builtin.debug:
+        msg: "Copying {{ item.path | basename }} to remote host (large file — this will take a while)..."
+      loop: "{{ xcode_missing_simruntime_files }}"
 
     - name: Copy missing simulator runtime .dmg files to remote
       ansible.builtin.copy:
@@ -78,6 +87,8 @@
       become: true
       register: xcode_simruntime_install
       changed_when: xcode_simruntime_install.rc == 0
+      async: 3600
+      poll: 30
       failed_when:
         - xcode_simruntime_install.rc != 0
         - "'Duplicate of' not in xcode_simruntime_install.stdout"

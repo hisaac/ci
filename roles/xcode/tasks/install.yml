@@ -84,11 +84,20 @@
 - name: Install missing Xcode versions from cache
   when: xcode_missing_install_plan | length > 0
   block:
+    - name: Print Xcode install plan
+      ansible.builtin.debug:
+        msg: >-
+          Installing {{ xcode_missing_install_plan | length }} Xcode version(s): {{ xcode_missing_install_plan | map(attribute='version') | join(', ') }} #magic___^_^___line
     - name: Create temp directory for Xcode cache on remote
       ansible.builtin.tempfile:
         state: directory
         suffix: xcode_cache
       register: xcode_remote_tmpdir
+
+    - name: Print Xcode copy notice
+      ansible.builtin.debug:
+        msg: "Copying {{ item.filename }} to remote host (large file — this will take a while)..."
+      loop: "{{ xcode_missing_install_plan }}"
 
     - name: Copy missing Xcode .xip files to remote
       ansible.builtin.copy:
@@ -110,6 +119,8 @@
       become: true
       changed_when: true
       loop: "{{ xcode_missing_install_plan }}"
+      async: 3600
+      poll: 30
 
     - name: Remove Xcode cache from remote
       ansible.builtin.file:

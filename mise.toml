@@ -52,11 +52,15 @@ alias = ["fmt", "format"]
 run = "hk fix --all"
 
 [tasks.run-tart-vms]
+usage = 'arg "[vm]" help="Specific Tart VM to start (e.g. macos:15). Starts all VMs if omitted." default=""'
 run = """
 declare -a vms=(
-	# macos:15
+	macos:15
 	macos:26
 )
+if [ -n "${usage_vm:-}" ]; then
+	vms=("$usage_vm")
+fi
 for vm in "${vms[@]}"; do
 	nohup tart run "$vm" > /dev/null 2>&1 &
 	echo "Waiting for $vm to have an IP..."
@@ -69,13 +73,22 @@ done
 """
 
 [tasks.shutdown-tart-vms]
-run = """
-ansible tart_agents -m ansible.builtin.command -a "shutdown -h now" -b || true
-"""
+run = 'ansible tart_agents -m ansible.builtin.command -a "shutdown -h now" -b || true'
+
+[tasks.verify-xcode-cache]
+run = "ansible-playbook playbooks/preflight-xcode-cache.yml --tags preflight"
 
 [tasks.provision]
 depends = ["run-tart-vms"]
 run = "ansible-playbook playbooks/provision.yml"
+
+[tasks.provision-15]
+depends = [{ task = "run-tart-vms", args = ["macos:15"] }]
+run = "ansible-playbook playbooks/provision.yml --limit macos_15_agents"
+
+[tasks.provision-26]
+depends = [{ task = "run-tart-vms", args = ["macos:26"] }]
+run = "ansible-playbook playbooks/provision.yml --limit macos_26_agents"
 
 [tasks.refresh-tart-vms]
 alias = "r"
@@ -83,7 +96,7 @@ run = [
   "tart delete macos:15 || true",
   "tart delete macos:26 || true",
   "tart clone macos:15.6.1-frozen macos:15",
-  "tart clone macos:26.4.1-frozen macos:26",
+  "tart clone macos:26.5.0-frozen macos:26",
 ]
 
 [tasks.upd]

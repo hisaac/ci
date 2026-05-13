@@ -1,0 +1,168 @@
+---
+# Play 1: Connect to each remote host to determine which configured Xcode versions
+# and simulator runtimes are not yet installed, producing per-host lists of the
+# cache files that are actually needed for this run.
+- name: Inventory installed Xcode assets and compute cache requirements
+  hosts: macos_agents
+  gather_facts: false
+  tags: [preflight, xcode]
+  tasks:
+    - name: Find installed Xcode app bundles
+      ansible.builtin.find:
+        paths: /Applications
+        patterns: "Xcode-*.app"
+        file_type: directory
+        recurse: false
+      register: _xcode_installed_apps
+
+    - name: Set installed Xcode version strings
+      ansible.builtin.set_fact:
+        _installed_xcode_versions: >-
+          {{
+            _xcode_installed_apps.files
+            | map(attribute='path')
+            | map('basename')
+            | map('regex_replace', '^Xcode-([0-9][0-9.]+[0-9])\.app$', '\\1')
+            | list
+          }}
+
+    - name: Query installed simulator runtimes
+      ansible.builtin.command:
+        argv: [xcrun, simctl, runtime, list, -j]
+      register: _simruntimes_raw
+      changed_when: false
+      failed_when: false
+
+    - name: Set installed simulator runtime version strings
+      ansible.builtin.set_fact:
+        _installed_simruntime_versions: >-
+          {{
+            [] if ((_simruntimes_raw.rc | default(1)) != 0) else
+            (
+              (_simruntimes_raw.stdout | from_json).values()
+              | map(attribute='version')
+              | map('regex_replace', '(\.0)+$', '')
+              | unique
+              | list
+            )
+          }}
+
+    - name: Compute Xcode .xip files still needed on this host
+      ansible.builtin.set_fact:
+        xcode_xip_cache_files_needed: >-
+          {{
+            xcode_cache_xip_files | default([])
+            | reject(
+              'search',
+              (
+                _installed_xcode_versions | map('regex_escape') | join('|')
+                if _installed_xcode_versions | length > 0
+                else 'NOMATCH_PLACEHOLDER'
+              )
+            )
+            | list
+          }}
+
+    - name: Compute simruntime .dmg files still needed on this host
+      ansible.builtin.set_fact:
+        xcode_simruntime_cache_files_needed: >-
+          {{
+            xcode_cache_simruntime_dmg_files | default([])
+            | reject(
+              'search',
+              (
+                _installed_simruntime_versions
+                | map('regex_replace', '(\.0)+$', '')
+                | map('regex_escape')
+                | join('|')
+                if _installed_simruntime_versions | length > 0
+                else 'NOMATCH_PLACEHOLDER'
+              )
+            )
+            | list
+          }}
+
+# Play 2: On the control node, verify that every cache file still needed across
+# all hosts is present. Fails with per-file download instructions if any are missing.
+- name: Verify control node cache contains all required Xcode assets
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags: [preflight, xcode]
+  tasks:
+    - name: Aggregate Xcode .xip files needed across all hosts
+      ansible.builtin.set_fact:
+        _all_needed_xip_files: >-
+          {{
+            (groups['macos_agents'] | default([]))
+            | map('extract', hostvars)
+            | map(attribute='xcode_xip_cache_files_needed', default=[])
+            | flatten
+            | unique
+            | list
+          }}
+
+    - name: Aggregate simruntime .dmg files needed across all hosts
+      ansible.builtin.set_fact:
+        _all_needed_dmg_files: >-
+          {{
+            (groups['macos_agents'] | default([]))
+            | map('extract', hostvars)
+            | map(attribute='xcode_simruntime_cache_files_needed', default=[])
+            | flatten
+            | unique
+            | list
+          }}
+
+    - name: Nothing needs installing — skip cache verification
+      ansible.builtin.meta: end_play
+      when: _all_needed_xip_files | length == 0 and _all_needed_dmg_files | length == 0
+
+    - name: Stat needed .xip files in local Xcode cache
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/../.cache/xcode/{{ item }}"
+      loop: "{{ _all_needed_xip_files }}"
+      register: _xip_stat
+
+    - name: Stat needed .dmg files in local simruntime cache
+      ansible.builtin.stat:
+        path: "{{ playbook_dir }}/../.cache/simruntime/{{ item }}"
+      loop: "{{ _all_needed_dmg_files }}"
+      register: _dmg_stat
+
+    - name: Collect missing cache files
+      ansible.builtin.set_fact:
+        _missing_xip_files: >-
+          {{ _xip_stat.results | rejectattr('stat.exists') | map(attribute='item') | list }}
+        _missing_dmg_files: >-
+          {{ _dmg_stat.results | rejectattr('stat.exists') | map(attribute='item') | list }}
+
+    - name: Print download instructions for missing Xcode .xip files
+      ansible.builtin.debug:
+        msg: |-
+          Missing: .cache/xcode/{{ item }}
+          To cache: xcodes download {{ item | regex_search('[0-9][0-9.]+[0-9]') }} --directory .cache/xcode/
+      loop: "{{ _missing_xip_files }}"
+      when: _missing_xip_files | length > 0
+
+    - name: Print download instructions for missing simruntime .dmg files
+      vars:
+        _platform_map:
+          iphonesimulator: iOS
+          watchsimulator: watchOS
+          appletvsimulator: tvOS
+          xrsimulator: visionOS
+        _platform: "{{ _platform_map[(item | regex_replace('-.*$', ''))] | default('iOS') }}"
+        _version: "{{ item | regex_search('[0-9][0-9.]+[0-9]') | regex_replace('(\\.0)+$', '') }}"
+      ansible.builtin.debug:
+        msg: |-
+          Missing: .cache/simruntime/{{ item }}
+          To cache: xcrun xcodebuild -downloadPlatform {{ _platform }} -exportPath ./.cache/simruntime -buildVersion {{ _version }}
+      loop: "{{ _missing_dmg_files }}"
+      when: _missing_dmg_files | length > 0
+
+    - name: Fail if any required cache assets are missing
+      ansible.builtin.fail:
+        msg: >-
+          {{ (_missing_xip_files | length) + (_missing_dmg_files | length) }} required cache file(s) are missing. See output above for per-file download instructions.
+      when: (_missing_xip_files | length > 0) or (_missing_dmg_files | length > 0)

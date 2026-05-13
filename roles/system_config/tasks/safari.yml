@@ -7,11 +7,18 @@
   changed_when: false
   failed_when: false
 
+- name: Print Safari update notice
+  ansible.builtin.debug:
+    msg: Installing Safari update — this may take several minutes...
+  when: >-
+    'Safari' in ((system_config_safari_updates.stdout | default('')) + (system_config_safari_updates.stderr | default(''))) #magic___^_^___line
 - name: Install Safari update
   ansible.builtin.command:
     cmd: softwareupdate --install --safari-only --verbose
   become: true
   changed_when: true
   failed_when: false
+  async: 1800
+  poll: 30
   when: >-
     'Safari' in ((system_config_safari_updates.stdout | default('')) + (system_config_safari_updates.stderr | default('')))

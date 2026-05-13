@@ -106,6 +106,14 @@ Group vars must reference exact filenames in these cache directories.
 
 If cache files are missing, install tasks for those assets are skipped.
 
+Run a preflight cache check explicitly:
+
+```bash
+mise run verify-xcode-cache
+```
+
+This runs the local Ansible playbook `playbooks/preflight-xcode-cache.yml`.
+
 ## Provisioning
 
 Run the full playbook:
@@ -141,7 +149,7 @@ Playbook role order in `playbooks/provision.yml` is intentional:
 `mise` includes helper tasks for local Tart loops:
 
 - `mise run run-tart-vms`: starts configured VMs and waits for SSH readiness
-- `mise run provision`: starts VMs and runs `ansible-playbook playbooks/provision.yml`
+- `mise run provision`: verifies Xcode/simruntime cache inputs, starts VMs, then runs `ansible-playbook playbooks/provision.yml`
 - `mise run shutdown-tart-vms`: shuts down hosts in `tart_agents`
 - `mise run refresh-tart-vms`: recreates local Tart VM clones from frozen images
 

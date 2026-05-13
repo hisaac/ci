@@ -1,4 +1,8 @@
 ---
+- name: Print Xcode CLT install notice
+  ansible.builtin.debug:
+    msg: Installing Xcode Command Line Tools — this may take several minutes...
+
 - name: Install or update Xcode Command Line Tools
   ansible.builtin.script: install-clt.bash
   become: true

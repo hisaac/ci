@@ -20,16 +20,23 @@
   ansible.builtin.debug:
     var: macos_updates_available_updates
 
+- name: Print macOS update install notice
+  ansible.builtin.debug:
+    msg: >-
+      Installing {{ macos_updates_available_updates | length }} macOS update(s) — this may take a long time...
+  when: macos_updates_available_updates | length > 0
+
 - name: Install available updates
   ansible.builtin.command:
-    cmd: "softwareupdate --install --agree-to-license --force --restart --user {{ macos_admin_user }} --stdinpass '{{ item.label }}'"
+    cmd: "softwareupdate --install --agree-to-license --force --user {{ macos_admin_user }} --stdinpass '{{ item.label }}'"
     stdin: "{{ macos_admin_password }}"
   changed_when: macos_updates_swupdate_install.rc == 0
   become: true
   register: macos_updates_swupdate_install
-  ignore_unreachable: true
   ignore_errors: true
   loop: "{{ macos_updates_available_updates }}"
+  async: 1800
+  poll: 30
   when: >-
     not item.label.startswith('macOS') or item.version.split('.')[0] == ansible_facts['distribution_version'].split('.')[0]
 
@@ -38,8 +45,8 @@
     macos_updates_installed: "{{ (macos_updates_swupdate_install.results | default([])) | selectattr('changed') | list | length > 0 }}"
   changed_when: false
 
-- name: Wait for VM to come back after update
-  ansible.builtin.wait_for_connection:
-    delay: 60
-    timeout: 1800
+- name: Reboot after macOS updates
+  ansible.builtin.reboot:
+    reboot_timeout: 1800
+  become: true
   when: macos_updates_installed | default(false)
