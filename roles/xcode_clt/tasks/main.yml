@@ -1,11 +1,4 @@
 ---
-- name: Check if Xcode Command Line Tools are installed
-  ansible.builtin.raw: xcode-select --print-path
-  register: xcode_clt_check
-  changed_when: false
-  failed_when: false
-
-- name: Install Xcode Command Line Tools
+- name: Install or update Xcode Command Line Tools
   ansible.builtin.script: install-clt.bash
-  when: xcode_clt_check.rc != 0
   become: true
