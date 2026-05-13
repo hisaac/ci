@@ -23,3 +23,4 @@ galaxy_collections/
 
 # Python
 .ruff_cache
+.venv/

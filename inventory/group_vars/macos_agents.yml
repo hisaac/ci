@@ -2,6 +2,11 @@
 macos_admin_user: admin
 macos_admin_password: admin
 
+ansible_connection: ssh
+ansible_user: "{{ macos_admin_user }}"
+ansible_password: "{{ macos_admin_password }}"
+ansible_ssh_password_mechanism: ssh_askpass
+
 # Homebrew
 
 homebrew_taps:

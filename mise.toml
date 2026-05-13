@@ -2,24 +2,26 @@
 activate_aggressive = true
 experimental = true
 lockfile = true
+python.uv_venv_auto = "create|source"
+
+[env]
+_.python.venv = { path = ".venv", create = true }
 
 [tools]
-"pipx:ansible-lint" = "latest"
-ansible = { version = "latest", pipx_args = "--include-deps", uvx = false }
 hk = "latest"
 jq = "latest"
 packer = "latest"
 pkl = "latest"
-python = "latest"
+python = { version = "latest", uv = true }
+ruff = "latest"
 shellcheck = "latest"
 shfmt = "latest"
 tart = "latest"
 tombi = "latest"
 usage = "latest"
-yamlfmt = "latest"
-ruff = "latest"
 uv = "latest"
 xcodes = "latest"
+yamlfmt = "latest"
 
 [hooks]
 postinstall = '''
@@ -49,25 +51,6 @@ run = "hk check --all"
 alias = ["fmt", "format"]
 run = "hk fix --all"
 
-[tasks.setup-ssh-key]
-depends = ["run-tart-vms"]
-run = """
-if [[ ! -f ~/.ssh/ansible_ci ]]; then
-	ssh-keygen -t ed25519 -C "ansible-ci" -f ~/.ssh/ansible_ci -N ""
-else
-	echo "~/.ssh/ansible_ci already exists, skipping key generation"
-fi
-
-declare -a vms=(
-	# macos:15
-	macos:26
-)
-for vm in "${vms[@]}"; do
-	echo "Installing key on $vm..."
-	ssh-copy-id -o PubkeyAuthentication=no -i ~/.ssh/ansible_ci.pub admin@$(tart ip "$vm")
-done
-"""
-
 [tasks.run-tart-vms]
 run = """
 declare -a vms=(
@@ -87,15 +70,7 @@ done
 
 [tasks.shutdown-tart-vms]
 run = """
-declare -a vms=(
-	# macos:15
-	macos:26
-)
-for vm in "${vms[@]}"; do
-	ip=$(tart ip "$vm" 2>/dev/null) || continue
-	echo "Shutting down $vm..."
-	ssh -i ~/.ssh/ansible_ci -o StrictHostKeyChecking=no admin@"$ip" "sudo shutdown -h now" || true
-done
+ansible tart_agents -m ansible.builtin.command -a "shutdown -h now" -b || true
 """
 
 [tasks.provision]
@@ -112,10 +87,16 @@ run = [
 ]
 
 [tasks.upd]
-run = ["mise upgrade", "mise lock"]
+run = ["mise upgrade", "mise lock", "uv sync --upgrade"]
 
 [tasks.upg]
-run = ["mise upgrade --bump", "mise lock"]
+run = [
+  "mise upgrade --bump",
+  "mise lock",
+  "uv sync --upgrade",
+  "ansible-galaxy role install -r requirements.yml --force",
+  "ansible-galaxy collection install -r requirements.yml --upgrade",
+]
 
 # Hidden Tasks
 
@@ -126,6 +107,7 @@ run = ["hk install --mise", { task = "update-hk-import" }]
 [tasks._bootstrap_ansible]
 hide = true
 run = [
-  "ansible-galaxy role install --roles-path ./galaxy_roles -r requirements.yml",
+  "uv sync --group ansible",
+  "ansible-galaxy role install -r requirements.yml",
   "ansible-galaxy collection install -r requirements.yml",
 ]
