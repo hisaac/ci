@@ -14,4 +14,4 @@ xcode_cache_simruntime_dmg_files:
 xcode_simulators:
   - name: "iPhone 16"
     device_type: "iPhone 16"
-    runtime: "iOS-18-5"
+    runtime: "com.apple.CoreSimulator.SimRuntime.iOS-26-5"

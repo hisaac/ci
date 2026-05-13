@@ -100,7 +100,7 @@ done
 
 [tasks.provision]
 depends = ["run-tart-vms"]
-run = "ansible-playbook playbooks/provision.yml -v"
+run = "ansible-playbook playbooks/provision.yml"
 
 [tasks.refresh-tart-vms]
 alias = "r"
