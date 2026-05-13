@@ -127,5 +127,5 @@ run = ["hk install --mise", { task = "update-hk-import" }]
 hide = true
 run = [
   "ansible-galaxy role install --roles-path ./galaxy_roles -r requirements.yml",
-  "ansible-galaxy collection install --collections-path ./galaxy_collections -r requirements.yml",
+  "ansible-galaxy collection install -r requirements.yml",
 ]
