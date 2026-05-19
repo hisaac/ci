@@ -11,7 +11,7 @@
   ansible.builtin.debug:
     msg: Installing Safari update — this may take several minutes...
   when: >-
-    'Safari' in ((system_config_safari_updates.stdout | default('')) + (system_config_safari_updates.stderr | default(''))) #magic___^_^___line
+    'Safari' in ((system_config_safari_updates.stdout | default('')) + (system_config_safari_updates.stderr | default('')))
 - name: Install Safari update
   ansible.builtin.command:
     cmd: softwareupdate --install --safari-only --verbose

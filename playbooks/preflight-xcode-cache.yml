@@ -164,5 +164,6 @@
     - name: Fail if any required cache assets are missing
       ansible.builtin.fail:
         msg: >-
-          {{ (_missing_xip_files | length) + (_missing_dmg_files | length) }} required cache file(s) are missing. See output above for per-file download instructions.
+          {{ (_missing_xip_files | length) + (_missing_dmg_files | length) }} required cache file(s) are missing.
+          See output above for per-file download instructions.
       when: (_missing_xip_files | length > 0) or (_missing_dmg_files | length > 0)

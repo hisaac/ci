@@ -62,7 +62,8 @@
     - name: Print simruntime install plan
       ansible.builtin.debug:
         msg: >-
-          Installing {{ xcode_missing_simruntime_files | length }} simulator runtime(s): {{ xcode_missing_simruntime_files | map(attribute='path') | map('basename') | join(', ') }} #magic___^_^___line
+          Installing {{ xcode_missing_simruntime_files | length }} simulator runtime(s):
+          {{ xcode_missing_simruntime_files | map(attribute='path') | map('basename') | join(', ') }}
     - name: Create temp directory for simulator runtime cache on remote
       ansible.builtin.tempfile:
         state: directory

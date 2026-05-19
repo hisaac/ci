@@ -29,7 +29,6 @@ local builtin_linters = new Mapping<String, Step> {
   ["shellcheck"] = Builtins.shellcheck
   ["shfmt"] = Builtins.shfmt
   ["tombi"] = Builtins.tombi
-  ["yamlfmt"] = Builtins.yamlfmt
 }
 
 local utility_linters = new Mapping<String, Step> {

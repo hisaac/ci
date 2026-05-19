@@ -171,42 +171,42 @@ url = "https://github.com/astral-sh/python-build-standalone/releases/download/20
 provenance = "github-attestations"
 
 [[tools.ruff]]
-version = "0.15.12"
+version = "0.15.13"
 backend = "aqua:astral-sh/ruff"
 
 [tools.ruff."platforms.linux-arm64"]
-checksum = "sha256:8996fe01814d00480c81da2b8ce9e8274f63eb07992318f082f7071772699635"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.12/ruff-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:1084d8038eeb51f55c7b7c9779bb37e5f53b28b987767df61333e9d0da7b2701"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.linux-arm64-musl"]
-checksum = "sha256:8996fe01814d00480c81da2b8ce9e8274f63eb07992318f082f7071772699635"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.12/ruff-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:1084d8038eeb51f55c7b7c9779bb37e5f53b28b987767df61333e9d0da7b2701"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.linux-x64"]
-checksum = "sha256:e0b074f722f87efe2e09de3a77820a012d1417ebabbd308cccdf6b98ba8d4bb3"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.12/ruff-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:66ac0b0582c8d24badc210b8e933e9aa0ad6707414e236409c9b9ad638972fb9"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.linux-x64-musl"]
-checksum = "sha256:e0b074f722f87efe2e09de3a77820a012d1417ebabbd308cccdf6b98ba8d4bb3"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.12/ruff-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:66ac0b0582c8d24badc210b8e933e9aa0ad6707414e236409c9b9ad638972fb9"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.macos-arm64"]
-checksum = "sha256:bd59107e125f9c9f64a75be13b6ff21bf7cbc61c4b9529bbb75c8184e3dd6c3c"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.12/ruff-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:66ab3abeeba319266612e675dfbe0ca9c63f1e5f6ca3c6174482b0b088b8f6ff"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-aarch64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.macos-x64"]
-checksum = "sha256:f88b6ad8338ad7acf83497e4bc2f2b5d3cac46c3e71363b7263c1bb9027c9b37"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.12/ruff-x86_64-apple-darwin.tar.gz"
+checksum = "sha256:3ff692a61d5231ea6c94e6dafc575f87582a089d1281fac6b31cef2b4f2e4b6b"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-x86_64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools.ruff."platforms.windows-x64"]
-checksum = "sha256:d378033392042377491ef2541457af47cc4652c4e984639c95413b0c4876b0f1"
-url = "https://github.com/astral-sh/ruff/releases/download/0.15.12/ruff-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:59892c6773df805effe7928e69796447585b42af54310cb6f1552536b746c39a"
+url = "https://github.com/astral-sh/ruff/releases/download/0.15.13/ruff-x86_64-pc-windows-msvc.zip"
 provenance = "github-attestations"
 
 [[tools.shellcheck]]
@@ -286,36 +286,36 @@ checksum = "sha256:8554ab4f7fc12afe52f9b7e3093a935673cbac737a83973d2db7a0683c814
 url = "https://github.com/cirruslabs/tart/releases/download/2.32.1/tart.tar.gz"
 
 [[tools.tombi]]
-version = "0.11.4"
+version = "0.11.5"
 backend = "aqua:tombi-toml/tombi"
 
 [tools.tombi."platforms.linux-arm64"]
-checksum = "sha256:b328200ed71260cc6e08de2560afbe08de722ac5f3bc433dbff49f740c4b3e95"
-url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.4/tombi-cli-0.11.4-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:962051888913737f1bd95602ca73276a78e3161c63c108eb99ba95737edb414a"
+url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.5/tombi-cli-0.11.5-aarch64-unknown-linux-musl.tar.gz"
 
 [tools.tombi."platforms.linux-arm64-musl"]
-checksum = "sha256:b328200ed71260cc6e08de2560afbe08de722ac5f3bc433dbff49f740c4b3e95"
-url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.4/tombi-cli-0.11.4-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:962051888913737f1bd95602ca73276a78e3161c63c108eb99ba95737edb414a"
+url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.5/tombi-cli-0.11.5-aarch64-unknown-linux-musl.tar.gz"
 
 [tools.tombi."platforms.linux-x64"]
-checksum = "sha256:05fd1fb924588e25b575e5178fae22f5725ad852358a69966c93309b6b69d478"
-url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.4/tombi-cli-0.11.4-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:1014df3fb672ecd7c7e060539c305b93fe8d6eec936e5f2aff4fdac45339783b"
+url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.5/tombi-cli-0.11.5-x86_64-unknown-linux-musl.tar.gz"
 
 [tools.tombi."platforms.linux-x64-musl"]
-checksum = "sha256:05fd1fb924588e25b575e5178fae22f5725ad852358a69966c93309b6b69d478"
-url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.4/tombi-cli-0.11.4-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:1014df3fb672ecd7c7e060539c305b93fe8d6eec936e5f2aff4fdac45339783b"
+url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.5/tombi-cli-0.11.5-x86_64-unknown-linux-musl.tar.gz"
 
 [tools.tombi."platforms.macos-arm64"]
-checksum = "sha256:8e413ca597a883f2b0e3c58fedfafcc339e8cfe90eb38dbdc0eba3e4e0952b2a"
-url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.4/tombi-cli-0.11.4-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:f763beba6764a6533ebb9a2692762df0a1c27953fcd4fb6824b087909b01878e"
+url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.5/tombi-cli-0.11.5-aarch64-apple-darwin.tar.gz"
 
 [tools.tombi."platforms.macos-x64"]
-checksum = "sha256:1c0c0b7ae2b6d151345ac0d2c0aa8b8038a12850b046c0734f5dd38b830ea3f6"
-url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.4/tombi-cli-0.11.4-x86_64-apple-darwin.tar.gz"
+checksum = "sha256:1e4dbf0c75c5c681a8081e0d55d78572895a1a60e18ae8e8e9e87135fea8d2e6"
+url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.5/tombi-cli-0.11.5-x86_64-apple-darwin.tar.gz"
 
 [tools.tombi."platforms.windows-x64"]
-checksum = "sha256:1fef31f3338b82759e6ad6c8292a1b1aea0640c441cd44ca57599ab23221c061"
-url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.4/tombi-cli-0.11.4-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:099a3632f1a2c08d2b87eae8c1faacb44d5977c9215026814bfe43ffa3b5d98c"
+url = "https://github.com/tombi-toml/tombi/releases/download/v0.11.5/tombi-cli-0.11.5-x86_64-pc-windows-msvc.zip"
 
 [[tools.usage]]
 version = "3.3.0"
@@ -350,42 +350,42 @@ checksum = "sha256:628b8743d552f2cff2dee2b783a4827ef555409def3fb9ec536117d96cda2
 url = "https://github.com/jdx/usage/releases/download/v3.3.0/usage-x86_64-pc-windows-msvc.zip"
 
 [[tools.uv]]
-version = "0.11.14"
+version = "0.11.15"
 backend = "aqua:astral-sh/uv"
 
 [tools.uv."platforms.linux-arm64"]
-checksum = "sha256:d7d3966e46915c5f6932692aaf152a2473eecb1d2517ca4f8e88a07484b380b6"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.14/uv-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:6505075cec3f551fad4fe9026922967ff9c895c9f513c97682b24e7a1c9becd3"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.15/uv-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.linux-arm64-musl"]
-checksum = "sha256:d7d3966e46915c5f6932692aaf152a2473eecb1d2517ca4f8e88a07484b380b6"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.14/uv-aarch64-unknown-linux-musl.tar.gz"
+checksum = "sha256:6505075cec3f551fad4fe9026922967ff9c895c9f513c97682b24e7a1c9becd3"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.15/uv-aarch64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.linux-x64"]
-checksum = "sha256:077d36f45a0cc6d440b653b2d5c53e7731121e99e54b0221267eec5d1cae76ce"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.14/uv-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:200ccf2f351849c5d6698714e7e7eb9ead1e8c097dbdbb43730e1a4e059ceb87"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.15/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.linux-x64-musl"]
-checksum = "sha256:077d36f45a0cc6d440b653b2d5c53e7731121e99e54b0221267eec5d1cae76ce"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.14/uv-x86_64-unknown-linux-musl.tar.gz"
+checksum = "sha256:200ccf2f351849c5d6698714e7e7eb9ead1e8c097dbdbb43730e1a4e059ceb87"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.15/uv-x86_64-unknown-linux-musl.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-arm64"]
-checksum = "sha256:4333af5c0730d94323a7819bbdf87ce92dd07fc857d67fff0059e0fca31b5c02"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.14/uv-aarch64-apple-darwin.tar.gz"
+checksum = "sha256:7e5b336108f8576eda1939920ca0a805b4a9a3c3d3eb2f6140e38b7092fbe4f3"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.15/uv-aarch64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.macos-x64"]
-checksum = "sha256:9836c1440b0bd6aa5f81793648a339bd01d593b7b8f575de3b855dae4ab64654"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.14/uv-x86_64-apple-darwin.tar.gz"
+checksum = "sha256:42bca7cc879d117ed7139a0e26de8cab0b6f033ad439a32144f324d1f8580d8c"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.15/uv-x86_64-apple-darwin.tar.gz"
 provenance = "github-attestations"
 
 [tools.uv."platforms.windows-x64"]
-checksum = "sha256:52ba5d19409aaa688a8a1a6ec8dfb6a4817230d20186e75f4006105c3e39a846"
-url = "https://github.com/astral-sh/uv/releases/download/0.11.14/uv-x86_64-pc-windows-msvc.zip"
+checksum = "sha256:04b98d414a9000e25e5e0e7c9f53749e66b790cdaffc582829e6f58c544ee11c"
+url = "https://github.com/astral-sh/uv/releases/download/0.11.15/uv-x86_64-pc-windows-msvc.zip"
 provenance = "github-attestations"
 
 [[tools.xcodes]]

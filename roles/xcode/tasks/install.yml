@@ -87,7 +87,7 @@
     - name: Print Xcode install plan
       ansible.builtin.debug:
         msg: >-
-          Installing {{ xcode_missing_install_plan | length }} Xcode version(s): {{ xcode_missing_install_plan | map(attribute='version') | join(', ') }} #magic___^_^___line
+          Installing {{ xcode_missing_install_plan | length }} Xcode version(s): {{ xcode_missing_install_plan | map(attribute='version') | join(', ') }}
     - name: Create temp directory for Xcode cache on remote
       ansible.builtin.tempfile:
         state: directory
