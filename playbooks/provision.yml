@@ -1,4 +1,23 @@
 ---
+- name: Wait for system to settle
+  hosts: macos_agents
+  gather_facts: false
+  tasks:
+    - name: Print pre-provision wait notice
+      ansible.builtin.debug:
+        msg: Waiting 60 seconds for system to settle before provisioning...
+
+    - name: Wait for system to settle
+      ansible.builtin.pause:
+        seconds: 60
+
+- name: Cache software update catalog
+  hosts: macos_agents
+  gather_facts: false
+  tags: [softwareupdate_cache]
+  roles:
+    - role: softwareupdate_cache
+
 - name: Install Xcode Command Line Tools
   hosts: macos_agents
   gather_facts: false

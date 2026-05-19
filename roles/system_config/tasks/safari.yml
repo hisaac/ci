@@ -1,7 +1,7 @@
 ---
 - name: Check for available Safari updates
   ansible.builtin.command:
-    cmd: softwareupdate --list
+    cmd: softwareupdate --list --no-scan
   become: true
   register: system_config_safari_updates
   changed_when: false

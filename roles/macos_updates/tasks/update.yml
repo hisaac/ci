@@ -1,6 +1,6 @@
 ---
 - name: Check for available updates
-  ansible.builtin.command: softwareupdate --all --list
+  ansible.builtin.command: softwareupdate --all --list --no-scan
   register: macos_updates_swupdate_list
   changed_when: false
   failed_when: false
