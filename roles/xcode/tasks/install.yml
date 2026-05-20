@@ -127,6 +127,12 @@
         path: "{{ xcode_remote_tmpdir.path }}"
         state: absent
 
+- name: Check if default Xcode version app is present
+  ansible.builtin.stat:
+    path: "/Applications/Xcode-{{ xcode_default_version }}.app"
+  register: xcode_default_app
+  when: xcode_default_version | length > 0
+
 - name: Select default Xcode version with xcodes
   ansible.builtin.command:
     argv:
@@ -137,6 +143,7 @@
   changed_when: true
   when:
     - xcode_default_version | length > 0
+    - xcode_default_app.stat.exists | default(false)
     - xcode_current_selection.stdout | default('') | trim != '/Applications/Xcode-' ~ xcode_default_version ~ '.app/Contents/Developer'
 
 - name: Reset Xcode selection when no default is configured

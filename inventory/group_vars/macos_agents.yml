@@ -2,17 +2,18 @@
 macos_admin_user: admin
 macos_admin_password: admin
 
+ansible_become_password: "{{ macos_admin_password }}"
 ansible_connection: ssh
 ansible_user: "{{ macos_admin_user }}"
 ansible_password: "{{ macos_admin_password }}"
 ansible_ssh_password_mechanism: ssh_askpass
 
+xcode_install_enabled: true
+macos_update_enabled: true
+
 # Homebrew
 
-homebrew_taps:
-  - cirruslabs/cli
-
-homebrew_base_packages:
+homebrew_installed_packages:
   - bash
   - curl
   - git
@@ -50,5 +51,7 @@ dockitems_persist:
     path: /System/Applications/Utilities/Terminal.app/
   - name: System Settings
     path: /System/Applications/System Settings.app/
+  - name: Applications
+    path: /Applications/
   - name: Downloads
     path: ~/Downloads

@@ -11,12 +11,14 @@
       ansible.builtin.pause:
         seconds: 60
 
-- name: Cache software update catalog
+- name: Load macOS version-specific configuration
   hosts: macos_agents
-  gather_facts: false
-  tags: [softwareupdate_cache]
-  roles:
-    - role: softwareupdate_cache
+  gather_facts: true
+  tasks:
+    - name: Load macOS version vars
+      ansible.builtin.include_vars:
+        file: "{{ playbook_dir }}/../inventory/group_vars/macos_{{ ansible_distribution_major_version }}_agents.yml"
+      failed_when: false
 
 - name: Install Xcode Command Line Tools
   hosts: macos_agents
@@ -69,6 +71,14 @@
   tags: [dock]
   environment:
     PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+  handlers:
+    - name: Clear homebrew cache
+      ansible.builtin.command:
+        cmd: brew cleanup
+      become: "{{ (homebrew_user != ansible_facts.user_id) | bool }}"
+      become_user: "{{ homebrew_user }}"
+      when: homebrew_clear_cache | default(false) | bool
+      changed_when: false
   roles:
     - role: geerlingguy.mac.dock
 
@@ -77,6 +87,7 @@
   tags: [xcode]
   roles:
     - role: xcode
+      when: xcode_install_enabled | default(true) | bool
 
 - name: Re-index Spotlight
   hosts: macos_agents

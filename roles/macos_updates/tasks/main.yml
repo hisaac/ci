@@ -4,3 +4,4 @@
 
 - name: Install macOS updates
   ansible.builtin.import_tasks: update.yml
+  when: macos_update_enabled | default(true) | bool

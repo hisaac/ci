@@ -1,4 +1,13 @@
 ---
+# Dock
+
+- name: Disable recent apps in Dock
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: show-recents
+    type: bool
+    value: false
+
 # Window Manager
 
 - name: Disable Click to Show Desktop

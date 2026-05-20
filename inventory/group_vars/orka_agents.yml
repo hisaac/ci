@@ -1,3 +1,5 @@
 ---
-homebrew_platform_packages:
+homebrew_installed_packages_additional:
   - orka-vm-tools
+
+macos_update_enabled: false

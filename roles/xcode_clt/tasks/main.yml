@@ -1,53 +1,83 @@
 ---
-- name: Ensure Command Line Tools installation trigger file exists
-  ansible.builtin.raw: touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-  become: true
-  changed_when: false
+- name: Determine CLT installation state
+  block:
+    - name: Probe CLT install directory
+      ansible.builtin.raw: test -d /Library/Developer/CommandLineTools
+      register: xcode_clt_check
+      changed_when: false
+      failed_when: false
 
-- name: Get available Command Line Tools label
-  ansible.builtin.raw: >-
-    softwareupdate --list --no-scan 2>&1 |
-    grep '\* Label: Command Line Tools' |
-    sed 's/.*\* Label: //' |
-    tail -n1
-  register: xcode_clt_label_raw
-  become: true
-  changed_when: false
+    - name: Set CLT installed fact
+      ansible.builtin.set_fact:
+        xcode_clt_installed: "{{ xcode_clt_check.rc == 0 }}"
 
-- name: Parse Command Line Tools label
-  ansible.builtin.set_fact:
-    xcode_clt_label: "{{ xcode_clt_label_raw.stdout | trim }}"
-
-- name: Command Line Tools already up to date
+- name: Command Line Tools already installed
   ansible.builtin.debug:
-    msg: Command Line Tools are already up to date.
-  when: xcode_clt_label == ''
+    msg: Command Line Tools are already installed — skipping.
+  when: xcode_clt_installed
 
-- name: Print CLT install plan
-  ansible.builtin.debug:
-    msg: "Installing {{ xcode_clt_label }} — this may take 10–20 minutes..."
-  when: xcode_clt_label != ''
+- name: Detect and install Command Line Tools
+  when: not xcode_clt_installed
+  block:
+    - name: Print software update cache notice
+      ansible.builtin.debug:
+        msg: Fetching software update catalog — this may take a minute...
 
-- name: Print log stream tip
-  ansible.builtin.debug:
-    msg: >-
-      Tip: on the target host, run: log stream --predicate 'process == "softwareupdate"'
-      to watch real-time progress.
-  when: xcode_clt_label != ''
+    - name: Create Command Line Tools installation trigger file
+      ansible.builtin.raw: touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+      become: true
+      changed_when: false
 
-- name: Install Command Line Tools
-  ansible.builtin.raw: "softwareupdate --install --no-scan --verbose '{{ xcode_clt_label }}'"
-  become: true
-  when: xcode_clt_label != ''
-  changed_when: true
+    - name: Cache software update catalog
+      ansible.builtin.raw: softwareupdate --list --include-config-data
+      become: true
+      changed_when: false
+      timeout: 120
 
-- name: Reset Xcode developer directory
-  ansible.builtin.raw: xcrun xcode-select --reset
-  become: true
-  when: xcode_clt_label != ''
-  changed_when: true
+    - name: Get available Command Line Tools label
+      ansible.builtin.raw: >-
+        softwareupdate --list --no-scan 2>&1 |
+        grep '\* Label: Command Line Tools' |
+        sed 's/.*\* Label: //' |
+        tail -n1
+      register: xcode_clt_label_raw
+      become: true
+      changed_when: false
 
-- name: Remove Command Line Tools installation trigger file
-  ansible.builtin.raw: rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-  become: true
-  changed_when: false
+    - name: Parse Command Line Tools label
+      ansible.builtin.set_fact:
+        xcode_clt_label: "{{ xcode_clt_label_raw.stdout | trim }}"
+
+    - name: Command Line Tools label not found in catalog
+      ansible.builtin.debug:
+        msg: No Command Line Tools package found in software update catalog.
+      when: xcode_clt_label == ''
+
+    - name: Print CLT install plan
+      ansible.builtin.debug:
+        msg: "Installing {{ xcode_clt_label }} — this may take 10–20 minutes..."
+      when: xcode_clt_label != ''
+
+    - name: Print log stream tip
+      ansible.builtin.debug:
+        msg: >-
+          Tip: on the target host, run: log stream --predicate 'process == "softwareupdate"'
+          to watch real-time progress.
+      when: xcode_clt_label != ''
+
+    - name: Install Command Line Tools
+      ansible.builtin.raw: "softwareupdate --install --no-scan --verbose '{{ xcode_clt_label }}'"
+      become: true
+      when: xcode_clt_label != ''
+      changed_when: true
+
+    - name: Reset Xcode developer directory
+      ansible.builtin.raw: xcrun xcode-select --reset
+      become: true
+      when: xcode_clt_label != ''
+      changed_when: true
+
+    - name: Remove Command Line Tools installation trigger file
+      ansible.builtin.raw: rm -f /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+      become: true
+      changed_when: false

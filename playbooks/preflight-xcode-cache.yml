@@ -7,6 +7,10 @@
   gather_facts: false
   tags: [preflight, xcode]
   tasks:
+    - name: Skip Xcode cache preflight when xcode_install_enabled is false
+      ansible.builtin.meta: end_play
+      when: not (xcode_install_enabled | default(true) | bool)
+
     - name: Find installed Xcode app bundles
       ansible.builtin.find:
         paths: /Applications

@@ -72,22 +72,25 @@ done
 """
 
 [tasks.shutdown-tart-vms]
-run = 'ansible tart_agents -m ansible.builtin.command -a "shutdown -h now" -b || true'
+usage = 'arg "<vm>" help="Name of the Tart VM to shut down (e.g. macos:26)"'
+env = { VM_PROVIDER = "tart", VM_NAME = "{{usage.vm}}" }
+run = 'ansible tart_agents -i inventory/macos_inventory.py -m ansible.builtin.command -a "shutdown -h now" -b || true'
 
 [tasks.verify-xcode-cache]
-run = "ansible-playbook playbooks/preflight-xcode-cache.yml --tags preflight"
+usage = 'arg "<vm>" help="Name of the Tart VM to verify xcode cache for (e.g. macos:26)"'
+env = { VM_PROVIDER = "tart", VM_NAME = "{{usage.vm}}" }
+run = "ansible-playbook playbooks/preflight-xcode-cache.yml -i inventory/macos_inventory.py --tags preflight"
 
-[tasks.provision]
-depends = ["run-tart-vms"]
-run = "ansible-playbook playbooks/provision.yml"
+[tasks.provision-orka]
+usage = 'arg "<vm>" help="Name of the Orka VM to provision (e.g. orka-mobile-agent-thmpm)"'
+env = { VM_PROVIDER = "orka", VM_NAME = "{{usage.vm}}" }
+run = "ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py"
 
-[tasks.provision-15]
-depends = [{ task = "run-tart-vms", args = ["macos:15"] }]
-run = "ansible-playbook playbooks/provision.yml --limit macos_15_agents"
-
-[tasks.provision-26]
-depends = [{ task = "run-tart-vms", args = ["macos:26"] }]
-run = "ansible-playbook playbooks/provision.yml --limit macos_26_agents"
+[tasks.provision-tart]
+usage = 'arg "<vm>" help="Name of the Tart VM to provision (e.g. macos:26)"'
+depends = ["run-tart-vms {{usage.vm}}"]
+env = { VM_PROVIDER = "tart", VM_NAME = "{{usage.vm}}" }
+run = "ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py"
 
 [tasks.refresh-tart-vms]
 alias = "r"
