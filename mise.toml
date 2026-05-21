@@ -11,6 +11,8 @@ _.python.venv = { path = ".venv", create = true }
 hk = "latest"
 jq = "latest"
 packer = "latest"
+"pipx:ansible-core" = "latest"
+"pipx:ansible-lint" = "latest"
 pkl = "latest"
 python = { version = "latest", uv = true }
 ruff = "latest"
@@ -22,14 +24,14 @@ usage = "latest"
 uv = "latest"
 xcodes = "latest"
 
+[deps.ansible-galaxy]
+auto = true
+run = "ansible-galaxy install -r requirements.yml"
+sources = ["ansible.cfg", "requirements.yml"]
+outputs = ["galaxy_collections", "galaxy_roles"]
+
 [hooks]
-postinstall = '''
-if [ "$CI" = "true" ]; then
-	mise run bootstrap-ci
-else
-	mise run bootstrap
-fi
-'''
+postinstall = "mise run bootstrap"
 
 # Tasks
 
@@ -37,10 +39,7 @@ fi
 includes = ["scripts"]
 
 [tasks.bootstrap]
-run = [{ task = "_bootstrap_hk" }, { task = "_bootstrap_ansible" }]
-
-[tasks.bootstrap_ci]
-run = [{ task = "_bootstrap_ansible" }]
+run = [{ task = "_bootstrap_hk" }]
 
 [tasks.check]
 alias = ["chk", "lint"]
@@ -50,31 +49,17 @@ run = "hk check --all"
 alias = ["fmt", "format"]
 run = "hk fix --all"
 
-[tasks.run-tart-vms]
-usage = 'arg "[vm]" help="Specific Tart VM to start (e.g. macos:15). Starts all VMs if omitted." default=""'
-run = """
-declare -a vms=(
-	macos:15
-	macos:26
-)
-if [ -n "${usage_vm:-}" ]; then
-	vms=("$usage_vm")
-fi
-for vm in "${vms[@]}"; do
-	nohup tart run "$vm" > /dev/null 2>&1 &
-	echo "Waiting for $vm to have an IP..."
-	until tart ip "$vm" &>/dev/null; do sleep 2; done
-	ip=$(tart ip "$vm")
-	echo "Waiting for $vm SSH to be ready..."
-	until nc -z "$ip" 22 &>/dev/null; do sleep 2; done
-	echo "$vm is ready"
-done
-"""
-
-[tasks.shutdown-tart-vms]
-usage = 'arg "<vm>" help="Name of the Tart VM to shut down (e.g. macos:26)"'
-env = { VM_PROVIDER = "tart", VM_NAME = "{{usage.vm}}" }
-run = 'ansible tart_agents -i inventory/macos_inventory.py -m ansible.builtin.command -a "shutdown -h now" -b || true'
+[tasks.run-tart-vm]
+usage = 'arg "<vm>" help="Specific Tart VM to start (e.g. macos:15). Starts all VMs if omitted." default=""'
+run = '''
+nohup tart run "$vm" > /dev/null 2>&1 &
+echo "Waiting for $vm to have an IP..."
+until tart ip "$vm" &>/dev/null; do sleep 2; done
+ip=$(tart ip "$vm")
+echo "Waiting for $vm SSH to be ready..."
+until nc -z "$ip" 22 &>/dev/null; do sleep 2; done
+echo "$vm is ready"
+'''
 
 [tasks.verify-xcode-cache]
 usage = 'arg "<vm>" help="Name of the Tart VM to verify xcode cache for (e.g. macos:26)"'
@@ -88,41 +73,26 @@ run = "ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py"
 
 [tasks.provision-tart]
 usage = 'arg "<vm>" help="Name of the Tart VM to provision (e.g. macos:26)"'
-depends = ["run-tart-vms {{usage.vm}}"]
+depends = ["run-tart-vm {{usage.vm}}"]
 env = { VM_PROVIDER = "tart", VM_NAME = "{{usage.vm}}" }
 run = "ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py"
 
-[tasks.refresh-tart-vms]
-alias = "r"
-run = [
-  "tart delete macos:15 || true",
-  "tart delete macos:26 || true",
-  "tart clone macos:15.6.1-frozen macos:15",
-  "tart clone macos:26.5.0-frozen macos:26",
-]
-
 [tasks.upd]
-run = ["mise upgrade", "mise lock", "uv sync --upgrade"]
+run = ["mise upgrade", "mise lock"]
 
 [tasks.upg]
 run = [
   "mise upgrade --bump",
   "mise lock",
-  "uv sync --upgrade",
   "ansible-galaxy role install -r requirements.yml --force",
   "ansible-galaxy collection install -r requirements.yml --upgrade",
+  "touch .galaxy-installed",
 ]
 
 # Hidden Tasks
 
 [tasks._bootstrap_hk]
 hide = true
-run = ["hk install --mise", { task = "update-hk-import" }]
-
-[tasks._bootstrap_ansible]
-hide = true
-run = [
-  "uv sync",
-  "ansible-galaxy role install -r requirements.yml",
-  "ansible-galaxy collection install -r requirements.yml",
-]
+run = "scripts/update-hk-import.bash"
+sources = ["mise.toml", "mise.lock", "scripts/update-hk-import.bash", "hk.pkl"]
+outputs = { auto = true }

@@ -1,0 +1,15 @@
+---
+# Documentation for this file: https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees: ["hisaac"]
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees: ["hisaac"]
