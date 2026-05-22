@@ -20,5 +20,8 @@
     - /System/Library/LaunchDaemons/com.apple.backupd-helper.plist
     - /System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist
     - /System/Library/LaunchDaemons/com.apple.apsd.plist
+    # CPU overhead service with no CI value. Inspired by:
+    # https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-system.sh
+    - /System/Library/LaunchDaemons/com.apple.PerfPowerServices.plist
   failed_when: false
   changed_when: true
