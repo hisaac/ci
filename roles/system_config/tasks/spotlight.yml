@@ -4,6 +4,13 @@
     cmd: mdutil -E /
   become: true
   changed_when: true
+
+# Give mds time to begin re-indexing before we start polling for completion.
+# Without this, the log query can match stale entries from a prior mds cycle.
+- name: Wait for Spotlight re-indexing to start
+  ansible.builtin.pause:
+    seconds: 60
+
 # Indexing typically takes 3-6 minutes. Poll every 30 seconds for up to 6 minutes.
 - name: Wait for Spotlight indexing to complete
   ansible.builtin.command:
