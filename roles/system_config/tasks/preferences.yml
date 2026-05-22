@@ -230,6 +230,6 @@
     argv:
       - systemsetup
       - -settimezone
-      - UTC
+      - GMT
   become: true
   changed_when: true

@@ -7,6 +7,13 @@
 # Inspired by:
 # https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-hostname.sh
 
+- name: Ensure /usr/local/bin exists
+  ansible.builtin.file:
+    path: /usr/local/bin
+    state: directory
+    mode: "0755"
+  become: true
+
 - name: Install dynamic hostname script
   ansible.builtin.copy:
     src: hostname/set-dynamic-hostname.sh
