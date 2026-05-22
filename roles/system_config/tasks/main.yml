@@ -36,3 +36,6 @@
 
 - name: Configure automation mode
   ansible.builtin.import_tasks: automation.yml
+
+- name: Configure dynamic hostname
+  ansible.builtin.import_tasks: hostname.yml
