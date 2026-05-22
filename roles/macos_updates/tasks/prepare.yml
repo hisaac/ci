@@ -137,3 +137,16 @@
   ansible.builtin.command:
     cmd: defaults write com.apple.SoftwareUpdate MajorOSUserNotificationDate -date "2099-01-01 00:00:00 +0000"
   changed_when: false
+
+# Belt-and-suspenders: disable the background schedule in addition to the
+# preference keys above. Prevents softwareupdated from waking up at all.
+# Inspired by:
+# https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-auto-updates.sh
+- name: Disable softwareupdate automatic check schedule
+  ansible.builtin.command:
+    argv:
+      - softwareupdate
+      - --schedule
+      - "off"
+  become: true
+  changed_when: true
