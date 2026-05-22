@@ -1,0 +1,40 @@
+---
+# Enables XCTest UI automation to run without triggering authentication prompts.
+# Uses /usr/bin/expect (ships with macOS) to provide the user password non-interactively.
+#
+# Inspired by:
+# https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-machine.sh
+
+- name: Check if automation mode is already enabled
+  ansible.builtin.command:
+    argv:
+      - automationmodetool
+  register: system_config_automationmode_status
+  changed_when: false
+  failed_when: false
+
+- name: Enable automation mode without authentication
+  ansible.builtin.shell:
+    cmd: |
+      /usr/bin/expect << 'EOF'
+      spawn automationmodetool enable-automationmode-without-authentication
+      expect "assword"
+      send "{{ macos_admin_password }}\r"
+      expect {
+          "succeeded." { exit 0 }
+          eof
+      }
+      EOF
+    executable: /bin/bash
+  when: "'DOES NOT REQUIRE' not in system_config_automationmode_status.stdout"
+  changed_when: true
+  no_log: true
+
+- name: Verify automation mode is enabled
+  ansible.builtin.command:
+    argv:
+      - automationmodetool
+  register: system_config_automationmode_verify
+  changed_when: false
+  failed_when: "'DOES NOT REQUIRE' not in system_config_automationmode_verify.stdout"
+  when: "'DOES NOT REQUIRE' not in system_config_automationmode_status.stdout"
