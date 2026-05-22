@@ -27,6 +27,7 @@
     - { service: kTCCServiceAppleEvents, client: /bin/zsh }
     - { service: kTCCServiceAppleEvents, client: /usr/bin/osascript }
     - { service: kTCCServiceAppleEvents, client: /usr/sbin/sshd }
+    - { service: kTCCServiceAppleEvents, client: /usr/libexec/sshd-keygen-wrapper }
     - { service: kTCCServiceSystemPolicyAllFiles, client: /bin/bash }
     - { service: kTCCServiceSystemPolicyAllFiles, client: /bin/zsh }
     - { service: kTCCServiceSystemPolicyAllFiles, client: /usr/sbin/sshd }
