@@ -82,3 +82,17 @@
       - update
       - --all
   changed_when: true
+
+# Erase all simulator content and settings so no leftover app data from
+# the build/prewarm process gets baked into the image. Each CI job starts
+# with pristine simulators.
+# Inspired by:
+# https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-xcode.sh
+- name: Erase all simulator content and settings
+  ansible.builtin.command:
+    argv:
+      - xcrun
+      - simctl
+      - erase
+      - all
+  changed_when: true
