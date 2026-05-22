@@ -199,6 +199,14 @@
       failed_when: false
       changed_when: true
 
+    - name: Check SIP status for AppleScript tasks
+      ansible.builtin.command:
+        cmd: csrutil status
+      register: _cleanup_csrutil_status
+      changed_when: false
+
+    # These osascript tasks require TCC permissions which are only
+    # pre-granted when SIP is disabled (see roles/system_config/tasks/tcc.yml).
     - name: Quit System Settings
       ansible.builtin.command:
         argv:
@@ -207,6 +215,7 @@
           - quit app "System Settings"
       failed_when: false
       changed_when: false
+      when: "'disabled' in _cleanup_csrutil_status.stdout"
 
     - name: Close all Finder windows
       ansible.builtin.command:
@@ -216,6 +225,7 @@
           - tell application "Finder" to close every window
       failed_when: false
       changed_when: false
+      when: "'disabled' in _cleanup_csrutil_status.stdout"
 
 - name: Re-index Spotlight
   hosts: macos_agents
