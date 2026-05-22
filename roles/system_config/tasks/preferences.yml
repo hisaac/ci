@@ -101,6 +101,19 @@
 
 # Global domain
 
+- name: Force Light appearance
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleInterfaceStyleSwitchesAutomatically
+    type: bool
+    value: false
+
+- name: Remove Dark mode key to ensure Light appearance
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleInterfaceStyle
+    state: absent
+
 - name: Show all filename extensions
   community.general.osx_defaults:
     domain: NSGlobalDomain
