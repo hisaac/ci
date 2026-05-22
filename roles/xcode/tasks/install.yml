@@ -138,6 +138,21 @@
   loop: "{{ xcode_install_plan }}"
   changed_when: true
 
+# Register all .app bundles inside each Xcode install with Launch Services so that
+# 'open -a', file type associations, and Spotlight work immediately without waiting
+# for background indexing.
+# Inspired by:
+# https://github.com/actions/runner-images/blob/main/images/macos/scripts/helpers/Xcode.Installer.psm1
+- name: Register Xcode app bundles with Launch Services
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail &&
+      find /Applications/Xcode-{{ item.version }}.app -name "*.app" -maxdepth 5 -print0 |
+      xargs -0 -I{} /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f {}
+    executable: /bin/bash
+  loop: "{{ xcode_install_plan }}"
+  changed_when: true
+
 - name: Check if default Xcode version app is present
   ansible.builtin.stat:
     path: "/Applications/Xcode-{{ xcode_default_version }}.app"
