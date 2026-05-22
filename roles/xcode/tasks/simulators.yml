@@ -36,3 +36,36 @@
           }}
       when: item.name not in existing_names_for_runtime
       changed_when: true
+
+# Delete duplicate simulators (same device name within the same runtime).
+# This can happen when multiple Xcode versions share runtimes or from prior
+# provisioning runs. Duplicates waste disk space and cause ambiguity when
+# tests target a simulator by name.
+# Inspired by:
+# https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/Configure-Xcode-Simulators.ps1
+- name: Remove duplicate simulators (same name within same runtime)
+  when: xcode_simulators | length > 0
+  ansible.builtin.shell:
+    cmd: |
+      python3 << 'PYEOF'
+      import json, subprocess
+      result = subprocess.run(
+          ['xcrun', 'simctl', 'list', 'devices', '--json'],
+          capture_output=True, text=True, check=True)
+      data = json.loads(result.stdout)
+      deleted = 0
+      for runtime, devices in data['devices'].items():
+          seen = {}
+          for device in sorted(devices, key=lambda d: d['udid']):
+              if device['name'] in seen:
+                  subprocess.run(
+                      ['xcrun', 'simctl', 'delete', device['udid']],
+                      check=True)
+                  deleted += 1
+              else:
+                  seen[device['name']] = device['udid']
+      print(deleted)
+      PYEOF
+    executable: /bin/bash
+  register: xcode_dedup_result
+  changed_when: (xcode_dedup_result.stdout | trim | int) > 0
