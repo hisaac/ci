@@ -4,3 +4,5 @@ homebrew_taps_additional:
 
 homebrew_installed_packages_additional:
   - tart-guest-agent
+
+system_config_hostname_prefix: tart

@@ -15,8 +15,8 @@
   become: true
 
 - name: Install dynamic hostname script
-  ansible.builtin.copy:
-    src: hostname/set-dynamic-hostname.sh
+  ansible.builtin.template:
+    src: hostname/set-dynamic-hostname.sh.j2
     dest: /usr/local/bin/set-dynamic-hostname.sh
     owner: root
     mode: "0755"

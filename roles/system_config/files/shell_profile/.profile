@@ -1,4 +1,11 @@
 # shellcheck shell=sh
+
+# Guard against double-loading
+if [ -n "$__PROFILE_LOADED" ]; then
+	return 2>/dev/null || exit 0
+fi
+export __PROFILE_LOADED=1
+
 export LANG=en_US.UTF-8
 
 # Don't restore shell sessions
