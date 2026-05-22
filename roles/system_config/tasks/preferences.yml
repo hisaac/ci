@@ -218,3 +218,18 @@
   become: true
   changed_when: true
   when: "'hidden' in system_config_volumes_flags.stdout"
+
+# Timezone
+# Set UTC to ensure consistent timestamps for cache invalidation, code signing,
+# certificate validation, and log correlation across distributed CI agents.
+# Inspired by:
+# https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-ntpconf.sh
+
+- name: Set timezone to UTC
+  ansible.builtin.command:
+    argv:
+      - systemsetup
+      - -settimezone
+      - UTC
+  become: true
+  changed_when: true
