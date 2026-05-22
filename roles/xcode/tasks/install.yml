@@ -122,6 +122,7 @@
           - "{{ xcode_remote_tmpdir.path }}/{{ item.filename }}"
           - --directory
           - /Applications
+          - --experimental-unxip
       become: true
       changed_when: true
       loop: "{{ xcode_missing_install_plan }}"
