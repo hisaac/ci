@@ -183,6 +183,40 @@
     - role: xcode
       when: xcode_install_enabled | default(true) | bool
 
+# Close stray windows so they don't appear on every VM boot from the saved image.
+# Inspired by:
+# https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-windows.sh
+- name: Clean up stray windows before image finalization
+  hosts: macos_agents
+  tags: [cleanup]
+  tasks:
+    - name: Kill Setup Assistant if running
+      ansible.builtin.command:
+        argv:
+          - pkill
+          - -x
+          - Setup Assistant
+      failed_when: false
+      changed_when: true
+
+    - name: Quit System Settings
+      ansible.builtin.command:
+        argv:
+          - osascript
+          - -e
+          - quit app "System Settings"
+      failed_when: false
+      changed_when: false
+
+    - name: Close all Finder windows
+      ansible.builtin.command:
+        argv:
+          - osascript
+          - -e
+          - tell application "Finder" to close every window
+      failed_when: false
+      changed_when: false
+
 - name: Re-index Spotlight
   hosts: macos_agents
   tags: [spotlight]
