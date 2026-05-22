@@ -112,7 +112,7 @@
   roles:
     - role: homebrew
 
-- name: Configure git-lfs
+- name: Configure git
   hosts: macos_agents
   tags: [homebrew]
   environment:
@@ -125,6 +125,16 @@
           - lfs
           - install
       changed_when: false
+
+    # Prevent "dubious ownership" errors in CI checkouts where repo directories
+    # may be owned by a different user than the runner (CVE-2022-24765 mitigation).
+    # Inspired by:
+    # https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/install-git.sh
+    - name: Allow git operations in any directory (safe.directory wildcard)
+      community.general.git_config:
+        name: safe.directory
+        value: "*"
+        scope: global
 
 - name: Configure Dock
   hosts: macos_agents
