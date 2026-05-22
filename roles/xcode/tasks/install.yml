@@ -195,7 +195,7 @@
   ansible.builtin.find:
     paths: /Applications
     patterns: "Xcode-*.app"
-    file_type: directory
+    file_type: any
     recurse: false
   register: _xcode_dock_apps
 
