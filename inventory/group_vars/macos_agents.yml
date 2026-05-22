@@ -17,6 +17,7 @@ homebrew_installed_packages:
   - bash
   - curl
   - git
+  - git-lfs
   - mise
   - python
   - xcodes

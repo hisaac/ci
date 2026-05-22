@@ -112,6 +112,20 @@
   roles:
     - role: homebrew
 
+- name: Configure git-lfs
+  hosts: macos_agents
+  tags: [homebrew]
+  environment:
+    PATH: /opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+  tasks:
+    - name: Activate git-lfs globally
+      ansible.builtin.command:
+        argv:
+          - git
+          - lfs
+          - install
+      changed_when: false
+
 - name: Configure Dock
   hosts: macos_agents
   tags: [dock]
