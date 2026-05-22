@@ -1,4 +1,8 @@
 ---
+- name: Print Xcode cache filter list
+  ansible.builtin.debug:
+    msg: "xcode_cache_xip_files = {{ xcode_cache_xip_files | default('UNDEFINED') }}"
+
 - name: Find Xcode .xip files in local cache
   ansible.builtin.find:
     paths: "{{ playbook_dir }}/../.cache/xcodes"
@@ -9,14 +13,16 @@
 
 - name: Select Xcode .xip files to install
   ansible.builtin.set_fact:
-    xcode_selected_xip_files: []
-  changed_when: false
-
-- name: Build Xcode .xip selection list
-  ansible.builtin.set_fact:
-    xcode_selected_xip_files: "{{ xcode_selected_xip_files + [item] }}"
-  loop: "{{ xcode_xip_files.files }}"
-  when: (xcode_cache_xip_files | length == 0) or ((item.path | basename) in xcode_cache_xip_files)
+    xcode_selected_xip_files: >-
+      {{
+        xcode_xip_files.files
+        | selectattr('path', 'search', _xip_filter_pattern)
+        | list
+        if (xcode_cache_xip_files | default([]) | length > 0)
+        else []
+      }}
+  vars:
+    _xip_filter_pattern: "{{ xcode_cache_xip_files | default([]) | map('regex_escape') | join('|') }}"
   changed_when: false
 
 - name: Initialize Xcode install plan
@@ -182,3 +188,39 @@
   when:
     - xcode_default_version | length == 0
     - (xcode_current_selection.stdout | default('') | trim) != '/Library/Developer/CommandLineTools'
+
+# Add all configured Xcode versions to the Dock for quick access.
+- name: Check which Xcode apps are installed
+  ansible.builtin.stat:
+    path: "/Applications/Xcode-{{ item }}.app"
+  loop: >-
+    {{
+      xcode_cache_xip_files | default([])
+      | map('regex_search', '[0-9]+(\.[0-9]+){1,2}')
+      | select
+      | list
+    }}
+  register: _xcode_dock_apps
+
+- name: Add Xcode versions to Dock after Terminal
+  ansible.builtin.command:
+    argv:
+      - dockutil
+      - --add
+      - "/Applications/Xcode-{{ item.item }}.app"
+      - --after
+      - Terminal
+      - --no-restart
+  loop: "{{ _xcode_dock_apps.results | selectattr('stat.exists') | list }}"
+  loop_control:
+    label: "Xcode-{{ item.item }}"
+  changed_when: true
+  failed_when: false
+
+- name: Restart Dock to apply changes
+  ansible.builtin.command:
+    argv:
+      - killall
+      - Dock
+  changed_when: true
+  failed_when: false
