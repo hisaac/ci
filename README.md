@@ -99,8 +99,8 @@ Primary variable files:
 
 The `xcode` role expects cached installers on the control node:
 
-- `.cache/xcode/*.xip`
-- `.cache/simruntime/*.dmg`
+- `.cache/xcodes/*.xip`
+- `.cache/simruntimes/*.dmg`
 
 Group vars must reference exact filenames in these cache directories.
 

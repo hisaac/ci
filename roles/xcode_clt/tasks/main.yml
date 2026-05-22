@@ -32,7 +32,7 @@
       ansible.builtin.raw: softwareupdate --list --include-config-data
       become: true
       changed_when: false
-      timeout: 120
+      timeout: 300
 
     - name: Get available Command Line Tools label
       ansible.builtin.raw: >-

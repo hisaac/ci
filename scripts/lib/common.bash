@@ -46,6 +46,7 @@ function init() {
 	# Set project-specific environment variables
 	: "${PROJECT_ROOT:="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"}"
 	: "${ARTIFACTS_DIR:="${PROJECT_ROOT}/.artifacts"}"
-	export PROJECT_ROOT ARTIFACTS_DIR
+	: "${CACHE_DIR:="${PROJECT_ROOT}/.cache"}"
+	export PROJECT_ROOT ARTIFACTS_DIR CACHE_DIR
 }
 init

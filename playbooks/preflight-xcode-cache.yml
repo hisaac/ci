@@ -124,13 +124,13 @@
 
     - name: Stat needed .xip files in local Xcode cache
       ansible.builtin.stat:
-        path: "{{ playbook_dir }}/../.cache/xcode/{{ item }}"
+        path: "{{ playbook_dir }}/../.cache/xcodes/{{ item }}"
       loop: "{{ _all_needed_xip_files }}"
       register: _xip_stat
 
     - name: Stat needed .dmg files in local simruntime cache
       ansible.builtin.stat:
-        path: "{{ playbook_dir }}/../.cache/simruntime/{{ item }}"
+        path: "{{ playbook_dir }}/../.cache/simruntimes/{{ item }}"
       loop: "{{ _all_needed_dmg_files }}"
       register: _dmg_stat
 
@@ -144,8 +144,8 @@
     - name: Print download instructions for missing Xcode .xip files
       ansible.builtin.debug:
         msg: |-
-          Missing: .cache/xcode/{{ item }}
-          To cache: xcodes download {{ item | regex_search('[0-9][0-9.]+[0-9]') }} --directory .cache/xcode/
+          Missing: .cache/xcodes/{{ item }}
+          To cache: xcodes download {{ item | regex_search('[0-9][0-9.]+[0-9]') }} --directory .cache/xcodes/
       loop: "{{ _missing_xip_files }}"
       when: _missing_xip_files | length > 0
 
@@ -160,8 +160,8 @@
         _version: "{{ item | regex_search('[0-9][0-9.]+[0-9]') | regex_replace('(\\.0)+$', '') }}"
       ansible.builtin.debug:
         msg: |-
-          Missing: .cache/simruntime/{{ item }}
-          To cache: xcrun xcodebuild -downloadPlatform {{ _platform }} -exportPath ./.cache/simruntime -buildVersion {{ _version }}
+          Missing: .cache/simruntimes/{{ item }}
+          To cache: xcrun xcodebuild -downloadPlatform {{ _platform }} -exportPath ./.cache/simruntimes -buildVersion {{ _version }}
       loop: "{{ _missing_dmg_files }}"
       when: _missing_dmg_files | length > 0
 

@@ -11,21 +11,53 @@
       ansible.builtin.pause:
         seconds: 60
 
+- name: Install Xcode Command Line Tools
+  ansible.builtin.import_playbook: install-xcode-clt.yml
+
+- name: Update Xcode Command Line Tools
+  hosts: macos_agents
+  gather_facts: false
+  tags: [xcode_clt]
+  tasks:
+    - name: Get available Command Line Tools update label
+      ansible.builtin.raw: >-
+        softwareupdate --list --no-scan 2>&1 |
+        grep '\* Label: Command Line Tools' |
+        sed 's/.*\* Label: //' |
+        tail -n1
+      register: xcode_clt_update_label_raw
+      become: true
+      changed_when: false
+
+    - name: Parse Command Line Tools update label
+      ansible.builtin.set_fact:
+        xcode_clt_update_label: "{{ xcode_clt_update_label_raw.stdout | trim }}"
+
+    - name: No Command Line Tools update available
+      ansible.builtin.debug:
+        msg: No Command Line Tools update found in catalog — already up to date.
+      when: xcode_clt_update_label == ''
+
+    - name: Update Command Line Tools
+      ansible.builtin.raw: "softwareupdate --install --no-scan --verbose '{{ xcode_clt_update_label }}'"
+      become: true
+      when: xcode_clt_update_label != ''
+      changed_when: true
+
+    - name: Reset Xcode developer directory
+      ansible.builtin.raw: xcrun xcode-select --reset
+      become: true
+      when: xcode_clt_update_label != ''
+      changed_when: true
+
 - name: Load macOS version-specific configuration
   hosts: macos_agents
   gather_facts: true
   tasks:
     - name: Load macOS version vars
       ansible.builtin.include_vars:
-        file: "{{ playbook_dir }}/../inventory/group_vars/macos_{{ ansible_distribution_major_version }}_agents.yml"
+        file: "{{ playbook_dir }}/../inventory/group_vars/macos_{{ ansible_facts['distribution_major_version'] }}_agents.yml"
       failed_when: false
-
-- name: Install Xcode Command Line Tools
-  hosts: macos_agents
-  gather_facts: false
-  tags: [xcode_clt]
-  roles:
-    - role: xcode_clt
 
 - name: Verify Xcode cache assets are available for installation
   ansible.builtin.import_playbook: preflight-xcode-cache.yml

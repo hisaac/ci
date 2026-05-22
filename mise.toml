@@ -7,6 +7,10 @@ python.uv_venv_auto = "create|source"
 [env]
 _.python.venv = { path = ".venv", create = true }
 
+[vars]
+xcodes_cache_dir = "{{ config_root }}/.cache/xcodes"
+simruntimes_cache_dir = "{{ config_root }}/.cache/runtime"
+
 [tools]
 hk = "latest"
 jq = "latest"
@@ -35,9 +39,6 @@ postinstall = "mise run bootstrap"
 
 # Tasks
 
-[task_config]
-includes = ["scripts"]
-
 [tasks.bootstrap]
 run = [{ task = "_bootstrap_hk" }]
 
@@ -48,6 +49,9 @@ run = "hk check --all"
 [tasks.fix]
 alias = ["fmt", "format"]
 run = "hk fix --all"
+
+[tasks.warm-cache]
+run = "scripts/cache-xcodes.bash"
 
 [tasks.run-tart-vm]
 usage = 'arg "<vm>" help="Specific Tart VM to start (e.g. macos:15). Starts all VMs if omitted." default=""'
@@ -61,21 +65,26 @@ until nc -z "$ip" 22 &>/dev/null; do sleep 2; done
 echo "$vm is ready"
 '''
 
-[tasks.verify-xcode-cache]
-usage = 'arg "<vm>" help="Name of the Tart VM to verify xcode cache for (e.g. macos:26)"'
-env = { VM_PROVIDER = "tart", VM_NAME = "{{usage.vm}}" }
-run = "ansible-playbook playbooks/preflight-xcode-cache.yml -i inventory/macos_inventory.py --tags preflight"
+[tasks.refresh-orka-vm]
+usage = '''
+arg "<vm>" help="Name of the Orka VM to delete and recreate"
+arg "<vm_config>" help="Name of the VM Config to recreate the VM with"
+'''
+run = [
+  "orka3 vm delete {{ usage.vm }} || true",
+  "orka3 vm deploy {{ usage.vm }} --config {{ usage.vm_config }}",
+]
 
 [tasks.provision-orka]
-usage = 'arg "<vm>" help="Name of the Orka VM to provision (e.g. orka-mobile-agent-thmpm)"'
-env = { VM_PROVIDER = "orka", VM_NAME = "{{usage.vm}}" }
-run = "ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py"
+usage = 'arg "<vm>" help="Name of the Orka VM to provision"'
+env = { VM_PROVIDER = "orka" }
+run = 'VM_NAME="{{ usage.vm }}" ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py'
 
 [tasks.provision-tart]
-usage = 'arg "<vm>" help="Name of the Tart VM to provision (e.g. macos:26)"'
-depends = ["run-tart-vm {{usage.vm}}"]
-env = { VM_PROVIDER = "tart", VM_NAME = "{{usage.vm}}" }
-run = "ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py"
+usage = 'arg "<vm>" help="Name of the Tart VM to provision"'
+depends = ["run-tart-vm {{ usage.vm }}"]
+env = { VM_PROVIDER = "tart" }
+run = 'VM_NAME="{{ usage.vm }}" ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py'
 
 [tasks.upd]
 run = ["mise upgrade", "mise lock"]

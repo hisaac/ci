@@ -5,9 +5,9 @@ Dynamic inventory script for macOS VMs (Tart or Orka).
 Set VM_PROVIDER to 'tart' or 'orka', and VM_NAME to the VM name.
 
 Usage (Ansible calls these automatically):
-  VM_PROVIDER=tart  VM_NAME=macos:26                   ./macos_inventory.py --list
-  VM_PROVIDER=orka  VM_NAME=orka-mobile-agent-thmpm    ./macos_inventory.py --list
-  VM_PROVIDER=tart  VM_NAME=macos:26                   ./macos_inventory.py --host <vm_name>
+	VM_PROVIDER=tart  VM_NAME=macos:26          ./macos_inventory.py --list
+	VM_PROVIDER=orka  VM_NAME=orka-agent-thmpm  ./macos_inventory.py --list
+	VM_PROVIDER=tart  VM_NAME=macos:26          ./macos_inventory.py --host <vm_name>
 """
 
 import json

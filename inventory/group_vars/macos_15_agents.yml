@@ -3,16 +3,17 @@
 
 # Xcode
 
-# Use exact cache filenames from .cache/xcode and .cache/simruntime.
+# Use exact cache filenames from .cache/xcodes.
 xcode_default_version: "26.0.1"
 xcode_cache_xip_files:
   - xcode-16.2.0.xip
   - xcode-16.4.0.xip
   - xcode-26.0.1.xip
-xcode_cache_simruntime_dmg_files:
-  - iphonesimulator-18.2.0.dmg
-  - iphonesimulator-18.5.0.dmg
-  - iphonesimulator-26.0.1.dmg
+xcode_simruntime_downloads:
+  - build_version: "18.2"
+  - build_version: "18.5"
+  - build_version: "26.0.1"
+    architecture_variant: arm64
 xcode_simulators:
   - name: "iPhone 16"
     device_type: "iPhone 16"
