@@ -3,13 +3,13 @@
   hosts: macos_agents
   gather_facts: false
   tasks:
-    - name: Print pre-provision wait notice
-      ansible.builtin.debug:
-        msg: Waiting 60 seconds for system to settle before provisioning...
-
-    - name: Wait for system to settle
-      ansible.builtin.pause:
-        seconds: 60
+    - name: Wait for user session to be ready
+      ansible.builtin.raw: pgrep -x Dock
+      register: xcode_dock_check
+      until: xcode_dock_check.rc == 0
+      retries: 30
+      delay: 5
+      changed_when: false
 
 - name: Install Xcode Command Line Tools
   ansible.builtin.import_playbook: install-xcode-clt.yml
@@ -20,18 +20,22 @@
   tags: [xcode_clt]
   tasks:
     - name: Get available Command Line Tools update label
-      ansible.builtin.raw: >-
-        softwareupdate --list --no-scan 2>&1 |
-        grep '\* Label: Command Line Tools' |
-        sed 's/.*\* Label: //' |
-        tail -n1
+      ansible.builtin.command:
+        cmd: softwareupdate --list
       register: xcode_clt_update_label_raw
       become: true
       changed_when: false
+      failed_when: false
 
     - name: Parse Command Line Tools update label
       ansible.builtin.set_fact:
-        xcode_clt_update_label: "{{ xcode_clt_update_label_raw.stdout | trim }}"
+        xcode_clt_update_label: >-
+          {{
+            xcode_clt_update_label_raw.stdout
+            | regex_findall('\* Label: (Command Line Tools[^\n]*)')
+            | last
+            | default('')
+          }}
 
     - name: No Command Line Tools update available
       ansible.builtin.debug:
@@ -39,13 +43,23 @@
       when: xcode_clt_update_label == ''
 
     - name: Update Command Line Tools
-      ansible.builtin.raw: "softwareupdate --install --no-scan --verbose '{{ xcode_clt_update_label }}'"
+      ansible.builtin.command:
+        argv:
+          - softwareupdate
+          - --install
+          - --no-scan
+          - --verbose
+          - "{{ xcode_clt_update_label }}"
       become: true
       when: xcode_clt_update_label != ''
       changed_when: true
 
     - name: Reset Xcode developer directory
-      ansible.builtin.raw: xcrun xcode-select --reset
+      ansible.builtin.command:
+        argv:
+          - xcrun
+          - xcode-select
+          - --reset
       become: true
       when: xcode_clt_update_label != ''
       changed_when: true

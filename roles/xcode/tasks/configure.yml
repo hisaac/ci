@@ -48,6 +48,8 @@
       value: true
     - key: DeviceDiscoveryDisabled
       value: true
+    - key: StartLastDeviceOnLaunch
+      value: false
 
 - name: Disable automatic simulator creation on runtime install
   community.general.osx_defaults:

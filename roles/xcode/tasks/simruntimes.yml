@@ -24,74 +24,25 @@
 # ── Install missing runtimes ──────────────────────────────────────────────────
 
 - name: Download and install missing simulator runtimes
-  when: xcode_simruntime_downloads | length > 0
-  block:
-    - name: Create temp directory for simulator runtime downloads
-      ansible.builtin.tempfile:
-        state: directory
-        suffix: simruntime_download
-      register: xcode_simruntime_tmpdir
-
-    - name: Download simulator runtime
-      vars:
-        _argv_base:
-          - xcrun
-          - xcodebuild
-          - -downloadPlatform
-          - iOS
-          - -exportPath
-          - "{{ xcode_simruntime_tmpdir.path }}"
-          - -buildVersion
-          - "{{ item.build_version }}"
-        _argv_arch: "{{ ['-architectureVariant', item.architecture_variant] if 'architecture_variant' in item else [] }}"
-      ansible.builtin.command:
-        argv: "{{ _argv_base + _argv_arch }}"
-      become: true
-      loop: "{{ xcode_simruntime_downloads }}"
-      when: item.build_version not in xcode_installed_simruntime_versions
-      changed_when: true
-      async: 3600
-      poll: 30
-
-    - name: Find downloaded simulator runtime .dmg files
-      ansible.builtin.find:
-        paths: "{{ xcode_simruntime_tmpdir.path }}"
-        patterns: "*.dmg"
-        recurse: true
-      register: xcode_simruntime_dmg_files
-
-    - name: Print simruntime install plan
-      ansible.builtin.debug:
-        msg: >-
-          Installing {{ xcode_simruntime_dmg_files.files | length }} simulator runtime(s):
-          {{ xcode_simruntime_dmg_files.files | map(attribute='path') | map('basename') | join(', ') }}
-      when: xcode_simruntime_dmg_files.files | length > 0
-
-    - name: Install simulator runtimes
-      ansible.builtin.command:
-        argv:
-          - xcrun
-          - simctl
-          - runtime
-          - add
-          - "{{ item.path }}"
-      become: true
-      loop: "{{ xcode_simruntime_dmg_files.files }}"
-      register: xcode_simruntime_install
-      changed_when: xcode_simruntime_install.rc == 0
-      async: 3600
-      poll: 30
-      failed_when:
-        - xcode_simruntime_install.rc != 0
-        - "'Duplicate of' not in xcode_simruntime_install.stdout"
-
-  always:
-    - name: Remove simulator runtime temp directory
-      ansible.builtin.file:
-        path: "{{ xcode_simruntime_tmpdir.path }}"
-        state: absent
-      become: true
-      when: xcode_simruntime_tmpdir is defined
+  vars:
+    _argv_base:
+      - xcrun
+      - xcodebuild
+      - -downloadPlatform
+      - iOS
+      - -buildVersion
+      - "{{ item.build_version }}"
+    _argv_arch: "{{ ['-architectureVariant', item.architecture_variant] if 'architecture_variant' in item else [] }}"
+  ansible.builtin.command:
+    argv: "{{ _argv_base + _argv_arch }}"
+  become: true
+  loop: "{{ xcode_simruntime_downloads }}"
+  when:
+    - xcode_simruntime_downloads | length > 0
+    - item.build_version not in xcode_installed_simruntime_versions
+  changed_when: true
+  async: 3600
+  poll: 30
 
 # ── Delete unneeded runtimes ──────────────────────────────────────────────────
 

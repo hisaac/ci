@@ -127,18 +127,29 @@
         path: "{{ xcode_remote_tmpdir.path }}"
         state: absent
 
+- name: Run first launch and check for newer components for each Xcode version
+  ansible.builtin.command:
+    argv:
+      - xcodebuild
+      - -runFirstLaunch
+      - -checkForNewerComponents
+  environment:
+    DEVELOPER_DIR: "/Applications/Xcode-{{ item.version }}.app/Contents/Developer"
+  loop: "{{ xcode_install_plan }}"
+  changed_when: true
+
 - name: Check if default Xcode version app is present
   ansible.builtin.stat:
     path: "/Applications/Xcode-{{ xcode_default_version }}.app"
   register: xcode_default_app
   when: xcode_default_version | length > 0
 
-- name: Select default Xcode version with xcodes
+- name: Select default Xcode version
   ansible.builtin.command:
     argv:
-      - "{{ xcode_xcodes_path }}"
-      - select
-      - "{{ xcode_default_version }}"
+      - /usr/bin/xcode-select
+      - --switch
+      - "/Applications/Xcode-{{ xcode_default_version }}.app"
   become: true
   changed_when: true
   when:

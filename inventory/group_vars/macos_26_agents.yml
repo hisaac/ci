@@ -14,6 +14,9 @@ xcode_simruntime_downloads:
   - build_version: "26.5"
     architecture_variant: arm64
 xcode_simulators:
-  - name: "iPhone 16"
-    device_type: "iPhone 16"
+  - name: "iPhone 17"
+    device_type: "iPhone 17"
+    runtime: "com.apple.CoreSimulator.SimRuntime.iOS-26-0"
+  - name: "iPhone 17"
+    device_type: "iPhone 17"
     runtime: "com.apple.CoreSimulator.SimRuntime.iOS-26-5"

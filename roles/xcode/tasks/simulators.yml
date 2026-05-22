@@ -24,14 +24,15 @@
           - "{{ item.runtime }}"
       loop: "{{ xcode_simulators }}"
       vars:
-        existing_names: >-
+        existing_names_for_runtime: >-
           {{
             (xcode_existing_simulators_raw.stdout | from_json)['devices']
             | dict2items
+            | selectattr('key', 'equalto', item.runtime)
             | map(attribute='value')
             | flatten
             | map(attribute='name')
             | list
           }}
-      when: item.name not in existing_names
+      when: item.name not in existing_names_for_runtime
       changed_when: true
