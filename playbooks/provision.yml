@@ -136,6 +136,30 @@
         value: "*"
         scope: global
 
+    # Suppress git "hint:" messages that add noise to CI logs.
+    # Inspired by:
+    # https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/install-git.sh
+    - name: Suppress git advice messages
+      community.general.git_config:
+        name: "{{ item }}"
+        value: "false"
+        scope: global
+      loop:
+        - advice.pushUpdateRejected
+        - advice.pushNonFFCurrent
+        - advice.pushNonFFMatching
+        - advice.pushAlreadyExists
+        - advice.pushFetchFirst
+        - advice.pushNeedsForce
+        - advice.statusHints
+        - advice.statusUoption
+        - advice.commitBeforeMerge
+        - advice.resolveConflict
+        - advice.implicitIdentity
+        - advice.detachedHead
+        - advice.amWorkDir
+        - advice.rmHints
+
 - name: Configure Dock
   hosts: macos_agents
   tags: [dock]
