@@ -1,0 +1,80 @@
+---
+# Pre-populate macOS TCC (Transparency, Consent, and Control) database to prevent
+# consent dialogs during automated XCUITest runs, simulator operations, and SSH-based scripting.
+#
+# Note: These tasks require SIP to be disabled on the target system.
+#
+# Inspired by:
+# https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-tccdb-macos.sh
+
+- name: Grant system-wide TCC permissions (path-based clients)
+  ansible.builtin.shell:
+    cmd: |
+      sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" \
+        "INSERT OR IGNORE INTO access (service, client, client_type, auth_value, auth_reason, auth_version, flags) \
+         VALUES ('{{ item.service }}', '{{ item.client }}', 1, 2, 4, 1, 0);"
+    executable: /bin/bash
+  become: true
+  loop:
+    - { service: kTCCServiceAccessibility, client: /bin/bash }
+    - { service: kTCCServiceAccessibility, client: /bin/zsh }
+    - { service: kTCCServiceAccessibility, client: /usr/bin/osascript }
+    - { service: kTCCServiceAccessibility, client: /usr/sbin/sshd }
+    - { service: kTCCServiceScreenCapture, client: /bin/bash }
+    - { service: kTCCServiceScreenCapture, client: /bin/zsh }
+    - { service: kTCCServiceScreenCapture, client: /usr/sbin/sshd }
+    - { service: kTCCServiceAppleEvents, client: /bin/bash }
+    - { service: kTCCServiceAppleEvents, client: /bin/zsh }
+    - { service: kTCCServiceAppleEvents, client: /usr/bin/osascript }
+    - { service: kTCCServiceAppleEvents, client: /usr/sbin/sshd }
+    - { service: kTCCServiceSystemPolicyAllFiles, client: /bin/bash }
+    - { service: kTCCServiceSystemPolicyAllFiles, client: /bin/zsh }
+    - { service: kTCCServiceSystemPolicyAllFiles, client: /usr/sbin/sshd }
+  changed_when: true
+
+- name: Grant system-wide TCC permissions (bundle ID clients)
+  ansible.builtin.shell:
+    cmd: |
+      sqlite3 "/Library/Application Support/com.apple.TCC/TCC.db" \
+        "INSERT OR IGNORE INTO access (service, client, client_type, auth_value, auth_reason, auth_version, flags) \
+         VALUES ('{{ item.service }}', '{{ item.client }}', 0, 2, 4, 1, 0);"
+    executable: /bin/bash
+  become: true
+  loop:
+    - { service: kTCCServiceAccessibility, client: com.apple.dt.Xcode }
+    - { service: kTCCServiceScreenCapture, client: com.apple.dt.Xcode }
+    - { service: kTCCServiceAccessibility, client: com.apple.iphonesimulator }
+    - { service: kTCCServiceScreenCapture, client: com.apple.iphonesimulator }
+    - { service: kTCCServiceMicrophone, client: com.apple.iphonesimulator }
+    - { service: kTCCServiceScreenCapture, client: com.apple.Terminal }
+    - { service: kTCCServiceAccessibility, client: com.apple.Terminal }
+  changed_when: true
+
+- name: Grant user-level TCC permissions (path-based clients)
+  ansible.builtin.shell:
+    cmd: |
+      sqlite3 "{{ ansible_env.HOME }}/Library/Application Support/com.apple.TCC/TCC.db" \
+        "INSERT OR IGNORE INTO access (service, client, client_type, auth_value, auth_reason, auth_version, flags) \
+         VALUES ('{{ item.service }}', '{{ item.client }}', 1, 2, 4, 1, 0);"
+    executable: /bin/bash
+  loop:
+    - { service: kTCCServiceAccessibility, client: /bin/bash }
+    - { service: kTCCServiceAccessibility, client: /bin/zsh }
+    - { service: kTCCServiceAccessibility, client: /usr/bin/osascript }
+    - { service: kTCCServiceAppleEvents, client: /bin/bash }
+    - { service: kTCCServiceAppleEvents, client: /bin/zsh }
+    - { service: kTCCServiceAppleEvents, client: /usr/bin/osascript }
+  changed_when: true
+
+- name: Grant user-level TCC permissions (bundle ID clients)
+  ansible.builtin.shell:
+    cmd: |
+      sqlite3 "{{ ansible_env.HOME }}/Library/Application Support/com.apple.TCC/TCC.db" \
+        "INSERT OR IGNORE INTO access (service, client, client_type, auth_value, auth_reason, auth_version, flags) \
+         VALUES ('{{ item.service }}', '{{ item.client }}', 0, 2, 4, 1, 0);"
+    executable: /bin/bash
+  loop:
+    - { service: kTCCServiceScreenCapture, client: com.apple.Terminal }
+    - { service: kTCCServiceAccessibility, client: com.apple.Terminal }
+    - { service: kTCCServiceMicrophone, client: com.apple.iphonesimulator }
+  changed_when: true

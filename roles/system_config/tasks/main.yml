@@ -29,3 +29,7 @@
 - name: Configure Gatekeeper
   ansible.builtin.include_tasks: gatekeeper.yml
   when: system_config_sip_disabled
+
+- name: Pre-grant TCC permissions
+  ansible.builtin.include_tasks: tcc.yml
+  when: system_config_sip_disabled
