@@ -95,7 +95,6 @@ run = [
   "mise lock",
   "ansible-galaxy role install -r requirements.yml --force",
   "ansible-galaxy collection install -r requirements.yml --upgrade",
-  "touch .galaxy-installed",
 ]
 
 # Hidden Tasks

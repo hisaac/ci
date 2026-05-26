@@ -16,6 +16,7 @@ macos_update_enabled: true
 homebrew_installed_packages:
   - bash
   - curl
+  - dockutil
   - git
   - git-lfs
   - mise
@@ -25,34 +26,15 @@ homebrew_installed_packages:
 
 # Dock
 
-dockitems_remove:
-  - App Store
-  - Apps
-  - Calendar
-  - Contacts
-  - FaceTime
-  - Freeform
-  - Games
-  - iPhone Mirroring
-  - Launchpad
-  - Mail
-  - Maps
-  - Messages
-  - Music
-  - News
-  - Notes
-  - Phone
-  - Photos
-  - Reminders
-  - TV
-
-dockitems_persist:
+dockitems_apps:
   - name: Safari
     path: /Applications/Safari.app/
   - name: Terminal
     path: /System/Applications/Utilities/Terminal.app/
   - name: System Settings
     path: /System/Applications/System Settings.app/
+
+dockitems_folders:
   - name: Applications
     path: /Applications/
   - name: Downloads
