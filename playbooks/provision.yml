@@ -297,6 +297,30 @@
       changed_when: false
       when: _tcc_appleevent_check.stdout | trim == '2'
 
+- name: Clean up caches before image finalization
+  hosts: macos_agents
+  tags: [cleanup]
+  tasks:
+    - name: Delete local Time Machine snapshots
+      ansible.builtin.shell:
+        cmd: tmutil deletelocalsnapshots / 2>/dev/null || true
+        executable: /bin/bash
+      become: true
+      changed_when: true
+
+    - name: Remove cached software updates
+      ansible.builtin.file:
+        path: /Library/Updates
+        state: absent
+      become: true
+
+    - name: Clear software update catalog cache
+      ansible.builtin.command:
+        cmd: softwareupdate --clear-catalog
+      become: true
+      changed_when: true
+      failed_when: false
+
 - name: Re-index Spotlight
   hosts: macos_agents
   tags: [spotlight]

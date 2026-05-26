@@ -13,6 +13,8 @@ macos_update_enabled: true
 
 # Homebrew
 
+homebrew_upgrade_all_packages: true
+
 homebrew_installed_packages:
   - bash
   - curl
