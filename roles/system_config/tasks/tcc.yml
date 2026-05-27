@@ -54,7 +54,7 @@
 - name: Grant user-level TCC permissions (path-based clients)
   ansible.builtin.shell:
     cmd: |
-      sqlite3 "{{ ansible_env.HOME }}/Library/Application Support/com.apple.TCC/TCC.db" \
+      sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
         "INSERT OR IGNORE INTO access (service, client, client_type, auth_value, auth_reason, auth_version, flags) \
          VALUES ('{{ item.service }}', '{{ item.client }}', 1, 2, 4, 1, 0);"
     executable: /bin/bash
@@ -70,7 +70,7 @@
 - name: Grant user-level TCC permissions (bundle ID clients)
   ansible.builtin.shell:
     cmd: |
-      sqlite3 "{{ ansible_env.HOME }}/Library/Application Support/com.apple.TCC/TCC.db" \
+      sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
         "INSERT OR IGNORE INTO access (service, client, client_type, auth_value, auth_reason, auth_version, flags) \
          VALUES ('{{ item.service }}', '{{ item.client }}', 0, 2, 4, 1, 0);"
     executable: /bin/bash
