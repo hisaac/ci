@@ -2,9 +2,15 @@
 # Note: These tasks require SIP to be disabled on the target system.
 # launchctl bootout returns non-zero if the service is not running; failed_when: false handles that.
 
+- name: Get current user UID
+  ansible.builtin.command:
+    cmd: id -u
+  register: _system_config_user_uid
+  changed_when: false
+
 - name: Disable GUI-level launch agents
   ansible.builtin.command:
-    cmd: launchctl bootout "gui/{{ ansible_user_uid }}" {{ item }}
+    cmd: launchctl bootout "gui/{{ _system_config_user_uid.stdout | trim }}" {{ item }}
   loop:
     - /System/Library/LaunchAgents/com.apple.notificationcenterui.plist
     - /System/Library/LaunchAgents/com.apple.tipsd.plist
