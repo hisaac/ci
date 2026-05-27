@@ -3,10 +3,10 @@
   hosts: macos_agents
   gather_facts: false
   tasks:
-    - name: Wait for user session to be ready
-      ansible.builtin.raw: pgrep -x Dock
-      register: xcode_dock_check
-      until: xcode_dock_check.rc == 0
+    - name: Wait for GUI subsystem to be ready
+      ansible.builtin.raw: pgrep -x loginwindow
+      register: _loginwindow_check
+      until: _loginwindow_check.rc == 0
       retries: 30
       delay: 5
       changed_when: false
