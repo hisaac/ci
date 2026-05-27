@@ -244,6 +244,7 @@
           - killall
           - Dock
       changed_when: true
+      failed_when: false
 
 # Close stray windows so they don't appear on every VM boot from the saved image.
 # Inspired by:
