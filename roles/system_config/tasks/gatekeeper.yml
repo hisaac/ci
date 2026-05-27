@@ -6,6 +6,7 @@
     cmd: spctl --master-disable
   become: true
   changed_when: true
+  failed_when: false
 
 - name: Enable Developer Mode for Terminal
   ansible.builtin.command:
