@@ -13,11 +13,35 @@
   become: true
   register: auth_config_auto_login_password_file
 
+# kcpassword.py is copied from:
+# https://github.com/actions/runner-images/blob/main/images/macos/assets/bootstrap-provisioner/kcpassword.py
 - name: Enable auto-login for admin user
-  ansible.builtin.script: enable-auto-login.bash
-  environment:
-    USERNAME: "{{ macos_admin_user }}"
-    PASSWORD: "{{ macos_admin_password }}"
+  ansible.builtin.script: kcpassword.py {{ macos_admin_password }}
+  args:
+    executable: python3
+  become: true
+  no_log: true
+  changed_when: true
+  when: >-
+    (not auth_config_auto_login_password_file.stat.exists) or ((auth_config_auto_login_user.stdout | default('') | trim) != macos_admin_user)
+
+- name: Set auto-login user
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.loginwindow
+    key: autoLoginUser
+    type: string
+    value: "{{ macos_admin_user }}"
+  become: true
+  changed_when: true
+  when: >-
+    (not auth_config_auto_login_password_file.stat.exists) or ((auth_config_auto_login_user.stdout | default('') | trim) != macos_admin_user)
+
+- name: Disable auto-login lock screen
+  community.general.osx_defaults:
+    domain: /Library/Preferences/com.apple.loginwindow
+    key: autoLoginUserScreenLocked
+    type: bool
+    value: false
   become: true
   changed_when: true
   when: >-

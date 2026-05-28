@@ -23,5 +23,6 @@ galaxy_collections/
 .vault_pass
 
 # Python
+__pycache__
 .ruff_cache
 .venv/
