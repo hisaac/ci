@@ -309,12 +309,6 @@
       become: true
       changed_when: true
 
-    - name: Remove cached software updates
-      ansible.builtin.file:
-        path: /Library/Updates
-        state: absent
-      become: true
-
     - name: Clear software update catalog cache
       ansible.builtin.command:
         cmd: softwareupdate --clear-catalog
