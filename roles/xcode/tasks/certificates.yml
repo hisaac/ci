@@ -1,4 +1,11 @@
 ---
+# Apple issues WWDR intermediate CA certificates in multiple generations (G2–G7+).
+# Signing certificates chain through different generations depending on when they were
+# provisioned. All active generations must be present and explicitly trusted for headless
+# codesigning to work. `security add-trusted-cert` is required over `security import`
+# because `import` adds the certificate to the keychain without setting trust policies,
+# which causes chain-building failures in the codesigning subsystem.
+
 - name: Check for Apple WWDR certificate in system keychain
   ansible.builtin.command:
     cmd: security find-certificate -a -c 'Apple Worldwide Developer Relations Certification Authority' /Library/Keychains/System.keychain
@@ -16,7 +23,7 @@
   failed_when: false
 
 - name: Install missing Apple certificates into system keychain
-  when: xcode_wwdr_certificate_check.rc != 0 or xcode_developer_id_certificate_check.rc != 0
+  # when: xcode_wwdr_certificate_check.rc != 0 or xcode_developer_id_certificate_check.rc != 0
   block:
     - name: Create temp directory for certificates
       ansible.builtin.tempfile:
@@ -24,40 +31,40 @@
         suffix: certs
       register: xcode_cert_tmpdir
 
-    - name: Download Apple WWDR CA G3 certificate
+    - name: Download Apple WWDR CA certificates
       ansible.builtin.get_url:
-        url: https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
-        dest: "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG3.cer"
+        url: "{{ item.url }}"
+        dest: "{{ xcode_cert_tmpdir.path }}/{{ item.filename }}"
         mode: "0644"
-
-    - name: Download Apple WWDR CA G6 certificate
-      ansible.builtin.get_url:
-        url: https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer
-        dest: "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG6.cer"
-        mode: "0644"
-
-    - name: Download Developer ID CA certificate
-      ansible.builtin.get_url:
-        url: https://www.apple.com/certificateauthority/DeveloperIDCA.cer
-        dest: "{{ xcode_cert_tmpdir.path }}/DeveloperIDCA.cer"
-        mode: "0644"
-
-    - name: Download Developer ID G2 CA certificate
-      ansible.builtin.get_url:
-        url: https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer
-        dest: "{{ xcode_cert_tmpdir.path }}/DeveloperIDG2CA.cer"
-        mode: "0644"
-
-    - name: Import certificates into system keychain
-      ansible.builtin.command:
-        cmd: security import {{ item }} -k /Library/Keychains/System.keychain
-      become: true
-      register: xcode_certificate_import
-      changed_when: xcode_certificate_import.rc == 0
-      failed_when: xcode_certificate_import.rc != 0 and 'The specified item already exists in the keychain.' not in xcode_certificate_import.stderr
       loop:
+        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG2.cer", filename: "AppleWWDRCAG2.cer" }
+        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer", filename: "AppleWWDRCAG3.cer" }
+        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer", filename: "AppleWWDRCAG4.cer" }
+        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG5.cer", filename: "AppleWWDRCAG5.cer" }
+        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer", filename: "AppleWWDRCAG6.cer" }
+        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG7.cer", filename: "AppleWWDRCAG7.cer" }
+        - { url: "https://www.apple.com/certificateauthority/DeveloperIDCA.cer", filename: "DeveloperIDCA.cer" }
+        - { url: "https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer", filename: "DeveloperIDG2CA.cer" }
+
+    - name: Trust Apple certificates in system keychain
+      ansible.builtin.command:
+        cmd: >
+          security add-trusted-cert
+          -d
+          -r trustAsRoot
+          -k /Library/Keychains/System.keychain
+          {{ item }}
+      become: true
+      register: xcode_certificate_trust
+      changed_when: xcode_certificate_trust.rc == 0
+      failed_when: xcode_certificate_trust.rc != 0
+      loop:
+        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG2.cer"
         - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG3.cer"
+        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG4.cer"
+        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG5.cer"
         - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG6.cer"
+        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG7.cer"
         - "{{ xcode_cert_tmpdir.path }}/DeveloperIDCA.cer"
         - "{{ xcode_cert_tmpdir.path }}/DeveloperIDG2CA.cer"
 

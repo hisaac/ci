@@ -3,12 +3,8 @@
 
 # Xcode
 
-# Use exact cache filenames from .cache/xcodes.
+# Xcode .xip files must be pre-staged in the admin user's Downloads folder before provisioning.
 xcode_default_version: "26.0.1"
-xcode_cache_xip_files:
-  - xcode-16.2.0.xip
-  - xcode-16.4.0.xip
-  - xcode-26.0.1.xip
 xcode_simruntime_downloads:
   - build_version: "18.2"
   - build_version: "18.6"

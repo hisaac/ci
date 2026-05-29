@@ -97,22 +97,7 @@ Primary variable files:
 
 ## Xcode Cache Inputs
 
-The `xcode` role expects cached installers on the control node:
-
-- `.cache/xcodes/*.xip`
-- `.cache/simruntimes/*.dmg`
-
-Group vars must reference exact filenames in these cache directories.
-
-If cache files are missing, install tasks for those assets are skipped.
-
-Run a preflight cache check explicitly:
-
-```bash
-mise run verify-xcode-cache
-```
-
-This runs the local Ansible playbook `playbooks/preflight-xcode-cache.yml`.
+The `xcode` role installs all `*.xip` files found in the admin user's Downloads folder on the remote host. Stage the desired Xcode `.xip` files there before running provisioning — they will be deleted after installation.
 
 ## Provisioning
 

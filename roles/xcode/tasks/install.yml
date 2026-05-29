@@ -1,29 +1,9 @@
 ---
-- name: Print Xcode cache filter list
-  ansible.builtin.debug:
-    msg: "xcode_cache_xip_files = {{ xcode_cache_xip_files | default('UNDEFINED') }}"
-
-- name: Find Xcode .xip files in local cache
+- name: Find Xcode .xip files in Downloads
   ansible.builtin.find:
-    paths: "{{ playbook_dir }}/../.cache/xcodes"
+    paths: "/Users/{{ macos_admin_user }}/Downloads"
     patterns: "*.xip"
-  delegate_to: localhost
-  become: false
   register: xcode_xip_files
-
-- name: Select Xcode .xip files to install
-  ansible.builtin.set_fact:
-    xcode_selected_xip_files: >-
-      {{
-        xcode_xip_files.files
-        | selectattr('path', 'search', _xip_filter_pattern)
-        | list
-        if (xcode_cache_xip_files | default([]) | length > 0)
-        else []
-      }}
-  vars:
-    _xip_filter_pattern: "{{ xcode_cache_xip_files | default([]) | map('regex_escape') | join('|') }}"
-  changed_when: false
 
 - name: Initialize Xcode install plan
   ansible.builtin.set_fact:
@@ -34,11 +14,13 @@
   ansible.builtin.set_fact:
     xcode_install_plan: "{{ xcode_install_plan + [xcode_install_item] }}"
   vars:
+    _version: "{{ item.path | basename | regex_search('[0-9]+(\\.[0-9]+){1,2}') }}"
     xcode_install_item:
-      version: "{{ item.path | basename | regex_search('[0-9]+(\\.[0-9]+){1,2}') }}"
+      version: "{{ _version }}"
+      normalized_version: "{{ (_version.split('.') + ['0', '0'])[:3] | join('.') }}"
       source_path: "{{ item.path }}"
       filename: "{{ item.path | basename }}"
-  loop: "{{ xcode_selected_xip_files }}"
+  loop: "{{ xcode_xip_files.files }}"
   changed_when: false
 
 - name: Check standard xcodes install paths
@@ -62,7 +44,7 @@
 
 - name: Check whether planned Xcode versions are already installed
   ansible.builtin.stat:
-    path: "/Applications/Xcode-{{ item.version }}.app"
+    path: "/Applications/Xcode-{{ item.normalized_version }}.app"
   loop: "{{ xcode_install_plan }}"
   register: xcode_installed_apps
 
@@ -87,30 +69,13 @@
   changed_when: false
   failed_when: false
 
-- name: Install missing Xcode versions from cache
+- name: Install missing Xcode versions
   when: xcode_missing_install_plan | length > 0
   block:
     - name: Print Xcode install plan
       ansible.builtin.debug:
         msg: >-
           Installing {{ xcode_missing_install_plan | length }} Xcode version(s): {{ xcode_missing_install_plan | map(attribute='version') | join(', ') }}
-    - name: Create temp directory for Xcode cache on remote
-      ansible.builtin.tempfile:
-        state: directory
-        suffix: xcode_cache
-      register: xcode_remote_tmpdir
-
-    - name: Print Xcode copy notice
-      ansible.builtin.debug:
-        msg: "Copying {{ item.filename }} to remote host (large file — this will take a while)..."
-      loop: "{{ xcode_missing_install_plan }}"
-
-    - name: Copy missing Xcode .xip files to remote
-      ansible.builtin.copy:
-        src: "{{ item.source_path }}"
-        dest: "{{ xcode_remote_tmpdir.path }}/{{ item.filename }}"
-        mode: "0644"
-      loop: "{{ xcode_missing_install_plan }}"
 
     - name: Install Xcode versions with xcodes
       ansible.builtin.command:
@@ -119,7 +84,7 @@
           - install
           - "{{ item.version }}"
           - --path
-          - "{{ xcode_remote_tmpdir.path }}/{{ item.filename }}"
+          - "{{ item.source_path }}"
           - --directory
           - /Applications
           - --experimental-unxip
@@ -129,10 +94,12 @@
       async: 3600
       poll: 30
 
-    - name: Remove Xcode cache from remote
-      ansible.builtin.file:
-        path: "{{ xcode_remote_tmpdir.path }}"
-        state: absent
+- name: Remove Xcode .xip files from Downloads
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ xcode_xip_files.files }}"
+  when: xcode_xip_files.files | length > 0
 
 - name: Run first launch and check for newer components for each Xcode version
   ansible.builtin.command:
@@ -141,7 +108,7 @@
       - -runFirstLaunch
       - -checkForNewerComponents
   environment:
-    DEVELOPER_DIR: "/Applications/Xcode-{{ item.version }}.app/Contents/Developer"
+    DEVELOPER_DIR: "/Applications/Xcode-{{ item.normalized_version }}.app/Contents/Developer"
   loop: "{{ xcode_install_plan }}"
   changed_when: true
 
@@ -154,7 +121,7 @@
   ansible.builtin.shell:
     cmd: >-
       set -o pipefail &&
-      find /Applications/Xcode-{{ item.version }}.app -name "*.app" -maxdepth 5 -print0 |
+      find /Applications/Xcode-{{ item.normalized_version }}.app -name "*.app" -maxdepth 5 -print0 |
       xargs -0 -I{} /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f {}
     executable: /bin/bash
   loop: "{{ xcode_install_plan }}"
@@ -162,7 +129,7 @@
 
 - name: Check if default Xcode version app is present
   ansible.builtin.stat:
-    path: "/Applications/Xcode-{{ xcode_default_version }}.app"
+    path: "/Applications/Xcode-{{ (xcode_default_version.split('.') + ['0', '0'])[:3] | join('.') }}.app"
   register: xcode_default_app
   when: xcode_default_version | length > 0
 
@@ -171,13 +138,14 @@
     argv:
       - /usr/bin/xcode-select
       - --switch
-      - "/Applications/Xcode-{{ xcode_default_version }}.app"
+      - "/Applications/Xcode-{{ (xcode_default_version.split('.') + ['0', '0'])[:3] | join('.') }}.app"
   become: true
   changed_when: true
   when:
     - xcode_default_version | length > 0
     - xcode_default_app.stat.exists | default(false)
-    - xcode_current_selection.stdout | default('') | trim != '/Applications/Xcode-' ~ xcode_default_version ~ '.app/Contents/Developer'
+    - xcode_current_selection.stdout | default('') | trim != '/Applications/Xcode-' ~ ((xcode_default_version.split('.') + ['0', '0'])[:3] | join('.')) ~
+      '.app/Contents/Developer'
 
 - name: Reset Xcode selection when no default is configured
   ansible.builtin.command:
