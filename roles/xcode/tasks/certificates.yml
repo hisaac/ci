@@ -1,10 +1,5 @@
 ---
-# Apple issues WWDR intermediate CA certificates in multiple generations (G2–G7+).
-# Signing certificates chain through different generations depending on when they were
-# provisioned. All active generations must be present and explicitly trusted for headless
-# codesigning to work. `security add-trusted-cert` is required over `security import`
-# because `import` adds the certificate to the keychain without setting trust policies,
-# which causes chain-building failures in the codesigning subsystem.
+# Installs the Apple intermediate CA certificates required for codesigning into the system keychain.
 
 - name: Check for Apple WWDR certificate in system keychain
   ansible.builtin.command:
@@ -37,35 +32,18 @@
         dest: "{{ xcode_cert_tmpdir.path }}/{{ item.filename }}"
         mode: "0644"
       loop:
-        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG2.cer", filename: "AppleWWDRCAG2.cer" }
         - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer", filename: "AppleWWDRCAG3.cer" }
-        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer", filename: "AppleWWDRCAG4.cer" }
-        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG5.cer", filename: "AppleWWDRCAG5.cer" }
-        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG6.cer", filename: "AppleWWDRCAG6.cer" }
-        - { url: "https://www.apple.com/certificateauthority/AppleWWDRCAG7.cer", filename: "AppleWWDRCAG7.cer" }
-        - { url: "https://www.apple.com/certificateauthority/DeveloperIDCA.cer", filename: "DeveloperIDCA.cer" }
         - { url: "https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer", filename: "DeveloperIDG2CA.cer" }
 
-    - name: Trust Apple certificates in system keychain
+    - name: Import Apple certificates into system keychain
       ansible.builtin.command:
-        cmd: >
-          security add-trusted-cert
-          -d
-          -r trustAsRoot
-          -k /Library/Keychains/System.keychain
-          {{ item }}
+        cmd: security import {{ item }} -k /Library/Keychains/System.keychain
       become: true
-      register: xcode_certificate_trust
-      changed_when: xcode_certificate_trust.rc == 0
-      failed_when: xcode_certificate_trust.rc != 0
+      register: xcode_certificate_import
+      changed_when: xcode_certificate_import.rc == 0
+      failed_when: xcode_certificate_import.rc != 0 and 'The specified item already exists in the keychain.' not in xcode_certificate_import.stderr
       loop:
-        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG2.cer"
         - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG3.cer"
-        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG4.cer"
-        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG5.cer"
-        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG6.cer"
-        - "{{ xcode_cert_tmpdir.path }}/AppleWWDRCAG7.cer"
-        - "{{ xcode_cert_tmpdir.path }}/DeveloperIDCA.cer"
         - "{{ xcode_cert_tmpdir.path }}/DeveloperIDG2CA.cer"
 
     - name: Remove certificate temp directory
