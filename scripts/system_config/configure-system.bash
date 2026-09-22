@@ -17,6 +17,13 @@ function main() {
 	sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled -bool false
 	sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload -bool false
 
+	echo "==> Disabling wifi"
+	networksetup -setairportpower en0 off
+
+	echo "==> Disabling Bluetooth"
+	# Requires restart or `sudo killall -HUP bluetoothd` to work
+	sudo defaults write /private/var/root/Library/Preferences/com.apple.BTServer defaultPoweredState -bool false
+
 	echo "==> Disabling reopening of open apps on login"
 	defaults write com.apple.loginwindow TALLogoutSavesState -bool false
 	defaults write com.apple.loginwindow LoginwindowLaunchesRelaunchApps -bool false
