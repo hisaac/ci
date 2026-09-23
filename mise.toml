@@ -40,7 +40,7 @@ postinstall = "mise run bootstrap"
 # Tasks
 
 [tasks.bootstrap]
-run = [{ task = "_bootstrap_hk" }]
+run = ["hk install --mise", { task = "_bootstrap_hk" }]
 
 [tasks.check]
 alias = ["chk", "lint"]
