@@ -17,10 +17,14 @@ function main() {
 
 	log_info "Updating hk imports in ${config_path} to version ${hk_version}"
 
-	# Rewrite the versioned package URL wherever it appears
-	sed -i '' -E \
+	# Rewrite matching package URLs without relying on platform-specific sed -i behavior.
+	local -r temp_path="$(mktemp "${TMPDIR:-/tmp}/update-hk-import.XXXXXX")"
+
+	sed -E \
 		"s|package://github\.com/jdx/hk/releases/download/v[^/]+/hk@[^#]+#/|package://github.com/jdx/hk/releases/download/v${hk_version}/hk@${hk_version}#/|g" \
-		"${config_path}"
+		"${config_path}" >"${temp_path}" || exit 1
+
+	cat "${temp_path}" >"${config_path}"
 }
 
 main "$@"
