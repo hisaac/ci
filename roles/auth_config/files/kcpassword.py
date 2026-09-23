@@ -6,8 +6,9 @@
 # This script was taken from https://github.com/timsutton/osx-vm-templates/blob/master/scripts/support/set_kcpassword.py
 # Distributed by MIT license, license can be found at the bottom of this script
 
-import sys
 import os
+import sys
+
 
 def encode_data(passwd):
     # The magic 11 bytes - these are just repeated
@@ -23,11 +24,8 @@ def encode_data(passwd):
     elif (r > 0):
         passwd = passwd + [0] * (key_len - r)
 
-    for n in range(0, len(passwd), len(key)):
-        ki = 0
-        for j in range(n, min(n+len(key), len(passwd))):
-            passwd[j] = passwd[j] ^ key[ki]
-            ki += 1
+    for j in range(len(passwd)):
+        passwd[j] = passwd[j] ^ key[j % key_len]
 
     return bytearray(passwd)
 

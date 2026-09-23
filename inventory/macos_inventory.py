@@ -21,6 +21,7 @@ def get_tart_hostvars(vm_name: str) -> dict | None:
         ["tart", "ip", vm_name],
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         return None
@@ -33,6 +34,7 @@ def get_orka_hostvars(vm_name: str) -> dict | None:
         ["orka3", "vm", "list", "-o", "json"],
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         print(f"Error: orka3 vm list failed: {result.stderr}", file=sys.stderr)
