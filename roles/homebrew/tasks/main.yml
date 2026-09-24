@@ -1,9 +1,0 @@
----
-- name: Append additional packages to installed list
-  ansible.builtin.set_fact:
-    homebrew_installed_packages: "{{ homebrew_installed_packages + homebrew_installed_packages_additional }}"
-    homebrew_taps: "{{ homebrew_taps + homebrew_taps_additional }}"
-
-- name: Install Homebrew and packages
-  ansible.builtin.import_role:
-    name: geerlingguy.mac.homebrew

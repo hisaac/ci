@@ -7,26 +7,11 @@ env {
   ["HK_MISE"] = "true"
 }
 
-local custom_linters = new Mapping<String, Step> {
-  ["ansible-lint"] {
-    glob =
-      List(
-        "playbooks/**/*.yml",
-        "roles/**/*.yml",
-        "inventory/**/*.yml",
-        "ansible.cfg",
-        ".ansible-lint",
-      )
-    check = "ansible-lint"
-    fix = "ansible-lint --fix"
-  }
-}
-
 local builtin_linters = new Mapping<String, Step> {
+  ["actionlint"] = Builtins.actionlint
   ["mise"] = Builtins.mise
   ["pkl"] = Builtins.pkl
   ["pkl-format"] = Builtins.pkl_format
-  ["ruff"] = Builtins.ruff
   ["shellcheck"] = Builtins.shellcheck
   ["shfmt"] = Builtins.shfmt
   ["tombi"] = Builtins.tombi
@@ -47,7 +32,6 @@ local utility_linters = new Mapping<String, Step> {
 }
 
 local all_linters = new Mapping<String, Step> {
-  ...custom_linters
   ...builtin_linters
   ...utility_linters
 }
