@@ -1,8 +1,0 @@
----
-homebrew_taps_additional:
-  - cirruslabs/cli
-
-homebrew_installed_packages_additional:
-  - tart-guest-agent
-
-system_config_hostname_prefix: tart

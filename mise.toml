@@ -2,37 +2,17 @@
 activate_aggressive = true
 experimental = true
 lockfile = true
-python.uv_venv_auto = "create|source"
-
-[env]
-_.python.venv = { path = ".venv", create = true }
-
-[vars]
-xcodes_cache_dir = "{{ config_root }}/.cache/xcodes"
-simruntimes_cache_dir = "{{ config_root }}/.cache/runtime"
 
 [tools]
+actionlint = "latest"
 hk = "latest"
-jq = "latest"
 packer = "latest"
-"pipx:ansible-core" = "latest"
-"pipx:ansible-lint" = "latest"
 pkl = "latest"
-python = { version = "latest", uv = true }
-ruff = "latest"
 shellcheck = "latest"
 shfmt = "latest"
 tart = "latest"
 tombi = "latest"
 usage = "latest"
-uv = "latest"
-xcodes = "latest"
-
-[deps.ansible-galaxy]
-auto = true
-run = "ansible-galaxy install -r requirements.yml"
-sources = ["ansible.cfg", "requirements.yml"]
-outputs = ["galaxy_collections", "galaxy_roles"]
 
 [hooks]
 postinstall = "mise run bootstrap"
@@ -50,52 +30,11 @@ run = "hk check --all"
 alias = ["fmt", "format"]
 run = "hk fix --all"
 
-[tasks.warm-cache]
-run = "scripts/cache-xcodes.bash"
-
-[tasks.run-tart-vm]
-usage = 'arg "<vm>" help="Specific Tart VM to start (e.g. macos:15). Starts all VMs if omitted." default=""'
-run = '''
-nohup tart run "$vm" > /dev/null 2>&1 &
-echo "Waiting for $vm to have an IP..."
-until tart ip "$vm" &>/dev/null; do sleep 2; done
-ip=$(tart ip "$vm")
-echo "Waiting for $vm SSH to be ready..."
-until nc -z "$ip" 22 &>/dev/null; do sleep 2; done
-echo "$vm is ready"
-'''
-
-[tasks.refresh-orka-vm]
-usage = '''
-arg "<vm>" help="Name of the Orka VM to delete and recreate"
-arg "<vm_config>" help="Name of the VM Config to recreate the VM with"
-'''
-run = [
-  "orka3 vm delete {{ usage.vm }} || true",
-  "orka3 vm deploy {{ usage.vm }} --config {{ usage.vm_config }}",
-]
-
-[tasks.provision-orka]
-usage = 'arg "<vm>" help="Name of the Orka VM to provision"'
-env = { VM_PROVIDER = "orka" }
-run = 'VM_NAME="{{ usage.vm }}" ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py'
-
-[tasks.provision-tart]
-usage = 'arg "<vm>" help="Name of the Tart VM to provision"'
-depends = ["run-tart-vm {{ usage.vm }}"]
-env = { VM_PROVIDER = "tart" }
-run = 'VM_NAME="{{ usage.vm }}" ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py'
-
 [tasks.upd]
 run = ["mise upgrade", "mise lock"]
 
 [tasks.upg]
-run = [
-  "mise upgrade --bump",
-  "mise lock",
-  "ansible-galaxy role install -r requirements.yml --force",
-  "ansible-galaxy collection install -r requirements.yml --upgrade",
-]
+run = ["mise upgrade --bump", "mise lock"]
 
 # Hidden Tasks
 
