@@ -1,16 +1,6 @@
 ---
 # Note: These tasks require SIP to be disabled on the target system.
 
-# Note: On macOS 26+, spctl --master-disable requires GUI interaction in
-# System Settings to fully take effect. This command alone is insufficient
-# but is kept for reference and for older macOS versions.
-- name: Disable Gatekeeper
-  ansible.builtin.command:
-    cmd: spctl --master-disable
-  become: true
-  changed_when: true
-  failed_when: false
-
 - name: Enable Developer Mode for Terminal
   ansible.builtin.command:
     cmd: spctl developer-mode enable-terminal

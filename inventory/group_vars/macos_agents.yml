@@ -11,6 +11,23 @@ ansible_ssh_password_mechanism: ssh_askpass
 xcode_install_enabled: true
 macos_update_enabled: true
 
+# Xcode
+
+# Xcode .xip files must be pre-staged in the admin user's Downloads folder before provisioning.
+xcode_default_version: "26.5.0"
+xcode_simruntime_downloads:
+  - build_version: "26.0.1"
+    architecture_variant: arm64
+  - build_version: "26.5"
+    architecture_variant: arm64
+xcode_simulators:
+  - name: "iPhone 17"
+    device_type: "iPhone 17"
+    runtime: "com.apple.CoreSimulator.SimRuntime.iOS-26-0"
+  - name: "iPhone 17"
+    device_type: "iPhone 17"
+    runtime: "com.apple.CoreSimulator.SimRuntime.iOS-26-5"
+
 # Homebrew
 
 homebrew_upgrade_all_packages: true

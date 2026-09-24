@@ -1,10 +1,10 @@
 # hisaac-ci
 
-Ansible-first automation for provisioning macOS CI agents using Tart for VM management.
+Ansible-first automation for provisioning macOS 26 CI agents using Tart for VM management.
 
 ## Overview
 
-This repository provisions macOS Tart VMs using Ansible roles and playbooks.
+This repository provisions macOS 26 (Tahoe) Tart VMs using Ansible roles and playbooks. Other macOS versions are not supported; provisioning assumes the guest already runs macOS 26.
 
 The current active stack is:
 
@@ -22,9 +22,7 @@ The current active stack is:
 ├── inventory/
 │   ├── macos_inventory.py
 │   └── group_vars/
-│       ├── macos_agents.yml
-│       ├── macos_15_agents.yml
-│       └── macos_26_agents.yml
+│       └── macos_agents.yml
 ├── playbooks/
 │   └── provision.yml
 ├── roles/
@@ -52,8 +50,8 @@ The current active stack is:
 
 - macOS host for Tart-based workflows
 - [mise](https://mise.jdx.dev)
-- Tart VMs prepared locally (if using dynamic Tart inventory)
-- Pre-staged Xcode `.xip` and Simulator Runtime `.dmg` assets for the target OS version(s)
+- macOS 26 Tart VMs prepared locally
+- Pre-staged Xcode `.xip` and Simulator Runtime `.dmg` assets for the configured Xcode and iOS versions
 
 ## Setup
 
@@ -82,12 +80,10 @@ Pass `-i inventory/macos_inventory.py` and set `VM_NAME` to the Tart VM to provi
 
 - `inventory/macos_inventory.py` discovers the VM IP via `tart ip <vm_name>`
 - The VM belongs directly to `macos_agents`
-- The playbook loads version-specific configuration after detecting the guest macOS version
+- All agents use the same macOS 26 configuration; there is no OS-version selection or per-version preset loading
+- macOS updates are restricted to 26.x; provisioning does not upgrade guests to a newer major release
 
-Primary variable files:
-
-- `inventory/group_vars/macos_agents.yml`: agent settings (admin credentials, Homebrew packages including `tart-guest-agent`, the `openai/tools` tap, and Dock config)
-- `inventory/group_vars/macos_15_agents.yml` and `inventory/group_vars/macos_26_agents.yml`: Xcode/runtime/simulator presets
+`inventory/group_vars/macos_agents.yml` contains all agent settings: admin credentials, Homebrew packages including `tart-guest-agent`, the `openai/tools` tap, Dock config, and Xcode/runtime/simulator presets.
 
 ## Xcode Cache Inputs
 
@@ -130,7 +126,7 @@ Playbook role order in `playbooks/provision.yml` is intentional:
 - `mise run run-tart-vm macos:26`: starts the named Tart VM and waits for SSH readiness
 - `mise run provision macos:26`: starts the named Tart VM, then runs the provisioning playbook
 
-Replace `macos:26` with your local Tart VM name.
+Replace `macos:26` with your local macOS 26 Tart VM name. The name identifies the VM; it does not select an OS version.
 
 ## Linting and Formatting
 

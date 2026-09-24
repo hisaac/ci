@@ -38,7 +38,7 @@
   async: 1800
   poll: 30
   when: >-
-    not item.label.startswith('macOS') or item.version.split('.')[0] == ansible_facts['distribution_version'].split('.')[0]
+    not item.label.startswith('macOS') or item.version.split('.')[0] == '26'
 
 - name: Check if any updates were actually installed
   ansible.builtin.set_fact:

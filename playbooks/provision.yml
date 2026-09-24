@@ -64,15 +64,6 @@
       when: xcode_clt_update_label != ''
       changed_when: true
 
-- name: Load macOS version-specific configuration
-  hosts: macos_agents
-  gather_facts: true
-  tasks:
-    - name: Load macOS version vars
-      ansible.builtin.include_vars:
-        file: "{{ playbook_dir }}/../inventory/group_vars/macos_{{ ansible_facts['distribution_major_version'] }}_agents.yml"
-      failed_when: false
-
 - name: Install macOS updates
   hosts: macos_agents
   tags: [macos_updates]

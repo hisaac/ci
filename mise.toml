@@ -54,7 +54,7 @@ run = "hk fix --all"
 run = "scripts/cache-xcodes.bash"
 
 [tasks.run-tart-vm]
-usage = 'arg "<vm>" help="Specific Tart VM to start (e.g. macos:15). Starts all VMs if omitted." default=""'
+usage = 'arg "<vm>" help="Specific macOS 26 Tart VM to start (e.g. macos:26). Starts all VMs if omitted." default=""'
 run = '''
 nohup tart run "$vm" > /dev/null 2>&1 &
 echo "Waiting for $vm to have an IP..."
@@ -66,7 +66,7 @@ echo "$vm is ready"
 '''
 
 [tasks.provision]
-usage = 'arg "<vm>" help="Name of the Tart VM to provision"'
+usage = 'arg "<vm>" help="Name of the macOS 26 Tart VM to provision"'
 depends = ["run-tart-vm {{ usage.vm }}"]
 
 run = 'VM_NAME="{{ usage.vm }}" ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py'
