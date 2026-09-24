@@ -15,6 +15,9 @@ macos_update_enabled: true
 
 homebrew_upgrade_all_packages: true
 
+homebrew_taps:
+  - openai/tools
+
 homebrew_installed_packages:
   - bash
   - curl
@@ -23,6 +26,7 @@ homebrew_installed_packages:
   - git-lfs
   - mise
   - python
+  - tart-guest-agent
   - unxip
   - xcodes
 

@@ -107,7 +107,7 @@
   hosts: macos_agents
   tags: [homebrew]
   roles:
-    - role: homebrew
+    - role: geerlingguy.mac.homebrew
 
 - name: Configure git
   hosts: macos_agents

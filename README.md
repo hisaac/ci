@@ -1,15 +1,15 @@
 # hisaac-ci
 
-Ansible-first automation for provisioning macOS CI agents, with Tart VM support for local iteration.
+Ansible-first automation for provisioning macOS CI agents using Tart for VM management.
 
 ## Overview
 
-This repository provisions macOS hosts (VMs or physical machines) using Ansible roles and playbooks.
+This repository provisions macOS Tart VMs using Ansible roles and playbooks.
 
 The current active stack is:
 
 - Root-level Ansible project (`ansible.cfg`, `inventory/`, `playbooks/`, `roles/`)
-- Dynamic Tart inventory (`inventory/tart_inventory.py`) for VM IP discovery at runtime
+- Dynamic Tart inventory (`inventory/macos_inventory.py`) for VM IP discovery at runtime
 - Role-scoped reference scripts in `scripts/` used as implementation references and helpers
 - Toolchain and workflow orchestration via `mise`
 
@@ -20,13 +20,11 @@ The current active stack is:
 ├── ansible.cfg
 ├── requirements.yml
 ├── inventory/
-│   ├── tart_inventory.py
+│   ├── macos_inventory.py
 │   └── group_vars/
 │       ├── macos_agents.yml
 │       ├── macos_15_agents.yml
-│       ├── macos_26_agents.yml
-│       ├── tart_agents.yml
-│       └── orka_agents.yml
+│       └── macos_26_agents.yml
 ├── playbooks/
 │   └── provision.yml
 ├── roles/
@@ -36,7 +34,6 @@ The current active stack is:
 │   ├── ssh_config/
 │   ├── system_config/
 │   ├── auth_config/
-│   ├── homebrew/
 │   └── xcode/
 ├── scripts/
 │   ├── xcode/
@@ -81,18 +78,15 @@ Run commands from the repository root.
 
 ## Inventory and Variables
 
-`ansible.cfg` points to `inventory/tart_inventory.py` as the default inventory.
+Pass `-i inventory/macos_inventory.py` and set `VM_NAME` to the Tart VM to provision.
 
-- `inventory/tart_inventory.py` discovers VM IPs via `tart ip <vm_name>`
-- Hosts are grouped into:
-  - `macos_agents` (parent)
-  - `tart_agents` (runtime Tart VM group)
-  - version-specific groups like `macos_15_agents` and `macos_26_agents`
+- `inventory/macos_inventory.py` discovers the VM IP via `tart ip <vm_name>`
+- The VM belongs directly to `macos_agents`
+- The playbook loads version-specific configuration after detecting the guest macOS version
 
 Primary variable files:
 
-- `inventory/group_vars/macos_agents.yml`: shared settings (admin credentials, Homebrew base packages, Dock config)
-- `inventory/group_vars/tart_agents.yml`: Tart-specific packages (`tart-guest-agent`)
+- `inventory/group_vars/macos_agents.yml`: agent settings (admin credentials, Homebrew packages including `tart-guest-agent`, the `openai/tools` tap, and Dock config)
 - `inventory/group_vars/macos_15_agents.yml` and `inventory/group_vars/macos_26_agents.yml`: Xcode/runtime/simulator presets
 
 ## Xcode Cache Inputs
@@ -104,15 +98,15 @@ The `xcode` role installs all `*.xip` files found in the admin user's Downloads 
 Run the full playbook:
 
 ```bash
-ansible-playbook playbooks/provision.yml
+VM_NAME=macos:26 ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py
 ```
 
 Or run common role slices with tags:
 
 ```bash
-ansible-playbook playbooks/provision.yml --tags xcode
-ansible-playbook playbooks/provision.yml --tags homebrew
-ansible-playbook playbooks/provision.yml --tags system_config
+VM_NAME=macos:26 ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py --tags xcode
+VM_NAME=macos:26 ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py --tags homebrew
+VM_NAME=macos:26 ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py --tags system_config
 ```
 
 Playbook role order in `playbooks/provision.yml` is intentional:
@@ -123,7 +117,7 @@ Playbook role order in `playbooks/provision.yml` is intentional:
 4. `ssh_config`
 5. `system_config`
 6. `auth_config`
-7. `homebrew`
+7. `geerlingguy.mac.homebrew`
 8. `geerlingguy.mac.dock`
 9. `xcode`
 10. Spotlight re-index task
@@ -133,15 +127,10 @@ Playbook role order in `playbooks/provision.yml` is intentional:
 
 `mise` includes helper tasks for local Tart loops:
 
-- `mise run run-tart-vms`: starts configured VMs and waits for SSH readiness
-- `mise run provision`: verifies Xcode/simruntime cache inputs, starts VMs, then runs `ansible-playbook playbooks/provision.yml`
-- `mise run shutdown-tart-vms`: shuts down hosts in `tart_agents`
-- `mise run refresh-tart-vms`: recreates local Tart VM clones from frozen images
+- `mise run run-tart-vm macos:26`: starts the named Tart VM and waits for SSH readiness
+- `mise run provision macos:26`: starts the named Tart VM, then runs the provisioning playbook
 
-Adjust VM names in:
-
-- `inventory/tart_inventory.py` (`VMS` list)
-- `mise.toml` (`tasks.run-tart-vms` and `tasks.refresh-tart-vms`)
+Replace `macos:26` with your local Tart VM name.
 
 ## Linting and Formatting
 

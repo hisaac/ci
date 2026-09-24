@@ -13,7 +13,7 @@ import sys
 def encode_data(passwd):
     # The magic 11 bytes - these are just repeated
     # 0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F
-    key = [125,137,82,35,210,188,221,234,163,185,31]
+    key = [125, 137, 82, 35, 210, 188, 221, 234, 163, 185, 31]
     key_len = len(key)
 
     passwd = [ord(x) for x in list(passwd)]
@@ -21,7 +21,7 @@ def encode_data(passwd):
     r = len(passwd) % key_len
     if len(passwd) == 11:
         passwd += [0]
-    elif (r > 0):
+    elif r > 0:
         passwd = passwd + [0] * (key_len - r)
 
     for j in range(len(passwd)):
@@ -29,10 +29,11 @@ def encode_data(passwd):
 
     return bytearray(passwd)
 
+
 if __name__ == "__main__":
     runner_pwd_encoded = encode_data(sys.argv[1])
-    fd = os.open('/etc/kcpassword', os.O_WRONLY | os.O_CREAT, 0o600)
-    file = os.fdopen(fd, 'wb')
+    fd = os.open("/etc/kcpassword", os.O_WRONLY | os.O_CREAT, 0o600)
+    file = os.fdopen(fd, "wb")
     file.truncate(0)
     file.write(runner_pwd_encoded)
     file.close()

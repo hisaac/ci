@@ -1,5 +1,12 @@
 # macOS VM Bootstrapping: How GitHub Actions Runner Images Work
 
+> **Provenance:** Local research summary of the macOS image-building scripts in
+> [`actions/runner-images`](https://github.com/actions/runner-images), not an upstream document or a provisioning guide for this repository.
+>
+> **Last content update:** May 22, 2026, in local commit
+> [`a19b31b9c25a`](https://github.com/hisaac/ci/commit/a19b31b9c25adf7c15685c4bdedef8b4a79339ea).
+> The original upstream revision was not recorded.
+
 This document explains how macOS virtual machines are bootstrapped for GitHub Actions runners. The VMs are not truly headless — they boot into a full GUI session — but are configured so that no human interaction is ever required. This enables unattended UI automation, Xcode testing, and job provisioning.
 
 ---

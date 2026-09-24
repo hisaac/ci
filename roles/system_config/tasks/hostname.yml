@@ -2,7 +2,7 @@
 # Install a LaunchDaemon that generates a unique hostname on each boot.
 # Since many VMs are cloned from the same base image and run simultaneously,
 # they'd all share the same hostname causing Bonjour/mDNS conflicts.
-# A millisecond-precision timestamp ensures uniqueness without external coordination.
+# A random UUID avoids hostname collisions without external coordination.
 #
 # Inspired by:
 # https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-hostname.sh
@@ -15,8 +15,8 @@
   become: true
 
 - name: Install dynamic hostname script
-  ansible.builtin.template:
-    src: hostname/set-dynamic-hostname.sh.j2
+  ansible.builtin.copy:
+    src: hostname/set-dynamic-hostname.sh
     dest: /usr/local/bin/set-dynamic-hostname.sh
     owner: root
     mode: "0755"

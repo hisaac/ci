@@ -65,25 +65,10 @@ until nc -z "$ip" 22 &>/dev/null; do sleep 2; done
 echo "$vm is ready"
 '''
 
-[tasks.refresh-orka-vm]
-usage = '''
-arg "<vm>" help="Name of the Orka VM to delete and recreate"
-arg "<vm_config>" help="Name of the VM Config to recreate the VM with"
-'''
-run = [
-  "orka3 vm delete {{ usage.vm }} || true",
-  "orka3 vm deploy {{ usage.vm }} --config {{ usage.vm_config }}",
-]
-
-[tasks.provision-orka]
-usage = 'arg "<vm>" help="Name of the Orka VM to provision"'
-env = { VM_PROVIDER = "orka" }
-run = 'VM_NAME="{{ usage.vm }}" ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py'
-
-[tasks.provision-tart]
+[tasks.provision]
 usage = 'arg "<vm>" help="Name of the Tart VM to provision"'
 depends = ["run-tart-vm {{ usage.vm }}"]
-env = { VM_PROVIDER = "tart" }
+
 run = 'VM_NAME="{{ usage.vm }}" ansible-playbook playbooks/provision.yml -i inventory/macos_inventory.py'
 
 [tasks.upd]

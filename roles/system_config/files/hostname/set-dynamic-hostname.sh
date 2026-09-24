@@ -4,8 +4,7 @@
 # Inspired by:
 # https://github.com/actions/runner-images/blob/main/images/macos/scripts/build/configure-hostname.sh
 
-prefix="{{ system_config_hostname_prefix | default('Mac') }}"
-name="${prefix}-$(python3 -c 'from time import time; print(int(round(time() * 1000)))')"
+name="tart-$(/usr/bin/uuidgen)"
 scutil --set HostName "${name}.local"
 scutil --set LocalHostName "${name}"
 scutil --set ComputerName "${name}.local"
