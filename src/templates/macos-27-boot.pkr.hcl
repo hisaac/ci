@@ -42,46 +42,48 @@ source "tart-cli" "tart" {
   ]
 
   boot_command = [
-    # Enable on-screen keyboard for debugging
-    "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
-    "<wait10s>open 'x-apple.systempreferences:com.apple.preference.universalaccess?Keyboard'<enter>",
-    "<wait10s><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><spacebar>",
-    "<wait10s><tab><tab><tab><tab><tab><tab><tab><spacebar>",
+    "<wait60s>",
 
-    # Enable Keyboard navigation
-    # This is so that we can navigate the System Settings app using the keyboard
-    "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
-    "<wait10s><wait10s>defaults write NSGlobalDomain AppleKeyboardUIMode -int 3<enter>",
+    # Open System Settings to give it time to settle
+    "<wait10s><leftAltOn><spacebar><leftAltOff><wait2s>System Settings<wait10s><enter>",
+
+    # Enable Keyboard navigation so we can navigate System Settings using the keyboard
+    "<wait10s><leftAltOn><spacebar><leftAltOff><wait2s>Terminal<wait10s><enter>",
+    "<wait10s>defaults write NSGlobalDomain AppleKeyboardUIMode -int 3<enter>",
+
+    # # Enable on-screen keyboard for debugging
+    # "<wait10s>open 'x-apple.systempreferences:com.apple.preference.universalaccess?Keyboard'<enter>",
+    # "<wait10s><tab><tab><tab><tab><tab><tab><tab><tab><tab><spacebar>",
 
     # Disable Gatekeeper (1/2)
-    "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
+    "<wait10s><leftAltOn><spacebar><leftAltOff><wait2s>Terminal<wait10s><enter>",
     "<wait10s>sudo spctl --global-disable<enter>",
     "<wait10s>admin<enter>",
     # Disable Gatekeeper (2/2)
     "<wait10s>open 'x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension'<enter>",
-    "<wait10s><leftShiftOn><tab><tab><tab><tab><tab><tab><leftShiftOff>",
+    "<wait10s><leftShiftOn><tab><tab><tab><tab><tab><tab><tab><tab><leftShiftOff>",
     "<wait10s><down><wait1s><down><wait1s><enter>",
     "<wait10s>admin<enter>",
     "<wait10s><leftShiftOn><tab><leftShiftOff><wait1s><spacebar>",
 
     # Enable Screen Sharing through the UI to grant the required TCC permissions
-    "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
+    "<wait10s><leftAltOn><spacebar><leftAltOff><wait2s>Terminal<wait10s><enter>",
     "<wait10s>open 'x-apple.systempreferences:com.apple.Sharing-Settings.extension'<enter>",
     "<wait10s><tab><tab><tab><tab><tab><tab><spacebar>",
     "<wait10s>admin<enter>",
 
-    # Disable on-screen keyboard
-    "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
-    "<wait10s>open 'x-apple.systempreferences:com.apple.preference.universalaccess?Keyboard'<enter>",
-    "<wait10s><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><spacebar>",
-    "<wait10s><tab><tab><tab><tab><tab><tab><tab><spacebar>",
-    "<wait10s><tab><spacebar>",
+    # # Disable on-screen keyboard
+    # "<wait10s><leftAltOn><spacebar><leftAltOff><wait2s>Terminal<wait10s><enter>",
+    # "<wait10s>open 'x-apple.systempreferences:com.apple.preference.universalaccess?Keyboard'<enter>",
+    # "<wait10s><tab><tab><tab><tab><tab><tab><tab><spacebar>",
+    # "<wait10s><tab><spacebar>",
 
     # Quit System Settings
+    "<wait10s><leftAltOn><spacebar><leftAltOff><wait2s>System Settings<wait10s><enter>",
     "<wait10s><leftAltOn>q<leftAltOff>",
 
     # Quit Terminal
-    "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
+    "<wait10s><leftAltOn><spacebar><leftAltOff><wait2s>Terminal<wait10s><enter>",
     "<wait10s><leftAltOn>q<leftAltOff>",
   ]
 }
