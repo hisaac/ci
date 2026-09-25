@@ -42,12 +42,12 @@ source "tart-cli" "tart" {
   ]
 
   boot_command = [
-    # Wait for the cloned VM to boot and log in automatically
-    # "<wait120s>",
     # Enable on-screen keyboard for debugging
-    # "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
-    # "<wait10s>open 'x-apple.systempreferences:com.apple.preference.universalaccess?Keyboard'<enter>",
-    #
+    "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
+    "<wait10s>open 'x-apple.systempreferences:com.apple.preference.universalaccess?Keyboard'<enter>",
+    "<wait10s><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><spacebar>",
+    "<wait10s><tab><tab><tab><tab><tab><tab><tab><spacebar>",
+
     # Enable Keyboard navigation
     # This is so that we can navigate the System Settings app using the keyboard
     "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
@@ -69,6 +69,13 @@ source "tart-cli" "tart" {
     "<wait10s>open 'x-apple.systempreferences:com.apple.Sharing-Settings.extension'<enter>",
     "<wait10s><tab><tab><tab><tab><tab><tab><spacebar>",
     "<wait10s>admin<enter>",
+
+    # Disable on-screen keyboard
+    "<wait10s><leftAltOn><spacebar><leftAltOff>Terminal<wait10s><enter>",
+    "<wait10s>open 'x-apple.systempreferences:com.apple.preference.universalaccess?Keyboard'<enter>",
+    "<wait10s><tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><spacebar>",
+    "<wait10s><tab><tab><tab><tab><tab><tab><tab><spacebar>",
+    "<wait10s><tab><spacebar>",
 
     # Quit System Settings
     "<wait10s><leftAltOn>q<leftAltOff>",
