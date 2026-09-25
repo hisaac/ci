@@ -35,6 +35,22 @@ run = "hk check --all"
 alias = ["fmt", "format"]
 run = "hk fix --all"
 
+[tasks."build:base"]
+env = { PACKER_LOG = "1", PACKER_LOG_PATH = "packer-base.log" }
+run = [
+  "packer init src/templates/macos-27-base.pkr.hcl",
+  "packer validate src/templates/macos-27-base.pkr.hcl",
+  "packer build -on-error=ask src/templates/macos-27-base.pkr.hcl",
+]
+
+[tasks."build:boot"]
+env = { PACKER_LOG = "1", PACKER_LOG_PATH = "packer-boot.log" }
+run = [
+  "packer init src/templates/macos-27-boot.pkr.hcl",
+  "packer validate src/templates/macos-27-boot.pkr.hcl",
+  "packer build -on-error=ask src/templates/macos-27-boot.pkr.hcl",
+]
+
 [tasks.upd]
 run = ["mise upgrade", "mise lock"]
 

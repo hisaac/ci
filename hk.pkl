@@ -21,6 +21,7 @@ steps {
   ["pkl"] = Builtins.pkl
   ["pkl-format"] = Builtins.pkl_format
   ["ryl"] = Builtins.ryl
+  ["shellcheck"] = Builtins.shellcheck
   ["shfmt"] = Builtins.shfmt
   ["tombi"] = Builtins.tombi
 
@@ -36,19 +37,6 @@ steps {
     check {
       command {
         argv = Builtins.lychee.check.command.argv + List("--config", ".config/lychee.toml")
-      }
-    }
-  }
-  ["shellcheck"] = (Builtins.shellcheck) {
-    check {
-      command {
-        argv = Builtins.shellcheck.check.command.argv + List("--rcfile", ".config/shellcheckrc")
-      }
-    }
-    check_diff {
-      command {
-        argv =
-          Builtins.shellcheck.check_diff.command.argv + List("--rcfile", ".config/shellcheckrc")
       }
     }
   }
