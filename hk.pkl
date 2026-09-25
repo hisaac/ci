@@ -1,52 +1,70 @@
-amends "package://github.com/jdx/hk/releases/download/v2.1.0/hk@2.1.0#/Config.pkl"
+amends "package://github.com/jdx/hk/releases/download/v2.2.0/hk@2.2.0#/Config.pkl"
 
-import "package://github.com/jdx/hk/releases/download/v2.1.0/hk@2.1.0#/Builtins.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.2.0/hk@2.2.0#/Builtins.pkl"
 
 fail_fast = false
 env {
-  ["HK_MISE"] = "true"
+  ["HK_MISE"] = "1"
 }
 
-local builtin_linters = new Mapping<String, Step> {
+steps {
+  ["packer"] = new Step {
+    glob = "*.pkr.hcl"
+    check = "packer fmt -check {{ files }}"
+    fix = "packer fmt {{ files }}"
+  }
+
+  // Builtins
   ["actionlint"] = Builtins.actionlint
+  ["editorconfig-checker"] = Builtins.editorconfig_checker
   ["mise"] = Builtins.mise
   ["pkl"] = Builtins.pkl
   ["pkl-format"] = Builtins.pkl_format
-  ["shellcheck"] = Builtins.shellcheck
+  ["ryl"] = Builtins.ryl
   ["shfmt"] = Builtins.shfmt
   ["tombi"] = Builtins.tombi
-}
 
-local utility_linters = new Mapping<String, Step> {
+  ["ls-lint"] = (Builtins.ls_lint) {
+    check {
+      command {
+        argv = Builtins.ls_lint.check.command.argv + List("-config", ".config/ls-lint.yml")
+      }
+    }
+  }
+  ["lychee"] = (Builtins.lychee) {
+    exclude = "mise.lock"
+    check {
+      command {
+        argv = Builtins.lychee.check.command.argv + List("--config", ".config/lychee.toml")
+      }
+    }
+  }
+  ["shellcheck"] = (Builtins.shellcheck) {
+    check {
+      command {
+        argv = Builtins.shellcheck.check.command.argv + List("--rcfile", ".config/shellcheckrc")
+      }
+    }
+    check_diff {
+      command {
+        argv =
+          Builtins.shellcheck.check_diff.command.argv + List("--rcfile", ".config/shellcheckrc")
+      }
+    }
+  }
+
+  // Utilities
   ["byte-order-marker"] = Builtins.byte_order_marker
   ["check-added-large-files"] = Builtins.check_added_large_files
   ["check-case-conflict"] = Builtins.check_case_conflict
   ["check-executables-have-shebangs"] = Builtins.check_executables_have_shebangs
   ["check-merge-conflict"] = Builtins.check_merge_conflict
   ["check-symlinks"] = Builtins.check_symlinks
+  ["destroyed_symlinks"] = Builtins.destroyed_symlinks
   ["detect-private-key"] = Builtins.detect_private_key
   ["fix-smart-quotes"] = Builtins.fix_smart_quotes
+  ["forbid-submodules"] = Builtins.forbid_submodules
   ["mixed-line-ending"] = Builtins.mixed_line_ending
   ["newlines"] = Builtins.newlines
   ["trailing-whitespace"] = Builtins.trailing_whitespace
-}
-
-local all_linters = new Mapping<String, Step> {
-  ...builtin_linters
-  ...utility_linters
-}
-
-hooks {
-  ["pre-commit"] {
-    fix = true
-    stash = "git"
-    steps = all_linters
-  }
-  ["fix"] {
-    fix = true
-    steps = all_linters
-  }
-  ["check"] {
-    steps = all_linters
-  }
 }

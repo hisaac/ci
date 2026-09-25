@@ -1,5 +1,6 @@
 ---
-# Documentation for this file: https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
+# Documentation for this file:
+# https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
 version: 2
 
 updates:

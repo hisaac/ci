@@ -2,10 +2,15 @@
 activate_aggressive = true
 experimental = true
 lockfile = true
+minimum_release_age = "0"
 
 [tools]
 actionlint = "latest"
+"aqua:owenlamont/ryl" = "latest"
+editorconfig-checker = "latest"
 hk = "latest"
+ls-lint = "latest"
+lychee = "latest"
 packer = "latest"
 pkl = "latest"
 shellcheck = "latest"

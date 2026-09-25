@@ -1,0 +1,7 @@
+---
+ls:
+  .*: kebab-case
+
+ignore:
+  - README.md
+  - scripts/xcode/tests/test_xcode-utils.bash

@@ -120,10 +120,10 @@ function prewarm_simulators() {
 
 	# Wait for the "update_dyld_sim_shared_cache" process to finish to avoid wasting CPU cycles after boot
 	# sources:
-	#   - https://github.com/cirruslabs/macos-image-templates/blob/5b17f4e2644723b2124c5cf1c1def4ba81fc6db7/templates/xcode.pkr.hcl#L243-L252
 	#   - https://apple.stackexchange.com/questions/412101/update-dyld-sim-shared-cache-is-taking-up-a-lot-of-memory
+	#   - https://github.com/cirruslabs/macos-image-templates/blob/5b17f4e2644723b2124c5cf1c1def4ba81fc6db7/templates/xcode.pkr.hcl#L243-L252
 	#   - https://github.com/cirruslabs/macos-image-templates/issues/236
-	#   - https://stackoverflow.com/a/68394101/9316533
+	#   - https://stackoverflow.com/questions/27564160/what-does-com-apple-coresimulator-coresimulatorservice-do/68394101#68394101
 	echo "Waiting for simulator shared cache to update..."
 
 	local -r selected_xcode_version="$(get_selected_xcode_version)"

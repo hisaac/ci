@@ -1,9 +1,8 @@
-# General
+# general
 .DS_Store
 .env
 
-# Cached files
+# caches
 .cache/
-
-# Packer
+.lycheecache
 packer_cache/
