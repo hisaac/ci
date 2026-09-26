@@ -19,7 +19,7 @@ variable "macos_version" {
 
 variable "vm_name" {
   type    = string
-  default = "macos-27-base"
+  default = "macos-27-01-base"
 }
 
 variable "vm_username" {
@@ -40,7 +40,7 @@ data "ipsw" "macos" {
   device  = "VirtualMac2,1"
 }
 
-source "tart-cli" "tart" {
+source "tart-cli" "base" {
   from_ipsw          = data.ipsw.macos.url
   vm_name            = var.vm_name
   cpu_count          = 4

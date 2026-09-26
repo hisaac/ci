@@ -7,24 +7,24 @@ mise run build:base
 mise run build:boot
 ```
 
-`build:base` installs macOS from the IPSW into `macos-27-base`, creates the
+`build:base` installs macOS from the IPSW into `macos-27-01-base`, creates the
 admin account, enables automatic login and SSH, and waits for SSH to become
 available. It then waits for Spotlight metadata power assertions to remain
 absent for 60 seconds, failing if they do not settle within 15 minutes. This is
 an indexing-idle heuristic, not proof that every item is indexed. It does not
 run the UI boot commands.
 
-`build:boot` clones `macos-27-base` into `macos-27-boot`, runs the boot commands
-from `src/templates/macos-27-boot.pkr.hcl`, and checks keyboard navigation,
+`build:boot` clones `macos-27-01-base` into `macos-27-02-ci-gui`, runs the boot commands
+from `src/templates/macos-27-02-ci-gui.pkr.hcl`, and checks keyboard navigation,
 Gatekeeper, and Screen Sharing. The base VM is preserved for future attempts.
 
 To troubleshoot, edit the boot template and rerun only `mise run build:boot`.
-If the previous attempt left a `macos-27-boot` VM, stop it if it is running
+If the previous attempt left a `macos-27-02-ci-gui` VM, stop it if it is running
 and delete that clone before retrying:
 
 ```sh
-tart stop macos-27-boot
-tart delete macos-27-boot
+tart stop macos-27-02-ci-gui
+tart delete macos-27-02-ci-gui
 mise run build:boot
 ```
 

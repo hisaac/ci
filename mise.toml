@@ -38,17 +38,33 @@ run = "hk fix --all"
 [tasks."build:base"]
 env = { PACKER_LOG = "1", PACKER_LOG_PATH = "packer-base.log" }
 run = [
-  "packer init src/templates/macos-27-base.pkr.hcl",
-  "packer validate src/templates/macos-27-base.pkr.hcl",
-  "packer build -on-error=ask src/templates/macos-27-base.pkr.hcl",
+  "packer init src/templates/macos-27-01-base.pkr.hcl",
+  "packer validate src/templates/macos-27-01-base.pkr.hcl",
+  "packer build -on-error=ask src/templates/macos-27-01-base.pkr.hcl",
 ]
 
-[tasks."build:boot"]
+[tasks."build:ci-gui"]
 env = { PACKER_LOG = "1", PACKER_LOG_PATH = "packer-boot.log" }
 run = [
-  "packer init src/templates/macos-27-boot.pkr.hcl",
-  "packer validate src/templates/macos-27-boot.pkr.hcl",
-  "packer build -on-error=ask src/templates/macos-27-boot.pkr.hcl",
+  "packer init src/templates/macos-27-02-ci-gui.pkr.hcl",
+  "packer validate src/templates/macos-27-02-ci-gui.pkr.hcl",
+  "packer build -on-error=ask src/templates/macos-27-02-ci-gui.pkr.hcl",
+]
+
+[tasks."build:ci-recovery"]
+env = { PACKER_LOG = "1", PACKER_LOG_PATH = "packer-recovery.log" }
+run = [
+  "packer init src/templates/macos-27-03-ci-recovery.pkr.hcl",
+  "packer validate src/templates/macos-27-03-ci-recovery.pkr.hcl",
+  "packer build -on-error=ask src/templates/macos-27-03-ci-recovery.pkr.hcl",
+]
+
+[tasks."build:ci-ssh"]
+env = { PACKER_LOG = "1", PACKER_LOG_PATH = "packer-ssh.log" }
+run = [
+  "packer init src/templates/macos-27-04-ci-ssh.pkr.hcl",
+  "packer validate src/templates/macos-27-04-ci-ssh.pkr.hcl",
+  "packer build -on-error=ask src/templates/macos-27-04-ci-ssh.pkr.hcl",
 ]
 
 [tasks.upd]
