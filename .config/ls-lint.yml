@@ -4,4 +4,4 @@ ls:
 
 ignore:
   - README.md
-  - src/scripts/xcode/tests/test_xcode-utils.bash
+  - src/templates/scripts/xcode/tests/test_xcode-utils.bash
