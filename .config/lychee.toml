@@ -1,0 +1,6 @@
+cache = true
+exclude = [
+	# StackExchange and StackOverflow URLs keep throwing 403s for some reason
+	'^https?://(.*\.)?stackexchange\.com',
+	'^https?://(.*\.)?stackoverflow\.com',
+]

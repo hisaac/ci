@@ -1,28 +1,10 @@
-# General
+# general
+*.env
+*.log
 .DS_Store
 .env
 
-# Cached files
+# caches
 .cache/
-
-# Packer
+.lycheecache
 packer_cache/
-
-# Ansible
-.ansible
-ansible.log
-
-# External roles/collections installed via ansible-galaxy
-galaxy_roles/
-galaxy_collections/
-
-# Ansible retry files
-*.retry
-
-# Vault password file (if used locally)
-.vault_pass
-
-# Python
-__pycache__
-.ruff_cache
-.venv/
