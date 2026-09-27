@@ -45,4 +45,48 @@ source "tart-cli" "ci-ssh" {
 
 build {
   sources = ["source.tart-cli.ci-ssh"]
+
+  provisioner "shell" {
+    script           = "${path.root}/scripts/auth_config/enable-passwordless-sudo.bash"
+    use_env_var_file = true
+    environment_vars = ["USERNAME=${var.vm_username}", "PASSWORD=${var.vm_password}"]
+  }
+
+  provisioner "shell" {
+    script          = "${path.root}/scripts/xcode_clt/install-xcode-command-line-tools.bash"
+    execute_command = "{{ .Vars }} sudo -n /bin/bash -euo pipefail '{{ .Path }}'"
+  }
+
+  provisioner "shell" {
+    script           = "${path.root}/scripts/homebrew/install-homebrew.bash"
+    use_env_var_file = true
+    environment_vars = ["NONINTERACTIVE=1"]
+  }
+
+  provisioner "shell" {
+    script = "${path.root}/scripts/mise/install-mise.bash"
+  }
+
+  provisioner "shell" {
+    inline = ["mkdir -p /tmp/hisaac-ci-shell-config"]
+  }
+
+  provisioner "file" {
+    source      = "${path.root}/data/"
+    destination = "/tmp/hisaac-ci-shell-config/"
+  }
+
+  provisioner "shell" {
+    script          = "${path.root}/scripts/system_config/install-shell-config.bash"
+    execute_command = "{{ .Vars }} /bin/bash -euo pipefail '{{ .Path }}' /tmp/hisaac-ci-shell-config"
+  }
+
+  provisioner "shell" {
+    inline = [
+      "rm -rf /tmp/hisaac-ci-shell-config",
+      "xcode-select --print-path",
+      "/bin/zsh -lc 'brew --version && mise --version'",
+      "/bin/bash -lc 'brew --version && mise --version'",
+    ]
+  }
 }

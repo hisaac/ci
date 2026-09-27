@@ -69,9 +69,9 @@ source "tart-cli" "base" {
 }
 
 build {
-  sources = ["source.tart-cli.tart"]
+  sources = ["source.tart-cli.base"]
 
   provisioner "shell" {
-    script = "scripts/system_config/wait-for-spotlight.bash"
+    script = "${path.root}/scripts/system_config/wait-for-spotlight.bash"
   }
 }
