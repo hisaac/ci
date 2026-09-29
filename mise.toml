@@ -25,7 +25,7 @@ postinstall = "mise run bootstrap"
 # Tasks
 
 [tasks.bootstrap]
-run = ["hk install --mise", { task = "_bootstrap_hk" }]
+run = [{ task = "_bootstrap_hk" }, "mise lock"]
 
 [tasks.check]
 alias = ["chk", "lint"]
@@ -68,15 +68,15 @@ run = [
 ]
 
 [tasks.upd]
-run = ["mise upgrade", "mise lock"]
+run = "mise upgrade"
 
 [tasks.upg]
-run = ["mise upgrade --bump", "mise lock"]
+run = "mise upgrade --bump"
 
 # Hidden Tasks
 
 [tasks._bootstrap_hk]
 hide = true
-run = "scripts/update-hk-import.bash"
+run = ["hk install --mise", "scripts/update-hk-import.bash"]
 sources = ["hk.pkl", "mise.lock", "mise.toml", "scripts/update-hk-import.bash"]
 outputs = { auto = true }
