@@ -97,4 +97,8 @@ build {
       "echo '${var.vm_password}' | sudo -S -p '' launchctl print system/com.apple.screensharing > /dev/null",
     ]
   }
+
+  provisioner "shell" {
+    script = "${path.root}/scripts/system_config/wait-for-spotlight.bash"
+  }
 }

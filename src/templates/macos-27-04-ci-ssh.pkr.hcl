@@ -40,7 +40,6 @@ source "tart-cli" "ci-ssh" {
     "--no-audio",
     "--vnc-experimental",
   ]
-
 }
 
 build {
@@ -48,18 +47,15 @@ build {
 
   provisioner "shell" {
     script           = "${path.root}/scripts/auth_config/enable-passwordless-sudo.bash"
-    use_env_var_file = true
     environment_vars = ["USERNAME=${var.vm_username}", "PASSWORD=${var.vm_password}"]
   }
 
   provisioner "shell" {
-    script          = "${path.root}/scripts/xcode_clt/install-xcode-command-line-tools.bash"
-    execute_command = "{{ .Vars }} sudo -n /bin/bash -euo pipefail '{{ .Path }}'"
+    script = "${path.root}/scripts/xcode_clt/install-xcode-command-line-tools.bash"
   }
 
   provisioner "shell" {
     script           = "${path.root}/scripts/homebrew/install-homebrew.bash"
-    use_env_var_file = true
     environment_vars = ["NONINTERACTIVE=1"]
   }
 
@@ -77,16 +73,40 @@ build {
   }
 
   provisioner "shell" {
-    script          = "${path.root}/scripts/system_config/install-shell-config.bash"
-    execute_command = "{{ .Vars }} /bin/bash -euo pipefail '{{ .Path }}' /tmp/hisaac-ci-shell-config"
+    scripts = [
+      "${path.root}/scripts/system_config/install-shell-config.bash",
+      "${path.root}/scripts/mise/install-mise-tools.bash",
+      "${path.root}/scripts/tart/install-tart-guest-agent.bash",
+    ]
+    environment_vars = ["DATA_DIRECTORY=/tmp/hisaac-ci-shell-config"]
   }
 
   provisioner "shell" {
     inline = [
-      "rm -rf /tmp/hisaac-ci-shell-config",
       "xcode-select --print-path",
-      "/bin/zsh -lc 'brew --version && mise --version'",
-      "/bin/bash -lc 'brew --version && mise --version'",
+      "/bin/zsh -lc 'brew --version && mise --version && ruby --version && node --version && python --version'",
+      "/bin/bash -lc 'brew --version && mise --version && ruby --version && node --version && python --version'",
     ]
+  }
+
+  provisioner "shell" {
+    script           = "${path.root}/scripts/auth_config/configure-ssh-tcc.bash"
+    environment_vars = ["DATA_DIRECTORY=/tmp/hisaac-ci-shell-config"]
+  }
+
+  provisioner "shell" {
+    inline = ["rm -rf /tmp/hisaac-ci-shell-config"]
+  }
+
+  provisioner "shell" {
+    script = "${path.root}/scripts/system_config/wait-for-spotlight.bash"
+  }
+
+  provisioner "shell" {
+    scripts = [
+      "${path.root}/scripts/system_config/dismiss-notifications.applescript",
+      "${path.root}/scripts/system_config/quit-applications.applescript",
+    ]
+    execute_command = "{{ .Vars }} /usr/bin/osascript '{{ .Path }}'"
   }
 }

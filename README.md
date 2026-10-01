@@ -28,11 +28,12 @@ tart delete macos-27-02-ci-gui
 mise run build:boot
 ```
 
-Both builds use Packer's `-on-error=ask` to allow inspection after a failure.
+All build tasks use Packer's `-on-error=ask` to allow inspection after a failure.
 Packer debug logging is enabled for all commands in these tasks, writing to
-`packer-base.log` and `packer-boot.log`, respectively. Each Packer invocation
-replaces its task's log, so the build log remains after a normal task run.
-These log files are ignored by Git.
+`.logs/packer-base.log`, `.logs/packer-boot.log`, `.logs/packer-recovery.log`,
+and `.logs/packer-ssh.log`. Each task creates `.logs/` before running Packer.
+Each Packer invocation replaces its task's log, so the build log remains after
+a normal task run. The `.logs/` directory is ignored by Git.
 The default username and password are both `admin`. When invoking Packer
 directly, build each template file separately. For a differently named base VM,
 set `vm_base_name` on the boot build to match the base build's `vm_name`.

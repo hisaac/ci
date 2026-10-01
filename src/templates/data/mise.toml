@@ -1,0 +1,26 @@
+[settings]
+activate_aggressive = true
+
+[tools]
+gh = "latest"
+git-lfs = "latest"
+go = "latest"
+java = "latest"
+jq = "latest"
+node = "latest"
+python = "latest"
+ruby = "latest"
+rust = "latest"
+uv = "latest"
+xcodes = "latest"
+
+[bootstrap.directories."~/.ssh"]
+mode = "0700"
+
+[bootstrap.brew.taps]
+"openai/tools" = "https://github.com/openai/homebrew-tools.git"
+
+[bootstrap.packages]
+"brew:coreutils" = "latest"
+"brew:git" = "latest"
+"brew:openai/tools/tart-guest-agent" = "latest"

@@ -3,8 +3,12 @@
 *.log
 .DS_Store
 .env
+/.logs/
 
 # caches
 .cache/
 .lycheecache
 packer_cache/
+
+# local agent verification scripts
+/.agent-tests/
