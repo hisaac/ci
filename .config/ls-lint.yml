@@ -3,6 +3,7 @@ ls:
   .*: kebab-case
 
 ignore:
+  - AGENTS.md
   - LICENSE.md
   - README.md
   - src/templates/scripts/xcode/tests/test_xcode-utils.bash
