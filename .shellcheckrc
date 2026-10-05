@@ -5,3 +5,7 @@ source-path=SCRIPTDIR
 # On most OS, shebangs can only specify a single parameter.
 # macOS currently allows multiple words in the shebang. Scripts running on macOS exclusively can ignore this warning.
 disable=SC2096
+
+# ShellCheck doesn't support zsh, but being the syntax is similar, it can still be a helpful signal,
+# so we'll ignore this rule to allow running on our zsh scripts.
+disable=SC1071

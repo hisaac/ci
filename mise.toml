@@ -72,15 +72,15 @@ run = [
 ]
 
 [tasks.upd]
-run = "mise upgrade"
+run = ["mise upgrade", { task = "_bootstrap_hk" }]
 
 [tasks.upg]
-run = "mise upgrade --bump"
+run = ["mise upgrade --bump", { task = "_bootstrap_hk" }]
 
 # Hidden Tasks
 
 [tasks._bootstrap_hk]
 hide = true
-run = ["hk install --mise", "scripts/update-hk-import.bash"]
-sources = ["hk.pkl", "mise.lock", "mise.toml", "scripts/update-hk-import.bash"]
+run = ["hk install --mise", "scripts/update-hk-import.zsh"]
+sources = ["hk.pkl", "mise.lock", "mise.toml", "scripts/update-hk-import.zsh"]
 outputs = { auto = true }
