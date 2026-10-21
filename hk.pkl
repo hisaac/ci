@@ -26,6 +26,7 @@ steps {
   ["pkl"] = Builtins.pkl
   ["pkl-format"] = Builtins.pkl_format
   ["ryl"] = Builtins.ryl
+  ["ryl-format"] = Builtins.ryl
   ["shellcheck"] = Builtins.shellcheck
   ["tombi"] = Builtins.tombi
 

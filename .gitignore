@@ -8,6 +8,7 @@
 # caches
 .cache/
 .lycheecache
+.ryl_cache
 packer_cache/
 
 # local agent verification scripts
