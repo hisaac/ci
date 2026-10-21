@@ -29,7 +29,7 @@ function main() {
 	defaults write com.apple.loginwindow LoginwindowLaunchesRelaunchApps -bool false
 
 	echo "==> Finder: Setting column view as default"
-	# Source: https://krypted.com/mac-os-x/change-default-finder-views-using-defaults/
+	# Source: https://web.archive.org/web/20241125041017/https://krypted.com/mac-os-x/change-default-finder-views-using-defaults/
 	defaults write com.apple.finder FXPreferredViewStyle -string "clmv"
 
 	echo "==> Finder: Enable showing hidden/invisible files by default"

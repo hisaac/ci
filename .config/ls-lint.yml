@@ -3,7 +3,9 @@ ls:
   .*: kebab-case
 
 ignore:
+  - .ryl_cache
   - AGENTS.md
   - LICENSE.md
   - README.md
   - src/templates/scripts/xcode/tests/test_xcode-utils.bash
+...
